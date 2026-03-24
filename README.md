@@ -1,1 +1,1 @@
-# WSU-study-group-finder
+# WSU-study-group-app
