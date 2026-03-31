@@ -8,13 +8,21 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * Database operations for the UserCourse entity.
+ * Contains the core classmate matching query that powers the study group finder.
+ */
 @Repository
 public interface UserCourseRepository extends JpaRepository<UserCourse, Long> {
 
-    // Get all enrollments for a profile
+    /** Returns all course enrollments for a given student profile. */
     List<UserCourse> findByProfileId(Long profileId);
 
-    // Find other students in the same course + section + semester (for matching)
+    /**
+     * Core matching query — finds all students enrolled in the same course, section, and semester.
+     * Excludes the requesting student's own profile from the results.
+     * Two students are considered classmates only if all three values match exactly.
+     */
     @Query("""
         SELECT uc FROM UserCourse uc
         WHERE uc.course.id = :courseId

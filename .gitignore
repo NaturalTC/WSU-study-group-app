@@ -36,3 +36,6 @@ build/
 .env
 *.env
 application-local.properties
+
+### Claude ###
+CLAUDE.md
