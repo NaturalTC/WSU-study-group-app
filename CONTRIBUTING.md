@@ -2,6 +2,19 @@
 
 Welcome to the team! This guide will walk you through everything you need to know to get the project running locally and start contributing — even if you've never used Spring Boot or Docker before.
 
+## Team & Sprint 1 Ownership
+
+| Member | Sprint 1 Task |
+|--------|--------------|
+| Jose Jimenez | Authentication — register, email verify, login, JWT |
+| Maicheal Shenouda | Profile + course enrollment endpoints |
+| Hayden Parker | Study group management (create, join, leave) |
+| Brian Torres | WebSocket real-time chat |
+| Eric Melnik | Frontend — auth, profile, courses, classmate view |
+| Michael Mayberry | Frontend — study groups, chat UI |
+
+If you're unsure where to start, find your name above and jump to the relevant section in [ARCHITECTURE.md](src/main/java/com/github/wsustudygroupapp/ARCHITECTURE.md).
+
 ---
 
 ## Table of Contents
@@ -79,7 +92,7 @@ Follow these steps in order. Do this once when you first join the project.
 This downloads the project to your machine.
 
 ```bash
-git clone https://github.com/yourteam/WSU-study-group-app.git
+git clone https://github.com/NaturalTC/WSU-study-group-app.git
 cd WSU-study-group-app
 ```
 

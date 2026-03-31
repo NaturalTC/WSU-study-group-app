@@ -2,46 +2,52 @@ package com.github.wsustudygroupapp.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
 
-/*
-    Profile entity stores app-specific user data (major, year, bio, etc.)
-    Kept separate from User so auth logic stays clean and independent.
-    Has a One-to-One relationship with User.
-    Enrolled courses are tracked via UserCourse (section + semester included).
-*/
-
+/**
+ * Stores student-facing data for a registered user.
+ * Kept separate from {@link User} so authentication logic stays isolated from app data.
+ * One Profile exists per User — created when the student completes onboarding after verification.
+ */
 @Entity
 @Table(name = "PROFILE_TABLE")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Profile {
 
+    /** Auto-generated primary key. */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** Student's display name shown across the app. */
     @Column
     private String name;
 
+    /** Student's declared major (e.g. "Computer Science"). */
     @Column
     private String major;
 
-    // e.g. Freshman, Sophomore, Junior, Senior
+    /** Academic year — Freshman, Sophomore, Junior, or Senior. */
     @Column
     private String year;
 
+    /** Optional short bio visible to other students in shared study groups. */
     @Column(columnDefinition = "TEXT")
     private String bio;
 
+    /** The User account this profile belongs to. */
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
+    /** All courses this student is enrolled in, each with a specific section and semester. */
     @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL)
     private List<UserCourse> enrollments;
 }

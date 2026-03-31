@@ -6,7 +6,13 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+/**
+ * Database operations for the Profile entity.
+ * Spring generates all SQL automatically from method names — no queries needed.
+ */
 @Repository
 public interface ProfileRepository extends JpaRepository<Profile, Long> {
+
+    /** Finds a student's profile by their User ID. Used to load profile data after login. */
     Optional<Profile> findByUserId(Long userId);
 }
