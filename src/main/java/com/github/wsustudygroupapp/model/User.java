@@ -2,45 +2,53 @@ package com.github.wsustudygroupapp.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-/*
-    This is an entity (Pojo - Plain Old Java Object) that is also a table in our MySQL database
-    The purpose of this entity is for user verification / login usage + User Registration.
-    All IDs are unique (Primary Key)
-*/
-
-
+/**
+ * Represents an authenticated user account.
+ * Stores credentials and verification state only — no app-specific data.
+ * All student-facing data (name, major, bio) lives in {@link Profile}.
+ */
 @Entity
 @Table(name = "USER_TABLE")
-@Data  // generates all getters/setters
-@NoArgsConstructor // generates a default constructor
-@AllArgsConstructor // generates a constructor that takes in all parameters
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
 
+    /** Auto-generated primary key. */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** Optional display username. */
     @Column
     private String username;
 
+    /** School email — must end with @westfield.ma.edu. Unique across all users. */
     @Column(nullable = false, unique = true)
     private String email;
 
+    /** BCrypt-hashed password. Never stored as plain text. */
     @Column(nullable = false)
     private String password;
 
+    /** User role for access control — default is "USER", reserved for future "ADMIN" use. */
     @Column
-    private String role; // the purpose of this is for later admin access
+    private String role;
 
+    /** False until the student clicks the verification link sent to their school email. */
     @Column
     private boolean isVerified = false;
 
+    /** UUID token emailed to the student on registration. Cleared after verification. */
     @Column
     private String verificationToken;
 
+    /** The student's profile — created automatically after email verification. */
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Profile profile;
 }
