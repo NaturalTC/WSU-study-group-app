@@ -17,49 +17,86 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    // TODO: pull secret and expiration from application-local.properties
+    // Inject the secret value from properties
     @Value("${app.jwt.secret}")
     private String secret;
 
+    // Inject the expiration time from properties
     @Value("${app.jwt.expiration}")
     private long expirationMs;
 
-    // TODO: build the signing key from the secret string
+    // Takes our secret String and encrypts it (private key)
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    // TODO: generate a JWT token — called after a successful login
-    // the token's subject is the user's email
-    public String generateToken(String email) {
-        // TODO: implement using Jwts.builder()
-        //  .setSubject(email)
-        //  .setIssuedAt(new Date())
-        //  .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
-        //  .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-        //  .compact()
-        return null;
-    }
+    /*
+        Ok so pretty much we need to build this object called a JSON web-token
+        so our web-app can be stateless. For example, if every API request required
+        a query to our DB of our user and password means our web app is stateful.
+        The solution to this problem is simple. We just want to send a JSON web-token (String)
+        so that after a user logs in can send it in a packet header <Authorization: Bearer eyJhbGci...>
+        Luckily the jwtt-api got us covered with the tools we need.
+     */
 
-    // TODO: extract the email from a token — called in JwtAuthFilter
+    // Okay, the front door to our application is created here,
+    // We will return a String that resembles a JWT token
+    public String generateToken(String email)
+    {
+        // Jwts class provides a Builder pattern static method that takes attributes as setters.
+        // Builder pattern is used for multiple arguments/method chaining
+        // Pretty much a constructor    email -> JWT Token   with some data
+        return Jwts.builder()
+          .setSubject(email) // user email
+          .setIssuedAt(new Date()) // date issued
+          .setExpiration(new Date(System.currentTimeMillis() + expirationMs)) // expiration date
+          .signWith(getSigningKey(), SignatureAlgorithm.HS256) // encryption for the jwt string
+          .compact(); // build the string and return it
+    }
+    /*
+            Three parts of packet
+            Header is the algorithm we are using to sign it (HS256)
+            This is the data into a JSON payload format (aka the data)
+        {
+            "sub": "jose@westfield.ma.edu",
+            "iat": 1743465600,
+            "exp": 1743552000
+        }
+            Then the signature is the Hash of your Header Payload and Secret Key all going through a hashing
+            function. That way people don't just decode the JWT token themselves and send it back as admin
+            The token can easily be decoded, the signing key puts our unique encryption on it
+     */
+
+    // A getter method that returns the email of the JWT token
     public String extractEmail(String token) {
-        // TODO: return parseClaims(token).getSubject()
-        return null;
+        // The parseClaims decodes the token (more specifics in method)
+        // after the information can be return using getter methods.
+        // getSubject() just returns whatever is in the subject of the Payload
+        return parseClaims(token).getSubject();
     }
 
-    // TODO: check if a token is valid and not expired
+    // Simple method that returns a T/F based on if no exception thrown during parsing
     public boolean isTokenValid(String token) {
-        // TODO: try parseClaims(token), return true if no exception is thrown
-        return false;
+        try
+        {
+            parseClaims(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
-    // TODO: parse the token and return its claims (subject, expiration, etc.)
+    // A JWT token in String format looks like this iuhfahebfkaubhsdiufh.aosiudhfiasuhf.oasuidhfoiauhf
+    // The dots separate the header payload and signature
+
+    // A method the returns the Payload Data (AKA a Claims Object)
     private Claims parseClaims(String token) {
-        // TODO: implement using Jwts.parserBuilder()
-        //  .setSigningKey(getSigningKey())
-        //  .build()
-        //  .parseClaimsJws(token)
-        //  .getBody()
-        return null;
+        return Jwts.parserBuilder()
+        .setSigningKey(getSigningKey()) // verifying the signature with our key -- throws signature exception if failed
+        .build() // configures the Parser object that is used to parse Tokens
+        .parseClaimsJws(token) // Splits header | payload | signature. decodes each part using Base64url.
+                               // verifies the signature (Throw Sig Excep). Deserializes into a JWS<Claims> wrapper.
+                                // Checks Exp (Throws ExpiredJWTException).
+        .getBody(); // finally it is returns the Claims Map object (AKA the Payload)
     }
 }
