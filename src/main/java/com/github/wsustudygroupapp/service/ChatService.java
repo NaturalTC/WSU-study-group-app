@@ -56,7 +56,7 @@ public class ChatService {
         savedMessage.setStudyGroup(studyGroup);
         savedMessage.setSender(sender);
         savedMessage.setContent(content);
-        savedMessage.setSentAt(LocalDateTime.now());
+        savedMessage.setSentAt(dto.getSentAt());
         messageRepository.save(savedMessage);
         return savedMessage;
     }

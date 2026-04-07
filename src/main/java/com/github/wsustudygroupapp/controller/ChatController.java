@@ -30,8 +30,10 @@ public class ChatController {
     @SendTo("/topic/chat/{groupId}")
     public MessageDTO sendMessage(MessageDTO dto) {
         // TODO: dto.setSentAt(LocalDateTime.now())
+        dto.setSentAt(LocalDateTime.now());
         // TODO: chatService.saveMessage(dto)
+        chatService.saveMessage(dto);
         // TODO: return dto
-        return null;
+        return dto;
     }
 }
