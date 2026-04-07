@@ -46,7 +46,7 @@ public class ChatService {
     {
         Long groupId = dto.getStudyGroupId();
         String name = dto.getSenderName();
-        Profile sender = profileRepository.findByUsername(name).orElseThrow
+        Profile sender = profileRepository.findByName(name).orElseThrow
                 (
                     () -> new RuntimeException("Could not find profile")
                 );
