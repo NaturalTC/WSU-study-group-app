@@ -1,6 +1,24 @@
 spring.datasource.url=jdbc:mysql://localhost:3306/wsu_study_group
-spring.datasource.username=your_mysql_username
-spring.datasource.password=your_mysql_password
+spring.datasource.username=studyuser
+spring.datasource.password=studypassword
 
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
+spring.sql.init.mode=always
+spring.jpa.defer-datasource-initialization=true
+
+# Mail (use a Gmail App Password)
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=yourgmail@gmail.com
+spring.mail.password=your-app-password
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+
+# JWT
+app.jwt.secret=your-secret-key-here-make-it-long-and-random
+app.jwt.expiration=86400000
+
+# App
+app.school-email-domain=@westfield.ma.edu
+app.base-url=http://localhost:8080
