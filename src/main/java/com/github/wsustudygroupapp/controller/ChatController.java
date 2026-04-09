@@ -7,6 +7,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 // TODO: Brian — WebSocket message handler
@@ -30,8 +31,11 @@ public class ChatController {
     @SendTo("/topic/chat/{groupId}")
     public MessageDTO sendMessage(MessageDTO dto) {
         // TODO: dto.setSentAt(LocalDateTime.now())
+        LocalDateTime sentAt = LocalDateTime.now();
+        dto.setSentAt(sentAt);
         // TODO: chatService.saveMessage(dto)
+        chatService.saveMessage(dto);
         // TODO: return dto
-        return null;
+        return dto;
     }
 }
