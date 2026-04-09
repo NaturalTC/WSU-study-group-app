@@ -1,5 +1,6 @@
 package com.github.wsustudygroupapp.service;
 
+import com.github.wsustudygroupapp.model.User;
 import com.github.wsustudygroupapp.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -20,14 +21,19 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        // TODO: find the user by email using userRepository.findByEmail(email)
-        // TODO: if not found, throw new UsernameNotFoundException("User not found: " + email)
-        // TODO: return org.springframework.security.core.userdetails.User
-        //  .withUsername(user.getEmail())
-        //  .password(user.getPassword())
-        //  .roles("USER")
-        //  .build()
-        return null;
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException
+    {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+
+        if (user.getRole() == null) {
+            throw new UsernameNotFoundException("User has no role assigned: " + email);
+        }
+
+        return org.springframework.security.core.userdetails.User
+                .withUsername(user.getEmail())
+                .password(user.getPassword())
+                .roles(user.getRole())
+                .build();
     }
 }
