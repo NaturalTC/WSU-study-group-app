@@ -38,4 +38,12 @@ class JwtUtilTest {
     void isTokenValid_garbageToken_returnsFalse() {
         Assertions.assertFalse(jwtUtil.isTokenValid("this.is.garbage"));
     }
+
+    @Test
+    void isTokenValid_expiredToken_returnsFalse() {
+        // Set expiration to -1000ms so the token is already expired the moment it's created
+        ReflectionTestUtils.setField(jwtUtil, "expirationMs", -1000L);
+        String token = jwtUtil.generateToken("jose@westfield.ma.edu");
+        Assertions.assertFalse(jwtUtil.isTokenValid(token));
+    }
 }
