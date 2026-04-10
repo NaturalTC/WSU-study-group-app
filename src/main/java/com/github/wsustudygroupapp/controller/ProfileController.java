@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 // All routes here require a valid JWT token (configured in SecurityConfig)
 
 @RestController
-@RequestMapping("/profile")
+@RequestMapping("/profiles")
 public class ProfileController {
 
     private final ProfileService profileService;

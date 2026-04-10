@@ -15,4 +15,5 @@ public interface ProfileRepository extends JpaRepository<Profile, Long> {
 
     /** Finds a student's profile by their User ID. Used to load profile data after login. */
     Optional<Profile> findByUserId(Long userId);
+    Optional<Profile> findByName(String name);
 }

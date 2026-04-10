@@ -14,53 +14,81 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-// TODO: Jose — JWT authentication filter
-// This runs on EVERY request before it reaches a controller
-// It reads the Authorization header, validates the token, and tells Spring Security who the user is
-// If the token is missing or invalid, the request is rejected here
+// Jose — JWT authentication filter
+// Runs on EVERY request before it reaches a controller
+// Reads the Authorization header, validates the token, and tells Spring Security who the user is
 
+/*
+    Every HTTP request that comes into our app passes through a Security Filter Chain before it
+    hits a controller. Think of it like a bouncer — this filter checks the JWT token on every
+    request and either stamps it "verified" or lets Spring Security reject it.
+
+    We extend OncePerRequestFilter so Spring guarantees this runs exactly once per request,
+    even if Spring internally forwards the request somewhere else.
+ */
+
+// Registers this as a Spring bean so it can be injected into SecurityConfig
 @Component
-public class JwtAuthFilter extends OncePerRequestFilter {
+public class JwtAuthFilter extends OncePerRequestFilter
+{
 
+    // final — once Spring injects these at startup they can never be swapped out.
+    // This bean is a singleton shared across every request simultaneously so we don't want these changing.
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
 
+    // Spring reads this constructor at startup and automatically injects both beans.
+    // JwtUtil handles token math. UserDetailsService hits the DB to load the user.
+    // UserDetailsServiceImpl is the concrete class Spring actually injects here.
     public JwtAuthFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService) {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
     }
 
+    // This is the one method OncePerRequestFilter requires us to implement.
+    // Spring calls this on every incoming HTTP request automatically.
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        // TODO: Step 1 — read the Authorization header
-        //  String authHeader = request.getHeader("Authorization");
+        // Step 1 — read the Authorization header from the request
+        // Every request that has a token will include: Authorization: Bearer eyJhbGci...
+        String authHeader = request.getHeader("Authorization");
 
-        // TODO: Step 2 — check if the header exists and starts with "Bearer "
-        //  if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-        //      filterChain.doFilter(request, response); return;
-        //  }
+        // Step 2 — if there's no token just pass the request through
+        // We don't reject it here — Spring Security will block it if the route is protected
+        if (authHeader == null || !authHeader.startsWith("Bearer "))
+        {
+            filterChain.doFilter(request, response); return;
+        }
 
-        // TODO: Step 3 — extract the token (everything after "Bearer ")
-        //  String token = authHeader.substring(7);
+        // Step 3 — strip "Bearer " off the front (7 characters), leaving just the raw token string
+        String token = authHeader.substring(7);
 
-        // TODO: Step 4 — extract the email from the token using JwtUtil
-        //  String email = jwtUtil.extractEmail(token);
+        // Step 4 — decode the token and pull out the email (the subject we baked in at login)
+        String email = jwtUtil.extractEmail(token);
 
-        // TODO: Step 5 — if email is valid and no auth is set yet, load the user
-        //  UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+        // Step 5 — load the full user from the database using that email
+        // We hit the DB here because the user could have been deleted or banned since the token was issued
+        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-        // TODO: Step 6 — validate the token
-        //  if (jwtUtil.isTokenValid(token)) { ... }
+        // Step 6 — verify the token is legitimate and not expired
+        if (jwtUtil.isTokenValid(token))
+        {
+            // Step 7 — tell Spring Security this user is authenticated for this request
+            // UsernamePasswordAuthenticationToken wraps the user as "verified"
+            // null = no password needed, we already proved identity via JWT
+            // getAuthorities() = their roles/permissions, required to mark this as fully authenticated
+            UsernamePasswordAuthenticationToken authToken =
+                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
-        // TODO: Step 7 — set the authentication in Spring Security's context
-        //  UsernamePasswordAuthenticationToken authToken =
-        //      new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-        //  SecurityContextHolder.getContext().setAuthentication(authToken);
+            // SecurityContextHolder is Spring's per-thread storage for the current user
+            // Setting this here means any controller downstream knows who made this request
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+        }
 
-        // TODO: Step 8 — continue the filter chain
+        // Step 8 — pass the request to the next filter in the chain, eventually reaching the controller
         filterChain.doFilter(request, response);
     }
 }

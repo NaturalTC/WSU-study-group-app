@@ -59,7 +59,8 @@ public class StudyGroupController {
     // TODO: call chatService.getHistory(groupId)
     // TODO: return 200 with message history (loaded when student opens the chat)
     @GetMapping("/{groupId}/messages")
-    public ResponseEntity<List<Message>> getChatHistory(@PathVariable Long groupId) {
-        return null;
+    public ResponseEntity<List<Message>> getChatHistory(@PathVariable Long groupId)
+    {
+        return ResponseEntity.ok(chatService.getHistory(groupId));
     }
 }
