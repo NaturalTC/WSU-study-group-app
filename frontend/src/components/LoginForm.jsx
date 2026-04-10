@@ -124,10 +124,9 @@ function LoginForm() {
                 <label className="form-label" htmlFor="password">
                   Password
                 </label>
-                {/* TODO: Link to /forgot-password when that page is built */}
-                <a href="#" className="text-blue-700 font-semibold hover:underline">
+                <Link to="/forgot-password" className="text-blue-700 font-semibold hover:underline">
                   Forgot password?
-                </a>
+                </Link>
               </div>
               <input
                 id="password"

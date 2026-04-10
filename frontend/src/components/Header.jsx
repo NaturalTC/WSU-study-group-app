@@ -6,6 +6,7 @@ function Header() {
   const location = useLocation()
 
   const isActive = (path) => location.pathname === path
+  const isLoggedIn = !!localStorage.getItem('token')
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
@@ -50,6 +51,17 @@ function Header() {
           >
             Group Chat
           </Link>
+          {isLoggedIn && (
+            <Link
+              to="/change-password"
+              className={`font-medium text-sm transition-colors duration-200
+                ${isActive('/change-password')
+                  ? 'text-blue-700 font-semibold'
+                  : 'text-wsu-slate hover:text-blue-700'}`}
+            >
+              Change Password
+            </Link>
+          )}
         </nav>
 
         {/* Desktop CTA Buttons */}
@@ -91,6 +103,9 @@ function Header() {
           <a href="#about" className="text-wsu-slate hover:text-blue-700 font-medium" onClick={() => setMenuOpen(false)}>About</a>
           <Link to="/study-groups" className={`font-medium ${isActive('/study-groups') ? 'text-blue-700' : 'text-wsu-slate hover:text-blue-700'}`} onClick={() => setMenuOpen(false)}>Study Groups</Link>
           <Link to="/group-chat/1" className={`font-medium ${location.pathname.startsWith('/group-chat') ? 'text-blue-700' : 'text-wsu-slate hover:text-blue-700'}`} onClick={() => setMenuOpen(false)}>Group Chat</Link>
+          {isLoggedIn && (
+            <Link to="/change-password" className={`font-medium ${isActive('/change-password') ? 'text-blue-700' : 'text-wsu-slate hover:text-blue-700'}`} onClick={() => setMenuOpen(false)}>Change Password</Link>
+          )}
           <hr className="border-gray-100" />
           <Link to="/login" className="text-wsu-navy font-semibold" onClick={() => setMenuOpen(false)}>Log In</Link>
           <Link to="/register" className="bg-blue-700 hover:bg-blue-800 text-white font-semibold text-center rounded-lg px-6 py-3 transition-all duration-200" onClick={() => setMenuOpen(false)}>Get Started</Link>
