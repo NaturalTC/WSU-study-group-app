@@ -4,7 +4,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import StudyGroups from './pages/StudyGroups'
 import GroupChat from './pages/GroupChat'
-import ProfilePage from './pages/ProfilePage'
+import ProfilePage from './pages/Profile'
 
 function App() {
     return (

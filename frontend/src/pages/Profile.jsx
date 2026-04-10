@@ -100,7 +100,7 @@ function ProfilePage() {
 
                         {/* ── Left Sidebar ── */}
                         <div className="col-span-1">
-                            <div className="card p-0 overflow-hidden rounded-x1">
+                            <div className="card p-0 overflow-hidden rounded-xl">
                                 <ul>
                                     {NAV_ITEMS.map((item, index) => (
                                         <li key={item.key}>
