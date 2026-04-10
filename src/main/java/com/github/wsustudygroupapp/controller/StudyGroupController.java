@@ -5,13 +5,14 @@ import com.github.wsustudygroupapp.model.Message;
 import com.github.wsustudygroupapp.model.StudyGroup;
 import com.github.wsustudygroupapp.service.ChatService;
 import com.github.wsustudygroupapp.service.StudyGroupService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
-// TODO: Hayden — exposes study group endpoints
-// All routes here require a valid JWT token
 
 @RestController
 @RequestMapping("/groups")
@@ -25,42 +26,36 @@ public class StudyGroupController {
         this.chatService = chatService;
     }
 
-    // TODO: call studyGroupService.getGroupsForCourse(courseId)
-    // TODO: return 200 with the list of groups
     @GetMapping("/course/{courseId}")
     public ResponseEntity<List<StudyGroup>> getGroupsForCourse(@PathVariable Long courseId) {
-        return null;
+        return ResponseEntity.ok(studyGroupService.getGroupsForCourse(courseId));
     }
 
-    // TODO: extract the logged-in user's profile ID
-    // TODO: call studyGroupService.createGroup(profileId, request)
-    // TODO: return 201 with the created group
     @PostMapping
-    public ResponseEntity<StudyGroup> createGroup(@RequestBody StudyGroupRequest request) {
-        return null;
+    public ResponseEntity<StudyGroup> createGroup(
+            @Valid @RequestBody StudyGroupRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(studyGroupService.createGroup(request, userDetails.getUsername()));
     }
 
-    // TODO: extract the logged-in user's profile ID
-    // TODO: call studyGroupService.joinGroup(groupId, profileId)
-    // TODO: return 200 with the updated group
     @PostMapping("/{groupId}/join")
-    public ResponseEntity<StudyGroup> joinGroup(@PathVariable Long groupId) {
-        return null;
+    public ResponseEntity<StudyGroup> joinGroup(
+            @PathVariable Long groupId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(studyGroupService.joinGroup(groupId, userDetails.getUsername()));
     }
 
-    // TODO: extract the logged-in user's profile ID
-    // TODO: call studyGroupService.leaveGroup(groupId, profileId)
-    // TODO: return 204 No Content
     @DeleteMapping("/{groupId}/leave")
-    public ResponseEntity<Void> leaveGroup(@PathVariable Long groupId) {
-        return null;
+    public ResponseEntity<Void> leaveGroup(
+            @PathVariable Long groupId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        studyGroupService.leaveGroup(groupId, userDetails.getUsername());
+        return ResponseEntity.noContent().build();
     }
 
-    // TODO: call chatService.getHistory(groupId)
-    // TODO: return 200 with message history (loaded when student opens the chat)
     @GetMapping("/{groupId}/messages")
-    public ResponseEntity<List<Message>> getChatHistory(@PathVariable Long groupId)
-    {
+    public ResponseEntity<List<Message>> getChatHistory(@PathVariable Long groupId) {
         return ResponseEntity.ok(chatService.getHistory(groupId));
     }
 }

@@ -1,6 +1,7 @@
 package com.github.wsustudygroupapp.service;
 
 import com.github.wsustudygroupapp.dto.StudyGroupRequest;
+import com.github.wsustudygroupapp.model.Profile;
 import com.github.wsustudygroupapp.model.StudyGroup;
 import com.github.wsustudygroupapp.repository.CourseRepository;
 import com.github.wsustudygroupapp.repository.ProfileRepository;
@@ -9,11 +10,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-// TODO: Hayden — handles study group creation, joining, and leaving
+// Hayden — handles study group creation, joining, and leaving
 // getGroupsForCourse() → return all groups for a given course
-// createGroup() → create a new study group for a course
-// joinGroup() → add a student to an existing group
-// leaveGroup() → remove a student from a group
+// createGroup()        → create a new study group for a course
+// joinGroup()          → add a student to an existing group
+// leaveGroup()         → remove a student from a group
 
 @Service
 public class StudyGroupService {
@@ -36,24 +37,31 @@ public class StudyGroupService {
     }
 
     // TODO: find the course by request.getCourseId()
-    // TODO: find the profile by creatorProfileId
-    // TODO: build a new StudyGroup with name, course, createdBy, and add creator as first member
-    // TODO: save and return the group
-    public StudyGroup createGroup(Long creatorProfileId, StudyGroupRequest request) {
+    // TODO: build a new StudyGroup with name, course, createdBy = currentProfile(email)
+    // TODO: add creator as first member, save and return
+    public StudyGroup createGroup(StudyGroupRequest request, String email) {
+        Profile creator = currentProfile(email);
         return null;
     }
 
-    // TODO: find the group by groupId — throw exception if not found
-    // TODO: find the profile by profileId
+    // TODO: find the group by groupId — throw if not found
     // TODO: check the student isn't already a member
-    // TODO: add the profile to group.getMembers() and save
-    public StudyGroup joinGroup(Long groupId, Long profileId) {
+    // TODO: add currentProfile(email) to group.getMembers() and save
+    public StudyGroup joinGroup(Long groupId, String email) {
+        Profile profile = currentProfile(email);
         return null;
     }
 
-    // TODO: find the group by groupId — throw exception if not found
-    // TODO: remove the profile from group.getMembers() and save
-    public void leaveGroup(Long groupId, Long profileId) {
+    // TODO: find the group by groupId — throw if not found
+    // TODO: remove currentProfile(email) from group.getMembers() and save
+    public void leaveGroup(Long groupId, String email) {
+        Profile profile = currentProfile(email);
+    }
 
+    // Looks up the Profile for the logged-in user using their email from the JWT.
+    // Call this at the top of any method that needs to know who is making the request.
+    private Profile currentProfile(String email) {
+        return profileRepository.findByUserEmail(email)
+                .orElseThrow(() -> new RuntimeException("Profile not found for email: " + email));
     }
 }

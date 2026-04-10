@@ -50,6 +50,6 @@ public class StudyGroup {
     private List<Profile> members;
 
     /** All chat messages sent in this group, ordered by time. */
-    @OneToMany(mappedBy = "studyGroup", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "studyGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Message> messages;
 }

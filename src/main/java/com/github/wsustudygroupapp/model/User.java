@@ -53,6 +53,6 @@ public class User {
     private String resetToken;
 
     /** The student's profile — created automatically after email verification. */
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Profile profile;
 }

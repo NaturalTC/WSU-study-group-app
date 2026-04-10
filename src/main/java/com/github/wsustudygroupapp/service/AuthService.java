@@ -87,10 +87,10 @@ public class AuthService {
         user.setVerificationToken(verificationToken);
         userRepository.save(user);
 
-        // Create a blank Profile linked to this User
-        // Profile holds student data (name, major, bio) — kept separate from auth credentials
+        // Create a Profile linked to this User — save the display name they provided at registration
         Profile profile = new Profile();
         profile.setUser(user);
+        profile.setName(request.getName());
         profileRepository.save(profile);
 
         // Send the verification email — when they click it, GET /auth/verify?token=... fires
