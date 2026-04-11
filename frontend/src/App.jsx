@@ -4,7 +4,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import StudyGroups from './pages/StudyGroups'
 import GroupChat from './pages/GroupChat'
-import ProfilePage from './pages/Profile'
+import Profile from './pages/Profile'
 
 function App() {
     return (
@@ -14,7 +14,7 @@ function App() {
             <Route path="/register" element={<Register/>}/>
             <Route path="/study-groups" element={<StudyGroups/>}/>
             <Route path="/group-chat/:groupId" element={<GroupChat/>}/>
-            <Route path="/profile" element={<ProfilePage/>}/>
+            <Route path="/profile" element={<Profile/>}/>
         </Routes>
     )
 }
