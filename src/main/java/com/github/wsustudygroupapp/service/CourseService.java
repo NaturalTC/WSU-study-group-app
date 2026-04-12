@@ -1,12 +1,17 @@
 package com.github.wsustudygroupapp.service;
 
 import com.github.wsustudygroupapp.dto.CourseEnrollRequest;
+import com.github.wsustudygroupapp.exception.ResourceNotFoundException;
 import com.github.wsustudygroupapp.model.Course;
+import com.github.wsustudygroupapp.model.Profile;
 import com.github.wsustudygroupapp.model.UserCourse;
 import com.github.wsustudygroupapp.repository.CourseRepository;
 import com.github.wsustudygroupapp.repository.ProfileRepository;
 import com.github.wsustudygroupapp.repository.UserCourseRepository;
+import com.github.wsustudygroupapp.repository.UserRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -23,44 +28,96 @@ public class CourseService {
     private final CourseRepository courseRepository;
     private final UserCourseRepository userCourseRepository;
     private final ProfileRepository profileRepository;
+    private final UserRepository userRepository;
 
     public CourseService(CourseRepository courseRepository,
                          UserCourseRepository userCourseRepository,
-                         ProfileRepository profileRepository) {
+                         ProfileRepository profileRepository,
+                         UserRepository userRepository) {
         this.courseRepository = courseRepository;
         this.userCourseRepository = userCourseRepository;
         this.profileRepository = profileRepository;
+        this.userRepository = userRepository;
     }
 
-    // TODO: return courseRepository.findAll()
+    // DONE: return courseRepository.findAll()
     public List<Course> getAllCourses() {
-        return null;
+        return courseRepository.findAll();
     }
 
-    // TODO: return userCourseRepository.findByProfileId(profileId)
-    public List<UserCourse> getMyCourses(Long profileId) {
-        return null;
+    // DONE: return userCourseRepository.findByProfileId(profileId)
+    public List<UserCourse> getMyCourses(String email) {
+        // resolve profile from the logged-in user's email
+        Profile profile = resolveProfile(email);
+        return userCourseRepository.findByProfileId(profile.getId());
     }
 
-    // TODO: find the course by courseCode using courseRepository.findByCourseCode()
-    // TODO: find the profile by profileId
-    // TODO: build a new UserCourse with the course, profile, section, semester
-    // TODO: save and return it
-    public UserCourse enroll(Long profileId, CourseEnrollRequest request) {
-        return null;
+    // DONE: find the course by courseCode using courseRepository.findByCourseCode()
+    // DONE: find the profile by profileId
+    // DONE: build a new UserCourse with the course, profile, section, semester
+    // DONE: save and return it
+    public UserCourse enroll(String email, CourseEnrollRequest request) {
+        Profile profile = resolveProfile(email);
+        Course course = courseRepository.findByCourseCode(request.getCourseCode())
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + request.getCourseCode()));
+        // prevent the same student from enrolling in the same course+section+semester twice
+        if (userCourseRepository.existsByProfileIdAndCourseIdAndSectionAndSemester(
+                profile.getId(), course.getId(), request.getSection(), request.getSemester())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Already enrolled in this course section");
+        }
+        UserCourse enrollment = new UserCourse();
+        enrollment.setProfile(profile);
+        enrollment.setCourse(course);
+        enrollment.setSection(request.getSection());
+        enrollment.setSemester(request.getSemester());
+        return userCourseRepository.save(enrollment);
     }
 
-    // TODO: find the UserCourse by its ID
-    // TODO: confirm it belongs to this profileId (security check)
-    // TODO: delete it
-    public void drop(Long userCourseId, Long profileId) {
-
+    // DONE: find the UserCourse by its ID
+    // DONE: confirm it belongs to this profileId (security check)
+    // DONE: delete it
+    public void drop(Long userCourseId, String email) {
+        Profile profile = resolveProfile(email);
+        UserCourse enrollment = userCourseRepository.findById(userCourseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found: " + userCourseId));
+        // ensure students can only drop their own enrollments, not someone else's
+        if (!enrollment.getProfile().getId().equals(profile.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only drop your own enrollments");
+        }
+        userCourseRepository.delete(enrollment);
     }
 
-    // TODO: find the UserCourse by ID to get courseId, section, semester
-    // TODO: call userCourseRepository.findClassmates(courseId, section, semester, profileId)
-    // TODO: return the list
-    public List<UserCourse> getClassmates(Long userCourseId, Long profileId) {
-        return null;
+    // DONE: find the UserCourse by ID to get courseId, section, semester
+    // DONE: call userCourseRepository.findClassmates(courseId, section, semester, profileId)
+    // DONE: return the list
+    public List<UserCourse> getClassmates(Long userCourseId, String email) {
+        Profile profile = resolveProfile(email);
+        UserCourse enrollment = userCourseRepository.findById(userCourseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found: " + userCourseId));
+        // find all students in the same course, section, and semester (excluding the requester)
+        return userCourseRepository.findClassmates(
+                enrollment.getCourse().getId(),
+                enrollment.getSection(),
+                enrollment.getSemester(),
+                profile.getId());
+    }
+
+    // Plan C — search courses by keyword (e.g. "biology"), used for the frontend search bar
+    public List<Course> searchCourses(String keyword) {
+        return courseRepository.findByCourseNameContainingIgnoreCase(keyword);
+    }
+
+    // Plan C — filter courses by department code (e.g. "CAIS"), used for the frontend dropdown
+    public List<Course> getCoursesByDepartment(String departmentCode) {
+        return courseRepository.findByDepartmentCode(departmentCode);
+    }
+
+    // resolves the logged-in user's Profile from their email — throws 404 if not found
+    private Profile resolveProfile(String email) {
+        Long userId = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + email))
+                .getId();
+        return profileRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Profile not found for: " + email));
     }
 }
