@@ -50,4 +50,12 @@ public class Profile {
     /** All courses this student is enrolled in, each with a specific section and semester. */
     @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL)
     private List<UserCourse> enrollments;
+
+    // ── Sprint 2 fields ───────────────────────────────────────────────
+
+    /** Total gamification points earned by this student. Incremented by GamificationService. */
+    @Column(nullable = false)
+    private int points = 0;
+
+    // TODO: Maicheal Shenouda — add a @OneToMany to UserBadge so profile.getBadges() works
 }
