@@ -3,9 +3,13 @@ package com.github.wsustudygroupapp.service;
 import com.github.wsustudygroupapp.dto.MeetingSessionRequest;
 import com.github.wsustudygroupapp.exception.ResourceNotFoundException;
 import com.github.wsustudygroupapp.model.MeetingSession;
+import com.github.wsustudygroupapp.model.Profile;
+import com.github.wsustudygroupapp.model.StudyGroup;
+import com.github.wsustudygroupapp.model.User;
 import com.github.wsustudygroupapp.repository.MeetingSessionRepository;
 import com.github.wsustudygroupapp.repository.ProfileRepository;
 import com.github.wsustudygroupapp.repository.StudyGroupRepository;
+import com.github.wsustudygroupapp.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -23,42 +27,68 @@ public class MeetingSessionService {
     private final MeetingSessionRepository meetingSessionRepository;
     private final StudyGroupRepository studyGroupRepository;
     private final ProfileRepository profileRepository;
+    private final UserRepository userRepository;
     private final NotificationService notificationService;
 
     public MeetingSessionService(MeetingSessionRepository meetingSessionRepository,
                                  StudyGroupRepository studyGroupRepository,
                                  ProfileRepository profileRepository,
+                                 UserRepository userRepository,
                                  NotificationService notificationService) {
         this.meetingSessionRepository = meetingSessionRepository;
         this.studyGroupRepository = studyGroupRepository;
         this.profileRepository = profileRepository;
+        this.userRepository = userRepository;
         this.notificationService = notificationService;
     }
 
-    // TODO: find the group by request.getGroupId() — throw ResourceNotFoundException if missing
-    // TODO: find the profile by schedulerProfileId — throw ResourceNotFoundException if missing
-    // TODO: build a new MeetingSession with group, profile, scheduledAt, location, notes, createdAt
-    // TODO: save the session
-    // TODO: call notificationService.notifyGroupMembers() to notify all other group members
-    // TODO: return the saved session
-    public MeetingSession scheduleSession(Long schedulerProfileId, MeetingSessionRequest request) {
-        return null;
+    public MeetingSession scheduleSession(String schedulerEmail, MeetingSessionRequest request) {
+        Profile scheduler = currentProfile(schedulerEmail);
+        StudyGroup group = studyGroupRepository.findById(request.getGroupId())
+                .orElseThrow(() -> new ResourceNotFoundException("Study group not found: " + request.getGroupId()));
+
+        MeetingSession session = new MeetingSession();
+        session.setStudyGroup(group);
+        session.setScheduledBy(scheduler);
+        session.setScheduledAt(request.getScheduledAt());
+        session.setLocation(request.getLocation());
+        session.setNotes(request.getNotes());
+        session.setCreatedAt(LocalDateTime.now());
+
+        MeetingSession savedSession = meetingSessionRepository.save(session);
+
+        String message = "New study session scheduled: " + request.getScheduledAt() + " at " + request.getLocation();
+        notificationService.notifyGroupMembers(group, message, scheduler.getId());
+
+        return savedSession;
     }
 
-    // TODO: return meetingSessionRepository.findByStudyGroupMembersIdAndScheduledAtAfter(profileId, LocalDateTime.now())
-    public List<MeetingSession> getUpcomingSessions(Long profileId) {
-        return null;
+    public List<MeetingSession> getUpcomingSessions(String email) {
+        Profile profile = currentProfile(email);
+        return meetingSessionRepository.findByStudyGroupMembersIdAndScheduledAtAfterOrderByScheduledAtAsc(
+                profile.getId(), LocalDateTime.now());
     }
 
-    // TODO: return meetingSessionRepository.findByStudyGroupIdOrderByScheduledAtAsc(groupId)
     public List<MeetingSession> getSessionsForGroup(Long groupId) {
-        return null;
+        return meetingSessionRepository.findByStudyGroupIdOrderByScheduledAtAsc(groupId);
     }
 
-    // TODO: find the session by sessionId — throw ResourceNotFoundException if missing
-    // TODO: verify the requesting profile is the one who scheduled it — throw 403 if not
-    // TODO: delete the session from the repository
-    public void cancelSession(Long sessionId, Long requestingProfileId) {
+    public void cancelSession(Long sessionId, String requestingEmail) {
+        Profile requester = currentProfile(requestingEmail);
+        MeetingSession session = meetingSessionRepository.findById(sessionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Meeting session not found: " + sessionId));
 
+        if (!session.getScheduledBy().getId().equals(requester.getId())) {
+            throw new IllegalArgumentException("Only the session creator can cancel it");
+        }
+
+        meetingSessionRepository.delete(session);
+    }
+
+    private Profile currentProfile(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + email));
+        return profileRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Profile not found for: " + email));
     }
 }

@@ -3,8 +3,10 @@ package com.github.wsustudygroupapp.controller;
 import com.github.wsustudygroupapp.dto.MeetingSessionRequest;
 import com.github.wsustudygroupapp.model.MeetingSession;
 import com.github.wsustudygroupapp.service.MeetingSessionService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,36 +24,29 @@ public class MeetingSessionController {
         this.meetingSessionService = meetingSessionService;
     }
 
-    // TODO: extract the logged-in user's profile ID from the Authentication principal
-    // TODO: call meetingSessionService.scheduleSession(profileId, request)
-    // TODO: return 201 Created with the new session
     @PostMapping
     public ResponseEntity<MeetingSession> scheduleSession(@RequestBody MeetingSessionRequest request,
-                                                          Authentication authentication) {
-        return null;
+                                                          @AuthenticationPrincipal UserDetails userDetails) {
+        MeetingSession session = meetingSessionService.scheduleSession(userDetails.getUsername(), request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(session);
     }
 
-    // TODO: extract the logged-in user's profile ID from the Authentication principal
-    // TODO: call meetingSessionService.getUpcomingSessions(profileId)
-    // TODO: return 200 with the list of upcoming sessions
     @GetMapping("/upcoming")
-    public ResponseEntity<List<MeetingSession>> getUpcomingSessions(Authentication authentication) {
-        return null;
+    public ResponseEntity<List<MeetingSession>> getUpcomingSessions(@AuthenticationPrincipal UserDetails userDetails) {
+        List<MeetingSession> sessions = meetingSessionService.getUpcomingSessions(userDetails.getUsername());
+        return ResponseEntity.ok(sessions);
     }
 
-    // TODO: call meetingSessionService.getSessionsForGroup(groupId)
-    // TODO: return 200 with the list of sessions
     @GetMapping("/group/{groupId}")
     public ResponseEntity<List<MeetingSession>> getSessionsForGroup(@PathVariable Long groupId) {
-        return null;
+        List<MeetingSession> sessions = meetingSessionService.getSessionsForGroup(groupId);
+        return ResponseEntity.ok(sessions);
     }
 
-    // TODO: extract the logged-in user's profile ID from the Authentication principal
-    // TODO: call meetingSessionService.cancelSession(sessionId, profileId)
-    // TODO: return 204 No Content
     @DeleteMapping("/{sessionId}")
     public ResponseEntity<Void> cancelSession(@PathVariable Long sessionId,
-                                              Authentication authentication) {
-        return null;
+                                              @AuthenticationPrincipal UserDetails userDetails) {
+        meetingSessionService.cancelSession(sessionId, userDetails.getUsername());
+        return ResponseEntity.noContent().build();
     }
 }
