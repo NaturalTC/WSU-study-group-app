@@ -15,12 +15,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
-// TODO: Hayden Parker — handles scheduling, fetching, and cancelling group study sessions
-// scheduleSession()    → create a new session and notify all group members
-// getUpcomingSessions() → return all future sessions for a student across all their groups
-// getSessionsForGroup() → return all sessions for a specific group
-// cancelSession()      → delete a session (only the creator can cancel)
-
 @Service
 public class MeetingSessionService {
 
@@ -53,7 +47,6 @@ public class MeetingSessionService {
         session.setScheduledAt(request.getScheduledAt());
         session.setLocation(request.getLocation());
         session.setNotes(request.getNotes());
-        session.setCreatedAt(LocalDateTime.now());
 
         MeetingSession savedSession = meetingSessionRepository.save(session);
 

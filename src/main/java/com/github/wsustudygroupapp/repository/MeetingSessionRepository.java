@@ -22,5 +22,8 @@ public interface MeetingSessionRepository extends JpaRepository<MeetingSession, 
         Long profileId, LocalDateTime now
     );
 
-    // TODO: Hayden Parker — add findByStudyGroupIdAndScheduledAtBetween() for calendar view
+    /** Returns sessions for a group within a date range. Used for calendar view. */
+    List<MeetingSession> findByStudyGroupIdAndScheduledAtBetweenOrderByScheduledAtAsc(
+        Long groupId, LocalDateTime start, LocalDateTime end
+    );
 }

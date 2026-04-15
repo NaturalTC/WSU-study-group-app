@@ -52,5 +52,8 @@ public class MeetingSession {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    // TODO: Hayden Parker — add a @PrePersist hook to auto-set createdAt = LocalDateTime.now()
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 }
