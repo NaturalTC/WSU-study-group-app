@@ -11,8 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-// TODO: Hayden Parker — exposes meeting session endpoints
-// All routes here require a valid JWT token
+
 
 @RestController
 @RequestMapping("/meetings")
