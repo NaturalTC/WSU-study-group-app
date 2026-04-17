@@ -7,6 +7,10 @@ import AppHeader from '../components/AppHeader'
 // 1. MY STUDY GROUPS
 //    ENDPOINT: GET /api/study-groups/my-groups
 //    TODO: Replace MOCK_MY_GROUPS with real API call
+//
+// 2. MY COURSES
+//    ENDPOINT: GET /courses/my
+//    TODO: Replace MOCK_MY_COURSES with real API call
 // ─────────────────────────────────────────────────────────────────
 
 const MOCK_MY_GROUPS = [
@@ -42,6 +46,27 @@ const MOCK_MY_GROUPS = [
     },
 ]
 
+
+const MOCK_MY_COURSES = [
+    {
+        id: 1,
+        course: {courseCode: 'CAIS 0236', courseName: 'Computer Organization and Architecture', departmentCode: 'CAIS'},
+        section: '001',
+        semester: 'Spring 2026',
+    },
+    {
+        id: 2,
+        course: {courseCode: 'MATH 0261', courseName: 'Calculus II', departmentCode: 'MATH'},
+        section: '003',
+        semester: 'Spring 2026',
+    },
+    {
+        id: 3,
+        course: {courseCode: 'CAIS 0350', courseName: 'Software Engineering', departmentCode: 'CAIS'},
+        section: '002',
+        semester: 'Spring 2026',
+    },
+]
 
 function Profile() {
     const user = {firstName: 'Student', lastName: 'User', major: 'Computer Science', year: 'Junior'}
@@ -142,6 +167,40 @@ function Profile() {
 
                         {/* ── Right column: two tiles stacked ── */}
                         <div className="flex flex-col gap-6">
+
+                            {/* ── My Courses ── */}
+                            <div className="card flex flex-col gap-4">
+                                <div className="flex items-center justify-between">
+                                    <h2 className="font-display text-xl text-wsu-navy font-bold">
+                                        My Courses
+                                    </h2>
+                                    <span className="text-xs text-wsu-slate font-medium">
+                                        {MOCK_MY_COURSES.length} enrolled
+                                    </span>
+                                </div>
+
+                                <div className="space-y-3">
+                                    {MOCK_MY_COURSES.map((enrollment) => (
+                                        <div
+                                            key={enrollment.id}
+                                            className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3"
+                                        >
+                                            <div
+                                                className="w-9 h-9 bg-blue-700 rounded-xl flex items-center justify-center text-white font-display font-bold text-xs flex-shrink-0">
+                                                {enrollment.course.departmentCode.charAt(0)}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-xs font-semibold text-wsu-navy truncate">
+                                                    {enrollment.course.courseCode} · {enrollment.course.courseName}
+                                                </p>
+                                                <p className="text-xs text-wsu-slate mt-0.5">
+                                                    Section {enrollment.section} · {enrollment.semester}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
 
                         </div>
                     </div>
