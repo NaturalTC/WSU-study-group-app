@@ -7,14 +7,6 @@ import AppHeader from '../components/AppHeader'
 // 1. MY STUDY GROUPS
 //    ENDPOINT: GET /api/study-groups/my-groups
 //    TODO: Replace MOCK_MY_GROUPS with real API call
-//
-// 2. UPCOMING STUDY SESSIONS
-//    ENDPOINT: GET /api/study-sessions/upcoming
-//    TODO: Replace MOCK_SESSIONS with real API call
-//
-// 3. CONNECTIONS
-//    ENDPOINT: GET /api/connections
-//    TODO: Replace MOCK_CONNECTIONS with real API call
 // ─────────────────────────────────────────────────────────────────
 
 const MOCK_MY_GROUPS = [
@@ -50,46 +42,6 @@ const MOCK_MY_GROUPS = [
     },
 ]
 
-const MOCK_SESSIONS = [
-    {
-        id: 1,
-        groupName: 'CS 201 Weekend Grind',
-        courseCode: 'CS 201',
-        date: 'Sat, Apr 12',
-        time: '2:00 – 4:00 PM',
-        location: 'Ely Library Rm 204',
-    },
-    {
-        id: 2,
-        groupName: 'Algorithms Study Squad',
-        courseCode: 'CS 301',
-        date: 'Mon, Apr 14',
-        time: '5:00 – 7:00 PM',
-        location: 'Zoom (online)',
-    },
-    {
-        id: 3,
-        groupName: 'Software Eng. Capstone Group',
-        courseCode: 'CS 350',
-        date: 'Fri, Apr 18',
-        time: '1:00 – 3:00 PM',
-        location: 'Ely Library Rm 310',
-    },
-]
-
-const MOCK_CONNECTIONS = [
-    {id: 1, name: 'Alex Johnson', major: 'Computer Science', year: 'Junior', avatarBg: 'bg-red-500', sharedGroups: 2},
-    {id: 2, name: 'Jordan Smith', major: 'Computer Science', year: 'Senior', avatarBg: 'bg-green-600', sharedGroups: 1},
-    {id: 3, name: 'Sam Williams', major: 'Mathematics', year: 'Junior', avatarBg: 'bg-purple-600', sharedGroups: 3},
-    {
-        id: 4,
-        name: 'Taylor Brown',
-        major: 'Computer Science',
-        year: 'Sophomore',
-        avatarBg: 'bg-orange-500',
-        sharedGroups: 1
-    },
-]
 
 function Profile() {
     const user = {firstName: 'Student', lastName: 'User', major: 'Computer Science', year: 'Junior'}
@@ -190,83 +142,6 @@ function Profile() {
 
                         {/* ── Right column: two tiles stacked ── */}
                         <div className="flex flex-col gap-6">
-
-                            {/* ── Upcoming Sessions ── */}
-                            <div className="card flex flex-col gap-4">
-                                <div className="flex items-center justify-between">
-                                    <h2 className="font-display text-xl text-wsu-navy font-bold">
-                                        Upcoming Sessions
-                                    </h2>
-                                    <Link
-                                        to="/study-groups"
-                                        className="text-xs text-blue-700 font-semibold hover:underline"
-                                    >
-                                        View all →
-                                    </Link>
-                                </div>
-
-                                <div className="space-y-3">
-                                    {MOCK_SESSIONS.map((session) => (
-                                        <div
-                                            key={session.id}
-                                            className="flex items-start gap-3 bg-gray-50 rounded-xl px-4 py-3"
-                                        >
-                                            <div
-                                                className="w-9 h-9 bg-blue-700 rounded-xl flex items-center justify-center text-white font-display font-bold text-xs flex-shrink-0">
-                                                {session.courseCode.split(' ')[0].charAt(0)}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-xs font-semibold text-wsu-navy truncate">
-                                                    {session.groupName}
-                                                </p>
-                                                <p className="text-xs text-wsu-slate mt-0.5">
-                                                    {session.date} · {session.time}
-                                                </p>
-                                                <p className="text-xs text-wsu-slate truncate">
-                                                    📍 {session.location}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* ── Connections ── */}
-                            <div className="card flex flex-col gap-4">
-                                <div className="flex items-center justify-between">
-                                    <h2 className="font-display text-xl text-wsu-navy font-bold">
-                                        Connections
-                                    </h2>
-                                    <span className="text-xs text-wsu-slate font-medium">
-                                        {MOCK_CONNECTIONS.length} classmates
-                                    </span>
-                                </div>
-
-                                <div className="space-y-3">
-                                    {MOCK_CONNECTIONS.map((person) => (
-                                        <div
-                                            key={person.id}
-                                            className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3"
-                                        >
-                                            <div
-                                                className={`w-9 h-9 rounded-full ${person.avatarBg} flex items-center justify-center text-white font-bold text-xs flex-shrink-0`}>
-                                                {person.name.charAt(0)}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-xs font-semibold text-wsu-navy truncate">
-                                                    {person.name}
-                                                </p>
-                                                <p className="text-xs text-wsu-slate mt-0.5 truncate">
-                                                    {person.year} · {person.major}
-                                                </p>
-                                            </div>
-                                            <span className="text-xs text-wsu-slate flex-shrink-0">
-                                                {person.sharedGroups} group{person.sharedGroups !== 1 ? 's' : ''}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
 
                         </div>
                     </div>
