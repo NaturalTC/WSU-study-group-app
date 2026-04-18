@@ -11,6 +11,10 @@ import AppHeader from '../components/AppHeader'
 // 2. MY COURSES
 //    ENDPOINT: GET /courses/my
 //    TODO: Replace MOCK_MY_COURSES with real API call
+//
+// 3. CLASSMATES
+//    ENDPOINT: GET /courses/{userCourseId}/classmates
+//    TODO: Replace MOCK_CLASSMATES with real API call
 // ─────────────────────────────────────────────────────────────────
 
 const MOCK_MY_GROUPS = [
@@ -63,6 +67,72 @@ const MOCK_MY_COURSES = [
     {
         id: 3,
         course: {courseCode: 'CAIS 0350', courseName: 'Software Engineering', departmentCode: 'CAIS'},
+        section: '002',
+        semester: 'Spring 2026',
+    },
+]
+
+const MOCK_CLASSMATES = [
+    {
+        id: 10,
+        profile: {name: 'Alex Johnson'},
+        course: {courseCode: 'CAIS 0236'},
+        section: '001',
+        semester: 'Spring 2026',
+    },
+    {
+        id: 11,
+        profile: {name: 'Jordan Smith'},
+        course: {courseCode: 'CAIS 0236'},
+        section: '001',
+        semester: 'Spring 2026',
+    },
+    {
+        id: 12,
+        profile: {name: 'Sam Williams'},
+        course: {courseCode: 'CAIS 0236'},
+        section: '001',
+        semester: 'Spring 2026',
+    },
+    {
+        id: 13,
+        profile: {name: 'Taylor Brown'},
+        course: {courseCode: 'MATH 0261'},
+        section: '003',
+        semester: 'Spring 2026',
+    },
+    {
+        id: 14,
+        profile: {name: 'Casey Lee'},
+        course: {courseCode: 'MATH 0261'},
+        section: '003',
+        semester: 'Spring 2026',
+    },
+    {
+        id: 15,
+        profile: {name: 'Morgan Davis'},
+        course: {courseCode: 'MATH 0261'},
+        section: '003',
+        semester: 'Spring 2026',
+    },
+    {
+        id: 16,
+        profile: {name: 'Riley Clark'},
+        course: {courseCode: 'CAIS 0350'},
+        section: '002',
+        semester: 'Spring 2026',
+    },
+    {
+        id: 17,
+        profile: {name: 'Drew Martinez'},
+        course: {courseCode: 'CAIS 0350'},
+        section: '002',
+        semester: 'Spring 2026',
+    },
+    {
+        id: 18,
+        profile: {name: 'Jamie White'},
+        course: {courseCode: 'CAIS 0350'},
         section: '002',
         semester: 'Spring 2026',
     },
@@ -195,6 +265,40 @@ function Profile() {
                                                 </p>
                                                 <p className="text-xs text-wsu-slate mt-0.5">
                                                     Section {enrollment.section} · {enrollment.semester}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* ── Classmates ── */}
+                            <div className="card flex flex-col gap-4">
+                                <div className="flex items-center justify-between">
+                                    <h2 className="font-display text-xl text-wsu-navy font-bold">
+                                        Classmates
+                                    </h2>
+                                    <span className="text-xs text-wsu-slate font-medium">
+                                        {MOCK_CLASSMATES.length} total
+                                    </span>
+                                </div>
+
+                                <div className="space-y-3 overflow-y-auto max-h-64 pr-1">
+                                    {MOCK_CLASSMATES.map((enrollment) => (
+                                        <div
+                                            key={enrollment.id}
+                                            className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3"
+                                        >
+                                            <div
+                                                className="w-9 h-9 rounded-full bg-wsu-navy flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+                                                {enrollment.profile.name.charAt(0)}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-xs font-semibold text-wsu-navy truncate">
+                                                    {enrollment.profile.name}
+                                                </p>
+                                                <p className="text-xs text-wsu-slate mt-0.5 truncate">
+                                                    {enrollment.course.courseCode}
                                                 </p>
                                             </div>
                                         </div>
