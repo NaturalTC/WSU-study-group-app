@@ -164,50 +164,51 @@ function Profile() {
                                 </Link>
                             </div>
 
-                            <div className="space-y-3">
+                            <div className="grid grid-cols-2 gap-3">
                                 {MOCK_MY_GROUPS.map((group) => (
                                     <div
                                         key={group.id}
-                                        className="flex items-center gap-4 bg-gray-50 rounded-xl px-4 py-3"
+                                        className="flex flex-col gap-3 bg-gray-50 rounded-xl px-4 py-4 min-h-48 border border-blue-700"
                                     >
-                                        {/* Course badge */}
-                                        <div
-                                            className="w-11 h-11 bg-blue-700 rounded-xl flex items-center justify-center text-white font-display font-bold text-xs flex-shrink-0">
-                                            {group.course.departmentCode.charAt(0)}
-                                        </div>
-
-                                        {/* Info */}
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-semibold text-wsu-navy truncate mb-0.5">
+                                        {/* Name */}
+                                        <div className="min-w-0">
+                                            <p className="text-base font-semibold text-wsu-navy truncate">
                                                 {group.name}
                                             </p>
-                                            <p className="text-xs text-wsu-slate">
-                                                {group.course.courseCode} · {group.course.courseName}
+                                            <p className="text-sm text-wsu-slate truncate">
+                                                {group.course.courseCode}
                                             </p>
-                                            <div className="flex items-center gap-2 mt-1.5">
+                                        </div>
+
+                                        {/* Course name */}
+                                        <p className="text-sm text-wsu-slate truncate">
+                                            {group.course.courseName}
+                                        </p>
+
+                                        {/* Members + Go to Chat */}
+                                        <div className="flex items-center justify-between mt-auto">
+                                            <div className="flex items-center gap-2">
                                                 <div className="flex -space-x-1.5">
                                                     {group.members.slice(0, 4).map((member, i) => (
                                                         <div
                                                             key={i}
-                                                            className="w-5 h-5 rounded-full bg-wsu-navy text-white text-xs flex items-center justify-center border border-white font-semibold"
+                                                            className="w-7 h-7 rounded-full bg-wsu-navy text-white text-xs flex items-center justify-center border border-white font-semibold"
                                                         >
                                                             {member.name.charAt(0)}
                                                         </div>
                                                     ))}
                                                 </div>
                                                 <span className="text-xs text-wsu-slate">
-                                                    {group.members.length} members
+                                                    {group.members.length}
                                                 </span>
                                             </div>
+                                            <Link
+                                                to={`/group-chat/${group.id}`}
+                                                className="text-sm font-semibold px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-lg transition-all duration-200"
+                                            >
+                                                Go to Chat
+                                            </Link>
                                         </div>
-
-                                        {/* Go to Chat */}
-                                        <Link
-                                            to={`/group-chat/${group.id}`}
-                                            className="flex-shrink-0 text-xs font-semibold px-3 py-1.5 bg-blue-700 hover:bg-blue-800 text-white rounded-lg transition-all duration-200"
-                                        >
-                                            Go to Chat
-                                        </Link>
                                     </div>
                                 ))}
                             </div>
