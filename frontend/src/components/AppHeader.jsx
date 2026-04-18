@@ -80,10 +80,7 @@ function AppHeader() {
                                 ×
                             </button>
                             <div className="flex items-center gap-3">
-                                <div>
-                                    <p className="text-sm font-semibold text-wsu-navy text-right">{user.displayName}</p>
-                                    <p className="text-xs text-wsu-slate text-right">{user.year} · {user.major}</p>
-                                </div>
+                                <p className="text-xl font-display font-semibold text-wsu-navy">{user.displayName}</p>
                                 <div className={`w-10 h-10 rounded-full ${user.avatarBg} flex items-center justify-center flex-shrink-0`}>
                                     <span className="text-white text-sm font-bold font-display">{initials}</span>
                                 </div>
@@ -92,20 +89,28 @@ function AppHeader() {
 
                         {/* Nav Items */}
                         <nav className="flex-1 px-3 py-4">
-                            <p className="text-xs font-semibold text-gray-300 uppercase tracking-widest px-3 mb-3">
+                            <p className="text-xs font-display font-semibold text-blue-700 uppercase tracking-widest px-3 mb-3">
                                 Menu
                             </p>
                             <ul className="space-y-1">
                                 <li>
                                     <Link
-                                        to="/courses"
+                                        to="/profile"
                                         onClick={() => setSidebarOpen(false)}
                                         className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-wsu-navy hover:bg-wsu-mist hover:text-blue-700 transition-all duration-200 text-sm font-medium"
                                     >
-                                        Find Courses
+                                        Profile
                                     </Link>
                                 </li>
-                                {/* TODO: Add more nav items as features are built out */}
+                                <li>
+                                    <Link
+                                        to="/study-groups"
+                                        onClick={() => setSidebarOpen(false)}
+                                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-wsu-navy hover:bg-wsu-mist hover:text-blue-700 transition-all duration-200 text-sm font-medium"
+                                    >
+                                        Study Groups
+                                    </Link>
+                                </li>
                             </ul>
                         </nav>
 
