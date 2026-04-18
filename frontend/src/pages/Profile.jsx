@@ -21,32 +21,20 @@ const MOCK_MY_GROUPS = [
     {
         id: 1,
         name: 'CS 201 Weekend Grind',
-        courseCode: 'CS 201',
-        courseName: 'Data Structures',
-        schedule: 'Sat & Sun 2–4 PM',
-        location: 'Ely Library Rm 204',
-        members: ['Alex', 'Jordan', 'Sam', 'Taylor'],
-        isLive: true,
+        course: {courseCode: 'CAIS 0236', courseName: 'Computer Organization and Architecture', departmentCode: 'CAIS'},
+        members: [{name: 'Alex'}, {name: 'Jordan'}, {name: 'Sam'}, {name: 'Taylor'}],
     },
     {
         id: 4,
         name: 'Software Eng. Capstone Group',
-        courseCode: 'CS 350',
-        courseName: 'Software Engineering',
-        schedule: 'Fri 1–3 PM',
-        location: 'Ely Library Rm 310',
-        members: ['Chris', 'Dana', 'Lee', 'Pat'],
-        isLive: false,
+        course: {courseCode: 'CAIS 0350', courseName: 'Software Engineering', departmentCode: 'CAIS'},
+        members: [{name: 'Chris'}, {name: 'Dana'}, {name: 'Lee'}, {name: 'Pat'}],
     },
     {
         id: 3,
         name: 'Calc II Crew',
-        courseCode: 'MATH 261',
-        courseName: 'Calculus II',
-        schedule: 'Tue & Thu 3–5 PM',
-        location: 'Parenzo Hall Rm 101',
-        members: ['Jamie', 'Blake', 'Avery'],
-        isLive: false,
+        course: {courseCode: 'MATH 0261', courseName: 'Calculus II', departmentCode: 'MATH'},
+        members: [{name: 'Jamie'}, {name: 'Blake'}, {name: 'Avery'}],
     },
 ]
 
@@ -139,7 +127,7 @@ const MOCK_CLASSMATES = [
 ]
 
 function Profile() {
-    const user = {firstName: 'Student', lastName: 'User', major: 'Computer Science', year: 'Junior'}
+    const user = {name: 'Student User', major: 'Computer Science', year: 'Junior'}
     return (
         <div className="flex flex-col min-h-screen bg-wsu-chalk">
 
@@ -152,7 +140,7 @@ function Profile() {
                     {/* Welcome */}
                     <div className="mb-8">
                         <h1 className="font-display text-3xl text-wsu-navy font-bold">
-                            Welcome back, {user.firstName}
+                            Welcome back, {user.name.split(' ')[0]}
                         </h1>
                         <p className="text-wsu-slate text-sm mt-1">
                             {user.year} · {user.major}
@@ -185,26 +173,16 @@ function Profile() {
                                         {/* Course badge */}
                                         <div
                                             className="w-11 h-11 bg-blue-700 rounded-xl flex items-center justify-center text-white font-display font-bold text-xs flex-shrink-0">
-                                            {group.courseCode.split(' ')[0].charAt(0)}
+                                            {group.course.departmentCode.charAt(0)}
                                         </div>
 
                                         {/* Info */}
                                         <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-2 mb-0.5">
-                                                <p className="text-sm font-semibold text-wsu-navy truncate">
-                                                    {group.name}
-                                                </p>
-                                                {group.isLive && (
-                                                    <span
-                                                        className="flex items-center gap-1 bg-green-50 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0">
-                                                        <span
-                                                            className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"/>
-                                                        Live
-                                                    </span>
-                                                )}
-                                            </div>
+                                            <p className="text-sm font-semibold text-wsu-navy truncate mb-0.5">
+                                                {group.name}
+                                            </p>
                                             <p className="text-xs text-wsu-slate">
-                                                {group.courseCode} · {group.schedule}
+                                                {group.course.courseCode} · {group.course.courseName}
                                             </p>
                                             <div className="flex items-center gap-2 mt-1.5">
                                                 <div className="flex -space-x-1.5">
@@ -213,7 +191,7 @@ function Profile() {
                                                             key={i}
                                                             className="w-5 h-5 rounded-full bg-wsu-navy text-white text-xs flex items-center justify-center border border-white font-semibold"
                                                         >
-                                                            {member.charAt(0)}
+                                                            {member.name.charAt(0)}
                                                         </div>
                                                     ))}
                                                 </div>
