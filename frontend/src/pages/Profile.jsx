@@ -127,7 +127,7 @@ const MOCK_CLASSMATES = [
 ]
 
 function Profile() {
-    const user = {name: 'Student User', major: 'Computer Science', year: 'Junior'}
+    const user = {name: 'Joe Smith', major: 'Computer Science', year: 'Junior'}
     return (
         <div className="flex flex-col min-h-screen bg-wsu-chalk">
 
