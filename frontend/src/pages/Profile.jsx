@@ -8,91 +8,126 @@ import AppHeader from '../components/AppHeader'
 //    ENDPOINT: GET /api/study-groups/my-groups
 //    TODO: Replace MOCK_MY_GROUPS with real API call
 //
-// 2. UPCOMING STUDY SESSIONS
-//    ENDPOINT: GET /api/study-sessions/upcoming
-//    TODO: Replace MOCK_SESSIONS with real API call
+// 2. MY COURSES
+//    ENDPOINT: GET /courses/my
+//    TODO: Replace MOCK_MY_COURSES with real API call
 //
-// 3. CONNECTIONS
-//    ENDPOINT: GET /api/connections
-//    TODO: Replace MOCK_CONNECTIONS with real API call
+// 3. CLASSMATES
+//    ENDPOINT: GET /courses/{userCourseId}/classmates
+//    TODO: Replace MOCK_CLASSMATES with real API call
 // ─────────────────────────────────────────────────────────────────
 
 const MOCK_MY_GROUPS = [
     {
         id: 1,
         name: 'CS 201 Weekend Grind',
-        courseCode: 'CS 201',
-        courseName: 'Data Structures',
-        schedule: 'Sat & Sun 2–4 PM',
-        location: 'Ely Library Rm 204',
-        members: ['Alex', 'Jordan', 'Sam', 'Taylor'],
-        isLive: true,
+        course: {courseCode: 'CAIS 0236', courseName: 'Computer Organization and Architecture', departmentCode: 'CAIS'},
+        members: [{name: 'Alex'}, {name: 'Jordan'}, {name: 'Sam'}, {name: 'Taylor'}],
     },
     {
         id: 4,
         name: 'Software Eng. Capstone Group',
-        courseCode: 'CS 350',
-        courseName: 'Software Engineering',
-        schedule: 'Fri 1–3 PM',
-        location: 'Ely Library Rm 310',
-        members: ['Chris', 'Dana', 'Lee', 'Pat'],
-        isLive: false,
+        course: {courseCode: 'CAIS 0350', courseName: 'Software Engineering', departmentCode: 'CAIS'},
+        members: [{name: 'Chris'}, {name: 'Dana'}, {name: 'Lee'}, {name: 'Pat'}],
     },
     {
         id: 3,
         name: 'Calc II Crew',
-        courseCode: 'MATH 261',
-        courseName: 'Calculus II',
-        schedule: 'Tue & Thu 3–5 PM',
-        location: 'Parenzo Hall Rm 101',
-        members: ['Jamie', 'Blake', 'Avery'],
-        isLive: false,
+        course: {courseCode: 'MATH 0261', courseName: 'Calculus II', departmentCode: 'MATH'},
+        members: [{name: 'Jamie'}, {name: 'Blake'}, {name: 'Avery'}],
     },
 ]
 
-const MOCK_SESSIONS = [
+
+const MOCK_MY_COURSES = [
     {
         id: 1,
-        groupName: 'CS 201 Weekend Grind',
-        courseCode: 'CS 201',
-        date: 'Sat, Apr 12',
-        time: '2:00 – 4:00 PM',
-        location: 'Ely Library Rm 204',
+        course: {courseCode: 'CAIS 0236', courseName: 'Computer Organization and Architecture', departmentCode: 'CAIS'},
+        section: '001',
+        semester: 'Spring 2026',
     },
     {
         id: 2,
-        groupName: 'Algorithms Study Squad',
-        courseCode: 'CS 301',
-        date: 'Mon, Apr 14',
-        time: '5:00 – 7:00 PM',
-        location: 'Zoom (online)',
+        course: {courseCode: 'MATH 0261', courseName: 'Calculus II', departmentCode: 'MATH'},
+        section: '003',
+        semester: 'Spring 2026',
     },
     {
         id: 3,
-        groupName: 'Software Eng. Capstone Group',
-        courseCode: 'CS 350',
-        date: 'Fri, Apr 18',
-        time: '1:00 – 3:00 PM',
-        location: 'Ely Library Rm 310',
+        course: {courseCode: 'CAIS 0350', courseName: 'Software Engineering', departmentCode: 'CAIS'},
+        section: '002',
+        semester: 'Spring 2026',
     },
 ]
 
-const MOCK_CONNECTIONS = [
-    {id: 1, name: 'Alex Johnson', major: 'Computer Science', year: 'Junior', avatarBg: 'bg-red-500', sharedGroups: 2},
-    {id: 2, name: 'Jordan Smith', major: 'Computer Science', year: 'Senior', avatarBg: 'bg-green-600', sharedGroups: 1},
-    {id: 3, name: 'Sam Williams', major: 'Mathematics', year: 'Junior', avatarBg: 'bg-purple-600', sharedGroups: 3},
+const MOCK_CLASSMATES = [
     {
-        id: 4,
-        name: 'Taylor Brown',
-        major: 'Computer Science',
-        year: 'Sophomore',
-        avatarBg: 'bg-orange-500',
-        sharedGroups: 1
+        id: 10,
+        profile: {name: 'Alex Johnson'},
+        course: {courseCode: 'CAIS 0236'},
+        section: '001',
+        semester: 'Spring 2026',
+    },
+    {
+        id: 11,
+        profile: {name: 'Jordan Smith'},
+        course: {courseCode: 'CAIS 0236'},
+        section: '001',
+        semester: 'Spring 2026',
+    },
+    {
+        id: 12,
+        profile: {name: 'Sam Williams'},
+        course: {courseCode: 'CAIS 0236'},
+        section: '001',
+        semester: 'Spring 2026',
+    },
+    {
+        id: 13,
+        profile: {name: 'Taylor Brown'},
+        course: {courseCode: 'MATH 0261'},
+        section: '003',
+        semester: 'Spring 2026',
+    },
+    {
+        id: 14,
+        profile: {name: 'Casey Lee'},
+        course: {courseCode: 'MATH 0261'},
+        section: '003',
+        semester: 'Spring 2026',
+    },
+    {
+        id: 15,
+        profile: {name: 'Morgan Davis'},
+        course: {courseCode: 'MATH 0261'},
+        section: '003',
+        semester: 'Spring 2026',
+    },
+    {
+        id: 16,
+        profile: {name: 'Riley Clark'},
+        course: {courseCode: 'CAIS 0350'},
+        section: '002',
+        semester: 'Spring 2026',
+    },
+    {
+        id: 17,
+        profile: {name: 'Drew Martinez'},
+        course: {courseCode: 'CAIS 0350'},
+        section: '002',
+        semester: 'Spring 2026',
+    },
+    {
+        id: 18,
+        profile: {name: 'Jamie White'},
+        course: {courseCode: 'CAIS 0350'},
+        section: '002',
+        semester: 'Spring 2026',
     },
 ]
 
 function Profile() {
-    const user = {firstName: 'Student', lastName: 'User', major: 'Computer Science', year: 'Junior'}
+    const user = {name: 'Joe Smith', major: 'Computer Science', year: 'Junior'}
     return (
         <div className="flex flex-col min-h-screen bg-wsu-chalk">
 
@@ -105,7 +140,7 @@ function Profile() {
                     {/* Welcome */}
                     <div className="mb-8">
                         <h1 className="font-display text-3xl text-wsu-navy font-bold">
-                            Welcome back, {user.firstName}
+                            Welcome back, {user.name.split(' ')[0]}
                         </h1>
                         <p className="text-wsu-slate text-sm mt-1">
                             {user.year} · {user.major}
@@ -129,60 +164,51 @@ function Profile() {
                                 </Link>
                             </div>
 
-                            <div className="space-y-3">
+                            <div className="grid grid-cols-2 gap-3">
                                 {MOCK_MY_GROUPS.map((group) => (
                                     <div
                                         key={group.id}
-                                        className="flex items-center gap-4 bg-gray-50 rounded-xl px-4 py-3"
+                                        className="flex flex-col gap-3 bg-gray-50 rounded-xl px-4 py-4 min-h-48 border border-blue-700"
                                     >
-                                        {/* Course badge */}
-                                        <div
-                                            className="w-11 h-11 bg-blue-700 rounded-xl flex items-center justify-center text-white font-display font-bold text-xs flex-shrink-0">
-                                            {group.courseCode.split(' ')[0].charAt(0)}
+                                        {/* Name */}
+                                        <div className="min-w-0">
+                                            <p className="text-base font-semibold text-wsu-navy truncate">
+                                                {group.name}
+                                            </p>
+                                            <p className="text-sm text-wsu-slate truncate">
+                                                {group.course.courseCode}
+                                            </p>
                                         </div>
 
-                                        {/* Info */}
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-2 mb-0.5">
-                                                <p className="text-sm font-semibold text-wsu-navy truncate">
-                                                    {group.name}
-                                                </p>
-                                                {group.isLive && (
-                                                    <span
-                                                        className="flex items-center gap-1 bg-green-50 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0">
-                                                        <span
-                                                            className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"/>
-                                                        Live
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <p className="text-xs text-wsu-slate">
-                                                {group.courseCode} · {group.schedule}
-                                            </p>
-                                            <div className="flex items-center gap-2 mt-1.5">
+                                        {/* Course name */}
+                                        <p className="text-sm text-wsu-slate truncate">
+                                            {group.course.courseName}
+                                        </p>
+
+                                        {/* Members + Go to Chat */}
+                                        <div className="flex items-center justify-between mt-auto">
+                                            <div className="flex items-center gap-2">
                                                 <div className="flex -space-x-1.5">
                                                     {group.members.slice(0, 4).map((member, i) => (
                                                         <div
                                                             key={i}
-                                                            className="w-5 h-5 rounded-full bg-wsu-navy text-white text-xs flex items-center justify-center border border-white font-semibold"
+                                                            className="w-7 h-7 rounded-full bg-wsu-navy text-white text-xs flex items-center justify-center border border-white font-semibold"
                                                         >
-                                                            {member.charAt(0)}
+                                                            {member.name.charAt(0)}
                                                         </div>
                                                     ))}
                                                 </div>
                                                 <span className="text-xs text-wsu-slate">
-                                                    {group.members.length} members
+                                                    {group.members.length}
                                                 </span>
                                             </div>
+                                            <Link
+                                                to={`/group-chat/${group.id}`}
+                                                className="text-sm font-semibold px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-lg transition-all duration-200"
+                                            >
+                                                Go to Chat
+                                            </Link>
                                         </div>
-
-                                        {/* Go to Chat */}
-                                        <Link
-                                            to={`/group-chat/${group.id}`}
-                                            className="flex-shrink-0 text-xs font-semibold px-3 py-1.5 bg-blue-700 hover:bg-blue-800 text-white rounded-lg transition-all duration-200"
-                                        >
-                                            Go to Chat
-                                        </Link>
                                     </div>
                                 ))}
                             </div>
@@ -191,39 +217,33 @@ function Profile() {
                         {/* ── Right column: two tiles stacked ── */}
                         <div className="flex flex-col gap-6">
 
-                            {/* ── Upcoming Sessions ── */}
+                            {/* ── My Courses ── */}
                             <div className="card flex flex-col gap-4">
                                 <div className="flex items-center justify-between">
                                     <h2 className="font-display text-xl text-wsu-navy font-bold">
-                                        Upcoming Sessions
+                                        My Courses
                                     </h2>
-                                    <Link
-                                        to="/study-groups"
-                                        className="text-xs text-blue-700 font-semibold hover:underline"
-                                    >
-                                        View all →
-                                    </Link>
+                                    <span className="text-xs text-wsu-slate font-medium">
+                                        {MOCK_MY_COURSES.length} enrolled
+                                    </span>
                                 </div>
 
                                 <div className="space-y-3">
-                                    {MOCK_SESSIONS.map((session) => (
+                                    {MOCK_MY_COURSES.map((enrollment) => (
                                         <div
-                                            key={session.id}
-                                            className="flex items-start gap-3 bg-gray-50 rounded-xl px-4 py-3"
+                                            key={enrollment.id}
+                                            className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3"
                                         >
                                             <div
                                                 className="w-9 h-9 bg-blue-700 rounded-xl flex items-center justify-center text-white font-display font-bold text-xs flex-shrink-0">
-                                                {session.courseCode.split(' ')[0].charAt(0)}
+                                                {enrollment.course.departmentCode.charAt(0)}
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-xs font-semibold text-wsu-navy truncate">
-                                                    {session.groupName}
+                                                    {enrollment.course.courseCode} · {enrollment.course.courseName}
                                                 </p>
                                                 <p className="text-xs text-wsu-slate mt-0.5">
-                                                    {session.date} · {session.time}
-                                                </p>
-                                                <p className="text-xs text-wsu-slate truncate">
-                                                    📍 {session.location}
+                                                    Section {enrollment.section} · {enrollment.semester}
                                                 </p>
                                             </div>
                                         </div>
@@ -231,38 +251,35 @@ function Profile() {
                                 </div>
                             </div>
 
-                            {/* ── Connections ── */}
+                            {/* ── Classmates ── */}
                             <div className="card flex flex-col gap-4">
                                 <div className="flex items-center justify-between">
                                     <h2 className="font-display text-xl text-wsu-navy font-bold">
-                                        Connections
+                                        Classmates
                                     </h2>
                                     <span className="text-xs text-wsu-slate font-medium">
-                                        {MOCK_CONNECTIONS.length} classmates
+                                        {MOCK_CLASSMATES.length} total
                                     </span>
                                 </div>
 
-                                <div className="space-y-3">
-                                    {MOCK_CONNECTIONS.map((person) => (
+                                <div className="space-y-3 overflow-y-auto max-h-64 pr-1">
+                                    {MOCK_CLASSMATES.map((enrollment) => (
                                         <div
-                                            key={person.id}
+                                            key={enrollment.id}
                                             className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3"
                                         >
                                             <div
-                                                className={`w-9 h-9 rounded-full ${person.avatarBg} flex items-center justify-center text-white font-bold text-xs flex-shrink-0`}>
-                                                {person.name.charAt(0)}
+                                                className="w-9 h-9 rounded-full bg-wsu-navy flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+                                                {enrollment.profile.name.charAt(0)}
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-xs font-semibold text-wsu-navy truncate">
-                                                    {person.name}
+                                                    {enrollment.profile.name}
                                                 </p>
                                                 <p className="text-xs text-wsu-slate mt-0.5 truncate">
-                                                    {person.year} · {person.major}
+                                                    {enrollment.course.courseCode}
                                                 </p>
                                             </div>
-                                            <span className="text-xs text-wsu-slate flex-shrink-0">
-                                                {person.sharedGroups} group{person.sharedGroups !== 1 ? 's' : ''}
-                                            </span>
                                         </div>
                                     ))}
                                 </div>
