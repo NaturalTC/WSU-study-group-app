@@ -1,5 +1,6 @@
 package com.github.wsustudygroupapp.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -48,7 +49,7 @@ public class Profile {
     private User user;
 
     /** All courses this student is enrolled in, each with a specific section and semester. */
-    @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserCourse> enrollments;
 
     // ── Sprint 2 fields ───────────────────────────────────────────────

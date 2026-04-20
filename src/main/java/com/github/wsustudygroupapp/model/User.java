@@ -48,7 +48,11 @@ public class User {
     @Column
     private String verificationToken;
 
+    /** UUID token emailed when a student requests a password reset. Cleared after use. */
+    @Column
+    private String resetToken;
+
     /** The student's profile — created automatically after email verification. */
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Profile profile;
 }

@@ -51,7 +51,8 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // no sessions — JWT only
             )
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**").permitAll() // register, verify, login are public
+                .requestMatchers("/auth/register", "/auth/verify", "/auth/login",
+                        "/auth/forgot-password", "/auth/change-password").permitAll() // public auth routes
                 .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/api-docs/**").permitAll() // Swagger UI open
                 .anyRequest().authenticated() // everything else needs a valid JWT
             )

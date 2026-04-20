@@ -1,8 +1,6 @@
 package com.github.wsustudygroupapp.service;
 
-import com.github.wsustudygroupapp.dto.AuthResponse;
-import com.github.wsustudygroupapp.dto.LoginRequest;
-import com.github.wsustudygroupapp.dto.RegisterRequest;
+import com.github.wsustudygroupapp.dto.*;
 import com.github.wsustudygroupapp.model.Profile;
 import com.github.wsustudygroupapp.model.User;
 import com.github.wsustudygroupapp.repository.ProfileRepository;
@@ -11,6 +9,7 @@ import com.github.wsustudygroupapp.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -88,10 +87,10 @@ public class AuthService {
         user.setVerificationToken(verificationToken);
         userRepository.save(user);
 
-        // Create a blank Profile linked to this User
-        // Profile holds student data (name, major, bio) — kept separate from auth credentials
+        // Create a Profile linked to this User — save the display name they provided at registration
         Profile profile = new Profile();
         profile.setUser(user);
+        profile.setName(request.getName());
         profileRepository.save(profile);
 
         // Send the verification email — when they click it, GET /auth/verify?token=... fires
@@ -147,5 +146,69 @@ public class AuthService {
         // From this point on the client sends: Authorization: Bearer <token> on every request
         String token = jwtUtil.generateToken(user.getEmail());
         return new AuthResponse(token, "Login successful");
+    }
+
+    public void forgotPassword(ForgotPasswordRequest request)
+    {
+        User user = userRepository.findByEmail(request.getEmail())
+        .orElseThrow(() -> new RuntimeException("No account found with that email"));
+
+        // Generate a single-use reset token and save it to the user
+        String resetToken = UUID.randomUUID().toString();
+        user.setResetToken(resetToken);
+        userRepository.save(user);
+
+        // Email the reset link — frontend /reset-password?token=... page handles it
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(request.getEmail());
+        message.setSubject("Reset your WSU Study Group password");
+        message.setText("Click to reset your password: " + baseUrl + "/reset-password?token=" + resetToken);
+        mailSender.send(message);
+    }
+
+    /*
+        Update password for a logged-in user who knows their current password.
+        Gets the user from the JWT (SecurityContextHolder) — no token needed in the request body.
+        Verifies current password before allowing the change.
+     */
+    public void updatePassword(UpdatePasswordRequest request)
+    {
+        // Pull the authenticated user's email from the JWT — Spring Security sets this after JwtAuthFilter runs
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Make sure they actually know their current password before letting them change it
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword()))
+        {
+            throw new RuntimeException("Current password is incorrect");
+        }
+
+        if (request.getNewPassword().length() < 8)
+        {
+            throw new RuntimeException("New password must be at least 8 characters");
+        }
+
+        // Hash and save — never store plain text
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+    }
+
+    public void changePassword(ChangePasswordRequest request)
+    {
+        User user = userRepository.findByResetToken(request.getToken())
+                .orElseThrow(() -> new RuntimeException("Invalid or expired reset token"));
+
+        if (request.getNewPassword().length() < 8)
+        {
+            throw new RuntimeException("Password must be at least 8 characters");
+        }
+
+        // Hash the new password — never store plain text
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        // Clear the token so the reset link can't be reused
+        user.setResetToken(null);
+        userRepository.save(user);
     }
 }

@@ -1,55 +1,72 @@
 package com.github.wsustudygroupapp.controller;
 
-import com.github.wsustudygroupapp.dto.AuthResponse;
-import com.github.wsustudygroupapp.dto.LoginRequest;
-import com.github.wsustudygroupapp.dto.RegisterRequest;
+import com.github.wsustudygroupapp.dto.*;
 import com.github.wsustudygroupapp.service.AuthService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-// Jose — exposes the three auth endpoints
-// These are public routes — no JWT token required (configured in SecurityConfig)
-// All three just delegate straight to AuthService, no logic lives here
+// Jose — exposes auth endpoints
+// Public routes are configured in SecurityConfig
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
-    // AuthService handles all the actual logic — controller just wires HTTP to it
     private final AuthService authService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService)
+    {
         this.authService = authService;
     }
 
-    /*
-        POST /auth/register
-        Body: { "email": "jose@westfield.ma.edu", "password": "..." }
-        Saves the user and fires the verification email
-     */
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<String> register(@RequestBody RegisterRequest request)
+    {
         authService.register(request);
         return ResponseEntity.ok("Registration successful. Check your email to verify your account.");
     }
 
-    /*
-        GET /auth/verify?token=abc-123-uuid
-        The link emailed to the student — marks their account as verified
-     */
     @GetMapping("/verify")
-    public ResponseEntity<String> verify(@RequestParam String token) {
-        authService.verify(token);
-        return ResponseEntity.ok("Email verified. You can now log in.");
+    public ResponseEntity<Void> verify(@RequestParam String token)
+    {
+        try {
+            authService.verify(token);
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Location", "http://localhost:5173/verify-success");
+            return new ResponseEntity<>(headers, HttpStatus.FOUND);
+        } catch (RuntimeException e) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Location", "http://localhost:5173/verify-error");
+            return new ResponseEntity<>(headers, HttpStatus.FOUND);
+        }
     }
 
-    /*
-        POST /auth/login
-        Body: { "email": "jose@westfield.ma.edu", "password": "..." }
-        Returns the JWT token — client stores this and sends it on every future request
-     */
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request)
+    {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordRequest request)
+    {
+        authService.forgotPassword(request);
+        return ResponseEntity.ok("Password reset sent to email!");
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest request)
+    {
+        authService.changePassword(request);
+        return ResponseEntity.ok("Password has been successfully changed");
+    }
+
+    @PostMapping("/update-password")
+    public ResponseEntity<String> updatePassword(@RequestBody UpdatePasswordRequest request)
+    {
+        authService.updatePassword(request);
+        return ResponseEntity.ok("Password updated successfully");
     }
 }

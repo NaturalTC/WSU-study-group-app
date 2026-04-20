@@ -21,4 +21,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     /** Returns true if an account with this email already exists. Used to prevent duplicate registrations. */
     boolean existsByEmail(String email);
+
+    /** Finds a user by their password reset token. Used to validate a reset link. */
+    Optional<User> findByResetToken(String resetToken);
 }

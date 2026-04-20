@@ -70,8 +70,15 @@ public class JwtAuthFilter extends OncePerRequestFilter
         String email = jwtUtil.extractEmail(token);
 
         // Step 5 — load the full user from the database using that email
-        // We hit the DB here because the user could have been deleted or banned since the token was issued
-        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+        // We hit the DB here because the user could have been deleted since the token was issued.
+        // If the user no longer exists, skip authentication — Spring Security will return 401.
+        UserDetails userDetails;
+        try {
+            userDetails = userDetailsService.loadUserByUsername(email);
+        } catch (Exception e) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         // Step 6 — verify the token is legitimate and not expired
         if (jwtUtil.isTokenValid(token))

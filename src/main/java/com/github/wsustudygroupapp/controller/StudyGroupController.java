@@ -5,6 +5,7 @@ import com.github.wsustudygroupapp.model.Message;
 import com.github.wsustudygroupapp.model.StudyGroup;
 import com.github.wsustudygroupapp.service.ChatService;
 import com.github.wsustudygroupapp.service.StudyGroupService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
