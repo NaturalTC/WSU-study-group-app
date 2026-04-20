@@ -1,20 +1,19 @@
 package com.github.wsustudygroupapp.service;
 
 import com.github.wsustudygroupapp.dto.StudyGroupRequest;
+import com.github.wsustudygroupapp.exception.ResourceNotFoundException;
+import com.github.wsustudygroupapp.model.Course;
 import com.github.wsustudygroupapp.model.Profile;
 import com.github.wsustudygroupapp.model.StudyGroup;
+import com.github.wsustudygroupapp.model.User;
 import com.github.wsustudygroupapp.repository.CourseRepository;
 import com.github.wsustudygroupapp.repository.ProfileRepository;
 import com.github.wsustudygroupapp.repository.StudyGroupRepository;
+import com.github.wsustudygroupapp.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
-
-// Hayden — handles study group creation, joining, and leaving
-// getGroupsForCourse() → return all groups for a given course
-// createGroup()        → create a new study group for a course
-// joinGroup()          → add a student to an existing group
-// leaveGroup()         → remove a student from a group
 
 @Service
 public class StudyGroupService {
@@ -22,46 +21,67 @@ public class StudyGroupService {
     private final StudyGroupRepository studyGroupRepository;
     private final CourseRepository courseRepository;
     private final ProfileRepository profileRepository;
+    private final UserRepository userRepository;
 
     public StudyGroupService(StudyGroupRepository studyGroupRepository,
                              CourseRepository courseRepository,
-                             ProfileRepository profileRepository) {
+                             ProfileRepository profileRepository,
+                             UserRepository userRepository) {
         this.studyGroupRepository = studyGroupRepository;
         this.courseRepository = courseRepository;
         this.profileRepository = profileRepository;
+        this.userRepository = userRepository;
     }
 
-    // TODO: return studyGroupRepository.findByCourseId(courseId)
     public List<StudyGroup> getGroupsForCourse(Long courseId) {
-        return null;
+        return studyGroupRepository.findByCourseId(courseId);
     }
 
-    // TODO: find the course by request.getCourseId()
-    // TODO: build a new StudyGroup with name, course, createdBy = currentProfile(email)
-    // TODO: add creator as first member, save and return
-    public StudyGroup createGroup(StudyGroupRequest request, String email) {
-        Profile creator = currentProfile(email);
-        return null;
+    public StudyGroup createGroup(StudyGroupRequest request, String creatorEmail) {
+        Profile creator = currentProfile(creatorEmail);
+        Course course = courseRepository.findById(request.getCourseId())
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + request.getCourseId()));
+
+        StudyGroup group = new StudyGroup();
+        group.setName(request.getName());
+        group.setCourse(course);
+        group.setCreatedBy(creator);
+
+        List<Profile> members = new ArrayList<>();
+        members.add(creator);
+        group.setMembers(members);
+
+        return studyGroupRepository.save(group);
     }
 
-    // TODO: find the group by groupId — throw if not found
-    // TODO: check the student isn't already a member
-    // TODO: add currentProfile(email) to group.getMembers() and save
     public StudyGroup joinGroup(Long groupId, String email) {
         Profile profile = currentProfile(email);
-        return null;
+        StudyGroup group = studyGroupRepository.findById(groupId)
+                .orElseThrow(() -> new ResourceNotFoundException("Study group not found: " + groupId));
+
+        boolean alreadyMember = group.getMembers().stream()
+                .anyMatch(member -> member.getId().equals(profile.getId()));
+        if (!alreadyMember) {
+            group.getMembers().add(profile);
+            return studyGroupRepository.save(group);
+        }
+
+        return group;
     }
 
-    // TODO: find the group by groupId — throw if not found
-    // TODO: remove currentProfile(email) from group.getMembers() and save
     public void leaveGroup(Long groupId, String email) {
         Profile profile = currentProfile(email);
+        StudyGroup group = studyGroupRepository.findById(groupId)
+                .orElseThrow(() -> new ResourceNotFoundException("Study group not found: " + groupId));
+
+        group.getMembers().removeIf(member -> member.getId().equals(profile.getId()));
+        studyGroupRepository.save(group);
     }
 
-    // Looks up the Profile for the logged-in user using their email from the JWT.
-    // Call this at the top of any method that needs to know who is making the request.
     private Profile currentProfile(String email) {
-        return profileRepository.findByUserEmail(email)
-                .orElseThrow(() -> new RuntimeException("Profile not found for email: " + email));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + email));
+        return profileRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Profile not found for: " + email));
     }
 }

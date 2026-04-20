@@ -12,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -26,34 +27,39 @@ public class StudyGroupController {
         this.chatService = chatService;
     }
 
+    // get all groups for a course (consider adding paging params)
     @GetMapping("/course/{courseId}")
     public ResponseEntity<List<StudyGroup>> getGroupsForCourse(@PathVariable Long courseId) {
-        return ResponseEntity.ok(studyGroupService.getGroupsForCourse(courseId));
+        List<StudyGroup> groups = studyGroupService.getGroupsForCourse(courseId);
+        return ResponseEntity.ok(groups);
     }
 
+    // create a new group
     @PostMapping
     public ResponseEntity<StudyGroup> createGroup(
             @Valid @RequestBody StudyGroupRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(studyGroupService.createGroup(request, userDetails.getUsername()));
+        StudyGroup createdGroup = studyGroupService.createGroup(request, userDetails.getUsername());
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdGroup);
     }
 
+    // join an existing group
     @PostMapping("/{groupId}/join")
-    public ResponseEntity<StudyGroup> joinGroup(
-            @PathVariable Long groupId,
-            @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(studyGroupService.joinGroup(groupId, userDetails.getUsername()));
+    public ResponseEntity<StudyGroup> joinGroup(@PathVariable Long groupId,
+                                                @AuthenticationPrincipal UserDetails userDetails) {
+        StudyGroup updatedGroup = studyGroupService.joinGroup(groupId, userDetails.getUsername());
+        return ResponseEntity.ok(updatedGroup);
     }
 
+    // leave a group
     @DeleteMapping("/{groupId}/leave")
-    public ResponseEntity<Void> leaveGroup(
-            @PathVariable Long groupId,
-            @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<Void> leaveGroup(@PathVariable Long groupId,
+                                           @AuthenticationPrincipal UserDetails userDetails) {
         studyGroupService.leaveGroup(groupId, userDetails.getUsername());
         return ResponseEntity.noContent().build();
     }
 
+    // load chat history when user opens the group chat (consider pagination)
     @GetMapping("/{groupId}/messages")
     public ResponseEntity<List<Message>> getChatHistory(@PathVariable Long groupId) {
         return ResponseEntity.ok(chatService.getHistory(groupId));

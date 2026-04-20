@@ -52,42 +52,11 @@ public class Profile {
     @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserCourse> enrollments;
 
-    /**
-     * Study groups this student created.
-     * Cascade ALL + orphanRemoval ensures groups (and their messages) are deleted with the profile.
-     */
-    @JsonIgnore
-    @OneToMany(mappedBy = "createdBy", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<StudyGroup> createdGroups;
+    // ── Sprint 2 fields ───────────────────────────────────────────────
 
-    /**
-     * Messages this student sent across all groups.
-     * Cascade ALL + orphanRemoval deletes their messages when the profile is deleted.
-     */
-    @JsonIgnore
-    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Message> sentMessages;
+    /** Total gamification points earned by this student. Incremented by GamificationService. */
+    @Column(nullable = false)
+    private int points = 0;
 
-    /**
-     * Groups this student is a member of (inverse side of StudyGroup.members ManyToMany).
-     * Not persisted here — StudyGroup owns the join table.
-     * Used only by @PreRemove to clean up the study_group_members join table before deletion.
-     */
-    @JsonIgnore
-    @ManyToMany(mappedBy = "members")
-    private List<StudyGroup> memberOfGroups;
-
-    /**
-     * Before this profile is deleted, remove it from all group member lists.
-     * This clears the study_group_members join table rows on the profile side —
-     * JPA doesn't do this automatically since StudyGroup owns the join table.
-     */
-    @PreRemove
-    private void removeFromGroups() {
-        if (memberOfGroups != null) {
-            for (StudyGroup group : memberOfGroups) {
-                group.getMembers().remove(this);
-            }
-        }
-    }
+    // TODO: Maicheal Shenouda — add a @OneToMany to UserBadge so profile.getBadges() works
 }
