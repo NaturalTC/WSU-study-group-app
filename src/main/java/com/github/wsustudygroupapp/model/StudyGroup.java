@@ -1,5 +1,6 @@
 package com.github.wsustudygroupapp.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -41,7 +42,7 @@ public class StudyGroup {
     private Profile createdBy;
 
     /** All students currently in this study group. */
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "study_group_members",
         joinColumns = @JoinColumn(name = "group_id"),
@@ -50,6 +51,7 @@ public class StudyGroup {
     private List<Profile> members;
 
     /** All chat messages sent in this group, ordered by time. */
+    @JsonIgnore
     @OneToMany(mappedBy = "studyGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Message> messages;
 }

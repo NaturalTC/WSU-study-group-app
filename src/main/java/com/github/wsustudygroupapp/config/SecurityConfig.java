@@ -1,6 +1,7 @@
 package com.github.wsustudygroupapp.config;
 
 import com.github.wsustudygroupapp.filter.JwtAuthFilter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -25,8 +26,10 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    // JwtAuthFilter is injected here so we can plug it into the filter chain below
     private final JwtAuthFilter jwtAuthFilter;
+
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
 
     public SecurityConfig(JwtAuthFilter jwtAuthFilter)
     {
@@ -52,8 +55,10 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/register", "/auth/verify", "/auth/login",
-                        "/auth/forgot-password", "/auth/change-password").permitAll() // public auth routes
+                        "/auth/forgot-password", "/auth/change-password",
+                        "/auth/resend-verification").permitAll() // public auth routes
                 .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/api-docs/**").permitAll() // Swagger UI open
+                .requestMatchers("/ws/**").permitAll() // WebSocket upgrade — JWT passed as STOMP header instead
                 .anyRequest().authenticated() // everything else needs a valid JWT
             )
             // Plug our filter in — runs before Spring's built-in auth filter on every request
@@ -62,12 +67,10 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // Allows the React frontend (localhost:5173) to call the backend (localhost:8080)
-    // Without this, browsers block cross-origin requests by default
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173"));
+        config.setAllowedOrigins(List.of(frontendUrl));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

@@ -1,8 +1,12 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import api from '../api/axios'
+import { resendVerification } from '../api/auth'
+import { useAuth } from '../context/AuthContext'
 
 function LoginForm() {
   const navigate = useNavigate()
+  const { login } = useAuth()
 
   const [formData, setFormData] = useState({
     email: '',
@@ -11,6 +15,8 @@ function LoginForm() {
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [resendLoading, setResendLoading] = useState(false)
+  const [resendStatus, setResendStatus] = useState(null)
 
   // Handle input changes
   const handleChange = (e) => {
@@ -54,26 +60,31 @@ function LoginForm() {
     setError(null)
 
     try {
-      // TODO: Replace this block with real API call
-      // const response = await fetch('http://localhost:8080/api/auth/login', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(formData),
-      // })
-      // const data = await response.json()
-      // if (!response.ok) throw new Error(data.message)
-      // localStorage.setItem('token', data.token)
-      // navigate('/dashboard')
-
-      // ── PLACEHOLDER: Simulate API delay ──
-      await new Promise((res) => setTimeout(res, 1000))
-      console.log('Login payload (placeholder):', formData)
-      alert('Login placeholder triggered! See console for payload.')
-
+      const res = await api.post('/auth/login', {
+        email: formData.email,
+        password: formData.password,
+      })
+      const profile = await login(res.data.token)
+      navigate(profile ? '/profile' : '/setup-profile')
     } catch (err) {
-      setError(err.message || 'Something went wrong. Please try again.')
+      const msg = err.response?.data?.message || err.message || 'Something went wrong. Please try again.'
+      setError(msg)
+      setResendStatus(null)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleResend = async () => {
+    setResendLoading(true)
+    setResendStatus(null)
+    try {
+      await resendVerification(formData.email)
+      setResendStatus('success')
+    } catch (err) {
+      setResendStatus('error')
+    } finally {
+      setResendLoading(false)
     }
   }
 
@@ -95,8 +106,27 @@ function LoginForm() {
 
           {/* Error Message */}
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3 mb-6">
-              {error}
+            <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3 mb-6 space-y-2">
+              <p>{error}</p>
+              {error.toLowerCase().includes('verify') && (
+                <div>
+                  {resendStatus === 'success' ? (
+                    <p className="text-green-700 font-medium">Verification email sent! Check your inbox.</p>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleResend}
+                      disabled={resendLoading}
+                      className="text-blue-700 font-semibold underline hover:text-blue-900 disabled:opacity-50"
+                    >
+                      {resendLoading ? 'Sending...' : 'Resend verification email'}
+                    </button>
+                  )}
+                  {resendStatus === 'error' && (
+                    <p className="text-red-600 text-xs mt-1">Failed to resend. Try again.</p>
+                  )}
+                </div>
+              )}
             </div>
           )}
 

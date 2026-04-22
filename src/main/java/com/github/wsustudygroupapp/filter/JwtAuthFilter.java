@@ -67,7 +67,15 @@ public class JwtAuthFilter extends OncePerRequestFilter
         String token = authHeader.substring(7);
 
         // Step 4 — decode the token and pull out the email (the subject we baked in at login)
-        String email = jwtUtil.extractEmail(token);
+        // Wrap in try-catch: malformed or expired tokens throw JwtException — skip authentication
+        // and let Spring Security reject the request normally rather than blowing up with a 500.
+        String email;
+        try {
+            email = jwtUtil.extractEmail(token);
+        } catch (Exception e) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         // Step 5 — load the full user from the database using that email
         // We hit the DB here because the user could have been deleted since the token was issued.

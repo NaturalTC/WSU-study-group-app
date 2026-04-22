@@ -44,11 +44,13 @@ public class Profile {
     private String bio;
 
     /** The User account this profile belongs to. */
+    @JsonIgnore
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
     /** All courses this student is enrolled in, each with a specific section and semester. */
+    @JsonIgnore
     @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserCourse> enrollments;
 

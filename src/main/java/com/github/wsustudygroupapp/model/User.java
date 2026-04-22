@@ -1,5 +1,6 @@
 package com.github.wsustudygroupapp.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -33,6 +34,7 @@ public class User {
     private String email;
 
     /** BCrypt-hashed password. Never stored as plain text. */
+    @JsonIgnore
     @Column(nullable = false)
     private String password;
 
@@ -45,14 +47,17 @@ public class User {
     private boolean isVerified = false;
 
     /** UUID token emailed to the student on registration. Cleared after verification. */
+    @JsonIgnore
     @Column
     private String verificationToken;
 
     /** UUID token emailed when a student requests a password reset. Cleared after use. */
+    @JsonIgnore
     @Column
     private String resetToken;
 
     /** The student's profile — created automatically after email verification. */
+    @JsonIgnore
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Profile profile;
 }

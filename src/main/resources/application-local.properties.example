@@ -10,8 +10,9 @@ spring.jpa.defer-datasource-initialization=true
 # Mail (use a Gmail App Password)
 spring.mail.host=smtp.gmail.com
 spring.mail.port=587
-spring.mail.username=yourgmail@gmail.com
-spring.mail.password=your-app-password
+spring.mail.username=yourgmail@gmail.com    - Use your personal email
+spring.mail.password=your-app-password      - Go to your google account and look for App Passwords and create one. Add it without any spaces
+                                              Ex: jdivjaidowwmsweg          should be 12 letters
 spring.mail.properties.mail.smtp.auth=true
 spring.mail.properties.mail.smtp.starttls.enable=true
 
@@ -22,3 +23,4 @@ app.jwt.expiration=86400000
 # App
 app.school-email-domain=@westfield.ma.edu
 app.base-url=http://localhost:8080
+app.frontend-url=http://localhost:5173

@@ -15,6 +15,9 @@ export const logout = () => {
   window.location.href = '/login'
 }
 
+export const resendVerification = (email) =>
+  api.post('/auth/resend-verification', { email })
+
 export const forgotPassword = (email) =>
   api.post('/auth/forgot-password', { email })
 
