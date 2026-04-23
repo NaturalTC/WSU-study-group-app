@@ -1,138 +1,149 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-
-// ─────────────────────────────────────────────────────────────────
-// MOCK DATA — Backend Integration Point
-//
-// ENDPOINT: GET /api/profile/{userId}
-// TODO: Replace MOCK_USER with real user data passed down from an
-//       auth context once authentication is implemented.
-// ─────────────────────────────────────────────────────────────────
-const MOCK_USER = {
-    firstName:   'Joe',
-    lastName:    'Shmo',
-    displayName: 'Joe S.',
-    major:       'Computer Science',
-    year:        'Junior',
-    avatarBg:    'bg-blue-700',
-}
+import { useState, useRef, useEffect } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 
 function AppHeader() {
-    const user = MOCK_USER
+    const { profile, logout } = useAuth()
+    const location = useLocation()
+    const navigate = useNavigate()
+    const [mobileOpen, setMobileOpen]   = useState(false)
+    const [avatarOpen, setAvatarOpen]   = useState(false)
+    const avatarRef = useRef(null)
 
-    const [sidebarOpen, setSidebarOpen] = useState(false)
+    const initials = (() => {
+        const parts = (profile?.name ?? '').trim().split(' ')
+        return parts.length >= 2
+            ? `${parts[0].charAt(0)}${parts[parts.length - 1].charAt(0)}`
+            : (profile?.name?.charAt(0)?.toUpperCase() ?? '?')
+    })()
 
-    const initials = `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`
+    const navLinks = [
+        { label: 'Study Groups', to: '/study-groups' },
+        { label: 'Group Chat',   to: '/group-chat'   },
+    ]
+
+    const isActive = (to) =>
+        to === '/group-chat'
+            ? location.pathname.startsWith('/group-chat')
+            : location.pathname === to
+
+    // Close avatar dropdown when clicking outside
+    useEffect(() => {
+        const handler = (e) => {
+            if (avatarRef.current && !avatarRef.current.contains(e.target)) {
+                setAvatarOpen(false)
+            }
+        }
+        document.addEventListener('mousedown', handler)
+        return () => document.removeEventListener('mousedown', handler)
+    }, [])
 
     return (
-        <>
-            {/* ── Top Bar ─────────────────────────────────────────── */}
-            <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100 shadow-sm">
-                <div className="px-6 py-4 flex items-center justify-between">
+        <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100 shadow-sm">
+            <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between gap-6">
 
-                    {/* Logo */}
-                    <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 bg-blue-700 rounded-lg flex items-center justify-center shadow">
-                            <span className="text-white font-display text-lg font-bold">W</span>
-                        </div>
-                        <span className="font-display text-xl text-wsu-navy hidden sm:block">
-                            WSU StudyGroup
-                        </span>
+                {/* Logo */}
+                <Link to="/" className="flex items-center gap-2.5 flex-shrink-0">
+                    <div className="w-8 h-8 bg-blue-700 rounded-lg flex items-center justify-center shadow">
+                        <span className="text-white font-display text-base font-bold">W</span>
                     </div>
+                    <span className="font-display text-lg text-wsu-navy hidden sm:block">WSU StudyGroup</span>
+                </Link>
 
-                    {/* Hamburger + Avatar */}
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={() => setSidebarOpen(true)}
-                            className="flex flex-col gap-1.5 p-2 rounded-lg hover:bg-wsu-mist transition-colors"
-                            aria-label="Open menu"
+                {/* Desktop nav */}
+                <nav className="hidden md:flex items-center gap-1">
+                    {navLinks.map(link => (
+                        <Link
+                            key={link.to}
+                            to={link.to}
+                            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                                isActive(link.to)
+                                    ? 'bg-blue-700 text-white shadow-sm'
+                                    : 'text-wsu-slate hover:text-wsu-navy hover:bg-wsu-mist'
+                            }`}
                         >
-                            <span className="block w-6 h-0.5 bg-wsu-navy" />
-                            <span className="block w-6 h-0.5 bg-wsu-navy" />
-                            <span className="block w-6 h-0.5 bg-wsu-navy" />
+                            {link.label}
+                        </Link>
+                    ))}
+                </nav>
+
+                {/* Right side */}
+                <div className="flex items-center gap-3">
+
+                    {/* Mobile hamburger */}
+                    <button
+                        onClick={() => setMobileOpen(!mobileOpen)}
+                        className="md:hidden p-2 rounded-lg hover:bg-wsu-mist transition-colors"
+                        aria-label="Toggle menu"
+                    >
+                        <svg className="w-5 h-5 text-wsu-navy" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                d={mobileOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16M4 18h16'} />
+                        </svg>
+                    </button>
+
+                    {/* Avatar + dropdown */}
+                    <div className="relative" ref={avatarRef}>
+                        <button
+                            onClick={() => setAvatarOpen(prev => !prev)}
+                            className="w-9 h-9 rounded-full bg-blue-700 flex items-center justify-center shadow hover:bg-blue-800 transition-colors flex-shrink-0"
+                            aria-label="Account menu"
+                        >
+                            <span className="text-white text-xs font-bold font-display">{initials}</span>
                         </button>
-                        <div className={`w-10 h-10 rounded-full ${user.avatarBg} flex items-center justify-center shadow`}>
-                            <span className="text-white text-sm font-bold font-display">{initials}</span>
-                        </div>
+
+                        {avatarOpen && (
+                            <div className="absolute right-0 top-11 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1.5 animate-fade-in">
+                                <div className="px-4 py-2 border-b border-gray-100 mb-1">
+                                    <p className="text-xs font-semibold text-wsu-navy truncate">{profile?.name}</p>
+                                    <p className="text-xs text-wsu-slate truncate">{profile?.major}</p>
+                                </div>
+                                <button
+                                    onClick={() => { setAvatarOpen(false); navigate('/profile') }}
+                                    className="w-full text-left px-4 py-2 text-sm text-wsu-navy hover:bg-wsu-mist transition-colors"
+                                >
+                                    Profile
+                                </button>
+                                <button
+                                    onClick={() => { setAvatarOpen(false); logout() }}
+                                    className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors"
+                                >
+                                    Log Out
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
-            </header>
+            </div>
 
-            {/* ── Sidebar Overlay ─────────────────────────────────── */}
-            {sidebarOpen && (
-                <div className="fixed inset-0 z-50 flex">
-
-                    {/* Backdrop */}
-                    <div
-                        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-                        onClick={() => setSidebarOpen(false)}
-                    />
-
-                    {/* Panel */}
-                    <div className="relative ml-auto mr-3 my-3 w-72 h-[calc(100vh-1.5rem)] bg-white rounded-2xl shadow-2xl flex flex-col animate-fade-in overflow-hidden">
-
-                        {/* Panel Header */}
-                        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-                            <button
-                                onClick={() => setSidebarOpen(false)}
-                                className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-wsu-mist transition-colors text-wsu-slate text-xl leading-none"
-                            >
-                                ×
-                            </button>
-                            <div className="flex items-center gap-3">
-                                <p className="text-xl font-display font-semibold text-wsu-navy">{user.displayName}</p>
-                                <div className={`w-10 h-10 rounded-full ${user.avatarBg} flex items-center justify-center flex-shrink-0`}>
-                                    <span className="text-white text-sm font-bold font-display">{initials}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Nav Items */}
-                        <nav className="flex-1 px-3 py-4">
-                            <p className="text-xs font-display font-semibold text-blue-700 uppercase tracking-widest px-3 mb-3">
-                                Menu
-                            </p>
-                            <ul className="space-y-1">
-                                <li>
-                                    <Link
-                                        to="/profile"
-                                        onClick={() => setSidebarOpen(false)}
-                                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-wsu-navy hover:bg-wsu-mist hover:text-blue-700 transition-all duration-200 text-sm font-medium"
-                                    >
-                                        Profile
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link
-                                        to="/study-groups"
-                                        onClick={() => setSidebarOpen(false)}
-                                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-wsu-navy hover:bg-wsu-mist hover:text-blue-700 transition-all duration-200 text-sm font-medium"
-                                    >
-                                        Study Groups
-                                    </Link>
-                                </li>
-                            </ul>
-                        </nav>
-
-                        {/* Log Out */}
-                        <div className="px-3 py-4 border-t border-gray-100">
-                            <button
-                                onClick={() => {
-                                    // TODO: Clear JWT token from localStorage and redirect to /login
-                                    // localStorage.removeItem('token')
-                                    // navigate('/login')
-                                    console.log('Logout placeholder triggered')
-                                    setSidebarOpen(false)
-                                }}
-                                className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-red-500 hover:bg-red-50 hover:text-red-600 transition-all duration-200 text-sm font-medium"
-                            >
-                                Log Out
-                            </button>
-                        </div>
+            {/* Mobile dropdown */}
+            {mobileOpen && (
+                <div className="md:hidden border-t border-gray-100 bg-white px-4 py-3 space-y-1">
+                    {navLinks.map(link => (
+                        <Link
+                            key={link.to}
+                            to={link.to}
+                            onClick={() => setMobileOpen(false)}
+                            className={`flex items-center px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                                isActive(link.to)
+                                    ? 'bg-blue-700 text-white'
+                                    : 'text-wsu-navy hover:bg-wsu-mist'
+                            }`}
+                        >
+                            {link.label}
+                        </Link>
+                    ))}
+                    <div className="pt-2 border-t border-gray-100 mt-2">
+                        <button
+                            onClick={() => { setMobileOpen(false); logout() }}
+                            className="w-full text-left px-4 py-2.5 rounded-xl text-sm font-semibold text-red-500 hover:bg-red-50 transition-colors"
+                        >
+                            Log Out
+                        </button>
                     </div>
                 </div>
             )}
-        </>
+        </header>
     )
 }
 

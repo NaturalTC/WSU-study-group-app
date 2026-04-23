@@ -1,295 +1,297 @@
-import {Link} from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import AppHeader from '../components/AppHeader'
+import { useAuth } from '../context/AuthContext'
+import api from '../api/axios'
 
-// ─────────────────────────────────────────────────────────────────
-// MOCK DATA — Backend Integration Points
-//
-// 1. MY STUDY GROUPS
-//    ENDPOINT: GET /api/study-groups/my-groups
-//    TODO: Replace MOCK_MY_GROUPS with real API call
-//
-// 2. MY COURSES
-//    ENDPOINT: GET /courses/my
-//    TODO: Replace MOCK_MY_COURSES with real API call
-//
-// 3. CLASSMATES
-//    ENDPOINT: GET /courses/{userCourseId}/classmates
-//    TODO: Replace MOCK_CLASSMATES with real API call
-// ─────────────────────────────────────────────────────────────────
-
-const MOCK_MY_GROUPS = [
-    {
-        id: 1,
-        name: 'CS 201 Weekend Grind',
-        course: {courseCode: 'CAIS 0236', courseName: 'Computer Organization and Architecture', departmentCode: 'CAIS'},
-        members: [{name: 'Alex'}, {name: 'Jordan'}, {name: 'Sam'}, {name: 'Taylor'}],
-    },
-    {
-        id: 4,
-        name: 'Software Eng. Capstone Group',
-        course: {courseCode: 'CAIS 0350', courseName: 'Software Engineering', departmentCode: 'CAIS'},
-        members: [{name: 'Chris'}, {name: 'Dana'}, {name: 'Lee'}, {name: 'Pat'}],
-    },
-    {
-        id: 3,
-        name: 'Calc II Crew',
-        course: {courseCode: 'MATH 0261', courseName: 'Calculus II', departmentCode: 'MATH'},
-        members: [{name: 'Jamie'}, {name: 'Blake'}, {name: 'Avery'}],
-    },
-]
-
-
-const MOCK_MY_COURSES = [
-    {
-        id: 1,
-        course: {courseCode: 'CAIS 0236', courseName: 'Computer Organization and Architecture', departmentCode: 'CAIS'},
-        section: '001',
-        semester: 'Spring 2026',
-    },
-    {
-        id: 2,
-        course: {courseCode: 'MATH 0261', courseName: 'Calculus II', departmentCode: 'MATH'},
-        section: '003',
-        semester: 'Spring 2026',
-    },
-    {
-        id: 3,
-        course: {courseCode: 'CAIS 0350', courseName: 'Software Engineering', departmentCode: 'CAIS'},
-        section: '002',
-        semester: 'Spring 2026',
-    },
-]
-
-const MOCK_CLASSMATES = [
-    {
-        id: 10,
-        profile: {name: 'Alex Johnson'},
-        course: {courseCode: 'CAIS 0236'},
-        section: '001',
-        semester: 'Spring 2026',
-    },
-    {
-        id: 11,
-        profile: {name: 'Jordan Smith'},
-        course: {courseCode: 'CAIS 0236'},
-        section: '001',
-        semester: 'Spring 2026',
-    },
-    {
-        id: 12,
-        profile: {name: 'Sam Williams'},
-        course: {courseCode: 'CAIS 0236'},
-        section: '001',
-        semester: 'Spring 2026',
-    },
-    {
-        id: 13,
-        profile: {name: 'Taylor Brown'},
-        course: {courseCode: 'MATH 0261'},
-        section: '003',
-        semester: 'Spring 2026',
-    },
-    {
-        id: 14,
-        profile: {name: 'Casey Lee'},
-        course: {courseCode: 'MATH 0261'},
-        section: '003',
-        semester: 'Spring 2026',
-    },
-    {
-        id: 15,
-        profile: {name: 'Morgan Davis'},
-        course: {courseCode: 'MATH 0261'},
-        section: '003',
-        semester: 'Spring 2026',
-    },
-    {
-        id: 16,
-        profile: {name: 'Riley Clark'},
-        course: {courseCode: 'CAIS 0350'},
-        section: '002',
-        semester: 'Spring 2026',
-    },
-    {
-        id: 17,
-        profile: {name: 'Drew Martinez'},
-        course: {courseCode: 'CAIS 0350'},
-        section: '002',
-        semester: 'Spring 2026',
-    },
-    {
-        id: 18,
-        profile: {name: 'Jamie White'},
-        course: {courseCode: 'CAIS 0350'},
-        section: '002',
-        semester: 'Spring 2026',
-    },
-]
+const YEAR_OPTIONS = ['Freshman', 'Sophomore', 'Junior', 'Senior']
 
 function Profile() {
-    const user = {name: 'Joe Smith', major: 'Computer Science', year: 'Junior'}
+    const { profile, setProfile } = useAuth()
+
+    const [groups, setGroups]           = useState([])
+    const [dataLoading, setDataLoading] = useState(true)
+
+    const [editOpen, setEditOpen]       = useState(false)
+    const [editForm, setEditForm]       = useState({ name: '', major: '', year: '', bio: '' })
+    const [editLoading, setEditLoading] = useState(false)
+    const [editError, setEditError]     = useState('')
+
+    useEffect(() => {
+        api.get('/groups/my')
+            .then(res => setGroups(res.data))
+            .catch(() => {})
+            .finally(() => setDataLoading(false))
+    }, [])
+
+    const openEdit = () => {
+        setEditForm({
+            name:  profile?.name  ?? '',
+            major: profile?.major ?? '',
+            year:  profile?.year  ?? '',
+            bio:   profile?.bio   ?? '',
+        })
+        setEditError('')
+        setEditOpen(true)
+    }
+
+    const handleEditSubmit = async (e) => {
+        e.preventDefault()
+        setEditLoading(true)
+        setEditError('')
+        try {
+            const res = await api.put('/profiles', editForm)
+            setProfile(res.data)
+            setEditOpen(false)
+        } catch (err) {
+            setEditError(err.response?.data?.message || 'Failed to update profile.')
+        } finally {
+            setEditLoading(false)
+        }
+    }
+
+    const initials = (() => {
+        const parts = (profile?.name ?? '').trim().split(' ')
+        return parts.length >= 2
+            ? `${parts[0].charAt(0)}${parts[parts.length - 1].charAt(0)}`
+            : (profile?.name?.charAt(0)?.toUpperCase() ?? '?')
+    })()
+
     return (
         <div className="flex flex-col min-h-screen bg-wsu-chalk">
+            <AppHeader />
 
-            <AppHeader/>
+            <main className="flex-1 pt-20">
 
-            {/* ── Main Content ─────────────────────────────────────── */}
-            <main className="flex-1 pt-24 pb-12 px-6">
-                <div className="max-w-7xl mx-auto">
+                {/* ── Profile Banner ── */}
+                <div className="bg-white border-b border-gray-100">
+                    <div className="max-w-4xl mx-auto px-6 py-8">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
 
-                    {/* Welcome */}
-                    <div className="mb-8">
-                        <h1 className="font-display text-3xl text-wsu-navy font-bold">
-                            Welcome back, {user.name.split(' ')[0]}
-                        </h1>
-                        <p className="text-wsu-slate text-sm mt-1">
-                            {user.year} · {user.major}
-                        </p>
-                    </div>
-
-                    {/* ── Dashboard Tiles ── */}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-                        {/* ── My Study Groups (double-width, left) ── */}
-                        <div className="lg:col-span-2 card flex flex-col gap-4">
-                            <div className="flex items-center justify-between">
-                                <h2 className="font-display text-xl text-wsu-navy font-bold">
-                                    My Study Groups
-                                </h2>
-                                <Link
-                                    to="/study-groups"
-                                    className="text-xs text-blue-700 font-semibold hover:underline"
-                                >
-                                    Browse all →
-                                </Link>
+                            {/* Avatar */}
+                            <div className="w-20 h-20 rounded-2xl bg-blue-700 flex items-center justify-center text-white font-display text-3xl font-bold shadow-md flex-shrink-0">
+                                {initials}
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3">
-                                {MOCK_MY_GROUPS.map((group) => (
-                                    <div
-                                        key={group.id}
-                                        className="flex flex-col gap-3 bg-gray-50 rounded-xl px-4 py-4 min-h-48 border border-blue-700"
-                                    >
-                                        {/* Name */}
-                                        <div className="min-w-0">
-                                            <p className="text-base font-semibold text-wsu-navy truncate">
-                                                {group.name}
-                                            </p>
-                                            <p className="text-sm text-wsu-slate truncate">
-                                                {group.course.courseCode}
-                                            </p>
-                                        </div>
-
-                                        {/* Course name */}
-                                        <p className="text-sm text-wsu-slate truncate">
-                                            {group.course.courseName}
-                                        </p>
-
-                                        {/* Members + Go to Chat */}
-                                        <div className="flex items-center justify-between mt-auto">
-                                            <div className="flex items-center gap-2">
-                                                <div className="flex -space-x-1.5">
-                                                    {group.members.slice(0, 4).map((member, i) => (
-                                                        <div
-                                                            key={i}
-                                                            className="w-7 h-7 rounded-full bg-wsu-navy text-white text-xs flex items-center justify-center border border-white font-semibold"
-                                                        >
-                                                            {member.name.charAt(0)}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                                <span className="text-xs text-wsu-slate">
-                                                    {group.members.length}
-                                                </span>
-                                            </div>
-                                            <Link
-                                                to={`/group-chat/${group.id}`}
-                                                className="text-sm font-semibold px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-lg transition-all duration-200"
-                                            >
-                                                Go to Chat
-                                            </Link>
-                                        </div>
-                                    </div>
-                                ))}
+                            {/* Info */}
+                            <div className="flex-1 min-w-0">
+                                <h1 className="font-display text-2xl text-wsu-navy font-bold leading-tight">
+                                    {profile?.name}
+                                </h1>
+                                <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                                    {profile?.year && (
+                                        <span className="text-xs font-semibold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full">
+                                            {profile.year}
+                                        </span>
+                                    )}
+                                    {profile?.major && (
+                                        <span className="text-sm text-wsu-slate">{profile.major}</span>
+                                    )}
+                                </div>
+                                {profile?.bio && (
+                                    <p className="text-sm text-wsu-slate mt-2 leading-relaxed max-w-lg">
+                                        {profile.bio}
+                                    </p>
+                                )}
                             </div>
+
+                            {/* Edit button */}
+                            <button
+                                onClick={openEdit}
+                                className="flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-xl border border-gray-200 text-wsu-navy hover:bg-wsu-mist hover:border-blue-200 transition-all duration-200 flex-shrink-0"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 11l6-6 3 3-6 6H9v-3z" />
+                                </svg>
+                                Edit Profile
+                            </button>
                         </div>
 
-                        {/* ── Right column: two tiles stacked ── */}
-                        <div className="flex flex-col gap-6">
-
-                            {/* ── My Courses ── */}
-                            <div className="card flex flex-col gap-4">
-                                <div className="flex items-center justify-between">
-                                    <h2 className="font-display text-xl text-wsu-navy font-bold">
-                                        My Courses
-                                    </h2>
-                                    <span className="text-xs text-wsu-slate font-medium">
-                                        {MOCK_MY_COURSES.length} enrolled
-                                    </span>
-                                </div>
-
-                                <div className="space-y-3">
-                                    {MOCK_MY_COURSES.map((enrollment) => (
-                                        <div
-                                            key={enrollment.id}
-                                            className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3"
-                                        >
-                                            <div
-                                                className="w-9 h-9 bg-blue-700 rounded-xl flex items-center justify-center text-white font-display font-bold text-xs flex-shrink-0">
-                                                {enrollment.course.departmentCode.charAt(0)}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-xs font-semibold text-wsu-navy truncate">
-                                                    {enrollment.course.courseCode} · {enrollment.course.courseName}
-                                                </p>
-                                                <p className="text-xs text-wsu-slate mt-0.5">
-                                                    Section {enrollment.section} · {enrollment.semester}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
+                        {/* Stats */}
+                        <div className="flex gap-6 mt-6 pt-6 border-t border-gray-100">
+                            <div>
+                                <p className="text-xl font-display font-bold text-wsu-navy">
+                                    {dataLoading ? '—' : groups.length}
+                                </p>
+                                <p className="text-xs text-wsu-slate mt-0.5">Study Groups</p>
                             </div>
-
-                            {/* ── Classmates ── */}
-                            <div className="card flex flex-col gap-4">
-                                <div className="flex items-center justify-between">
-                                    <h2 className="font-display text-xl text-wsu-navy font-bold">
-                                        Classmates
-                                    </h2>
-                                    <span className="text-xs text-wsu-slate font-medium">
-                                        {MOCK_CLASSMATES.length} total
-                                    </span>
-                                </div>
-
-                                <div className="space-y-3 overflow-y-auto max-h-64 pr-1">
-                                    {MOCK_CLASSMATES.map((enrollment) => (
-                                        <div
-                                            key={enrollment.id}
-                                            className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3"
-                                        >
-                                            <div
-                                                className="w-9 h-9 rounded-full bg-wsu-navy flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
-                                                {enrollment.profile.name.charAt(0)}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-xs font-semibold text-wsu-navy truncate">
-                                                    {enrollment.profile.name}
-                                                </p>
-                                                <p className="text-xs text-wsu-slate mt-0.5 truncate">
-                                                    {enrollment.course.courseCode}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
+                            <div className="w-px bg-gray-100" />
+                            <div>
+                                <p className="text-xl font-display font-bold text-wsu-navy">
+                                    {profile?.points ?? 0}
+                                </p>
+                                <p className="text-xs text-wsu-slate mt-0.5">Points</p>
                             </div>
-
                         </div>
                     </div>
                 </div>
+
+                {/* ── Study Groups ── */}
+                <div className="max-w-4xl mx-auto px-6 py-8">
+                    <div className="flex items-center justify-between mb-5">
+                        <h2 className="font-display text-xl text-wsu-navy font-bold">My Study Groups</h2>
+                        <Link to="/study-groups" className="text-sm text-blue-700 font-semibold hover:underline">
+                            Browse all →
+                        </Link>
+                    </div>
+
+                    {dataLoading ? (
+                        <div className="flex justify-center py-16">
+                            <div className="animate-spin w-6 h-6 border-4 border-blue-700 border-t-transparent rounded-full" />
+                        </div>
+                    ) : groups.length === 0 ? (
+                        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-6 py-14 text-center">
+                            <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                                <svg className="w-6 h-6 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </div>
+                            <p className="text-wsu-navy font-semibold mb-1">No study groups yet</p>
+                            <p className="text-wsu-slate text-sm mb-5">Join a group for your courses to start collaborating.</p>
+                            <Link
+                                to="/study-groups"
+                                className="inline-flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-all duration-200"
+                            >
+                                Browse Study Groups
+                            </Link>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {groups.map(group => (
+                                <div key={group.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col gap-3 hover:shadow-md transition-shadow duration-200">
+                                    <div className="flex items-start justify-between gap-2">
+                                        <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-700 font-display font-bold text-sm flex-shrink-0">
+                                            {group.course?.courseCode?.split(' ')[0]?.charAt(0) ?? 'G'}
+                                        </div>
+                                        <span className="text-xs font-semibold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full">
+                                            {group.course?.courseCode}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <p className="font-semibold text-wsu-navy text-sm leading-snug">{group.name}</p>
+                                        <p className="text-xs text-wsu-slate mt-0.5">{group.course?.courseName}</p>
+                                    </div>
+                                    <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-50">
+                                        <div className="flex items-center gap-1.5">
+                                            <div className="flex -space-x-1.5">
+                                                {(group.members ?? []).slice(0, 3).map((m, i) => (
+                                                    <div key={i} className="w-6 h-6 rounded-full bg-wsu-navy text-white text-xs flex items-center justify-center border-2 border-white font-semibold">
+                                                        {m.name?.charAt(0) ?? '?'}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <span className="text-xs text-wsu-slate">{group.members?.length ?? 0} members</span>
+                                        </div>
+                                        <Link
+                                            to={`/group-chat/${group.id}`}
+                                            className="text-xs font-semibold text-blue-700 hover:text-blue-800 hover:underline transition-colors"
+                                        >
+                                            Open Chat →
+                                        </Link>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </main>
 
+            {/* ── Edit Profile Modal ── */}
+            {editOpen && (
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center sm:px-6 backdrop-blur-sm">
+                    <div className="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl shadow-2xl animate-fade-up">
+
+                        <div className="flex justify-center pt-3 pb-1 sm:hidden">
+                            <div className="w-10 h-1 bg-gray-200 rounded-full" />
+                        </div>
+
+                        <div className="px-6 pt-4 pb-6">
+                            <div className="flex items-center justify-between mb-6">
+                                <h2 className="font-display text-xl text-wsu-navy">Edit Profile</h2>
+                                <button
+                                    onClick={() => setEditOpen(false)}
+                                    className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-wsu-mist text-wsu-slate text-xl leading-none transition-colors"
+                                >
+                                    ×
+                                </button>
+                            </div>
+
+                            {editError && (
+                                <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3 mb-4">
+                                    {editError}
+                                </div>
+                            )}
+
+                            <form onSubmit={handleEditSubmit} className="space-y-4">
+                                <div>
+                                    <label className="form-label">Full Name</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        className="form-input"
+                                        value={editForm.name}
+                                        onChange={e => setEditForm(p => ({ ...p, name: e.target.value }))}
+                                    />
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="form-label">Major</label>
+                                        <input
+                                            type="text"
+                                            required
+                                            className="form-input"
+                                            value={editForm.major}
+                                            onChange={e => setEditForm(p => ({ ...p, major: e.target.value }))}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="form-label">Year</label>
+                                        <select
+                                            required
+                                            className="form-input"
+                                            value={editForm.year}
+                                            onChange={e => setEditForm(p => ({ ...p, year: e.target.value }))}
+                                        >
+                                            <option value="">Select</option>
+                                            {YEAR_OPTIONS.map(y => (
+                                                <option key={y} value={y}>{y}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="form-label">
+                                        Bio <span className="font-normal text-wsu-slate">(optional)</span>
+                                    </label>
+                                    <textarea
+                                        rows={3}
+                                        placeholder="Tell your classmates about yourself..."
+                                        className="form-input resize-none"
+                                        value={editForm.bio}
+                                        onChange={e => setEditForm(p => ({ ...p, bio: e.target.value }))}
+                                    />
+                                </div>
+                                <div className="flex gap-3 pt-1">
+                                    <button
+                                        type="button"
+                                        onClick={() => setEditOpen(false)}
+                                        className="flex-1 py-3 rounded-xl border border-gray-200 text-wsu-navy text-sm font-semibold hover:bg-wsu-mist transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={editLoading}
+                                        className="flex-1 py-3 bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold rounded-xl transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                                    >
+                                        {editLoading ? 'Saving...' : 'Save Changes'}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

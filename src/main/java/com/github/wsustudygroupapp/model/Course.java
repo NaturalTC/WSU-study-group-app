@@ -1,5 +1,6 @@
 package com.github.wsustudygroupapp.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -39,6 +40,7 @@ public class Course {
     private String courseName;
 
     /** All student enrollments in this course across all sections and semesters. */
+    @JsonIgnore
     @OneToMany(mappedBy = "course")
     private List<UserCourse> enrollments;
 }

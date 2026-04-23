@@ -1,7 +1,9 @@
 package com.github.wsustudygroupapp.controller;
 
 import com.github.wsustudygroupapp.dto.*;
+import java.util.Map;
 import com.github.wsustudygroupapp.service.AuthService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +17,9 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
 
     public AuthController(AuthService authService)
     {
@@ -34,11 +39,11 @@ public class AuthController {
         try {
             authService.verify(token);
             HttpHeaders headers = new HttpHeaders();
-            headers.add("Location", "http://localhost:5173/verify-success");
+            headers.add("Location", frontendUrl + "/verify-success");
             return new ResponseEntity<>(headers, HttpStatus.FOUND);
         } catch (RuntimeException e) {
             HttpHeaders headers = new HttpHeaders();
-            headers.add("Location", "http://localhost:5173/verify-error");
+            headers.add("Location", frontendUrl + "/verify-error");
             return new ResponseEntity<>(headers, HttpStatus.FOUND);
         }
     }
@@ -47,6 +52,12 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request)
     {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<String> resendVerification(@RequestBody Map<String, String> body) {
+        authService.resendVerification(body.get("email"));
+        return ResponseEntity.ok("Verification email resent. Check your inbox.");
     }
 
     @PostMapping("/forgot-password")

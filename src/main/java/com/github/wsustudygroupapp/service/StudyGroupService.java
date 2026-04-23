@@ -33,8 +33,22 @@ public class StudyGroupService {
         this.userRepository = userRepository;
     }
 
+    public StudyGroup getGroupById(Long groupId) {
+        return studyGroupRepository.findById(groupId)
+                .orElseThrow(() -> new ResourceNotFoundException("Study group not found: " + groupId));
+    }
+
+    public List<StudyGroup> getAllGroups() {
+        return studyGroupRepository.findAll();
+    }
+
     public List<StudyGroup> getGroupsForCourse(Long courseId) {
         return studyGroupRepository.findByCourseId(courseId);
+    }
+
+    public List<StudyGroup> getMyGroups(String email) {
+        Profile profile = currentProfile(email);
+        return studyGroupRepository.findByMembersId(profile.getId());
     }
 
     public StudyGroup createGroup(StudyGroupRequest request, String creatorEmail) {

@@ -27,6 +27,16 @@ public class StudyGroupController {
         this.chatService = chatService;
     }
 
+    @GetMapping("/{groupId}")
+    public ResponseEntity<StudyGroup> getGroup(@PathVariable Long groupId) {
+        return ResponseEntity.ok(studyGroupService.getGroupById(groupId));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<StudyGroup>> getAllGroups() {
+        return ResponseEntity.ok(studyGroupService.getAllGroups());
+    }
+
     // get all groups for a course (consider adding paging params)
     @GetMapping("/course/{courseId}")
     public ResponseEntity<List<StudyGroup>> getGroupsForCourse(@PathVariable Long courseId) {
@@ -63,5 +73,11 @@ public class StudyGroupController {
     @GetMapping("/{groupId}/messages")
     public ResponseEntity<List<Message>> getChatHistory(@PathVariable Long groupId) {
         return ResponseEntity.ok(chatService.getHistory(groupId));
+    }
+
+    // get all groups the logged-in student is a member of
+    @GetMapping("/my")
+    public ResponseEntity<List<StudyGroup>> getMyGroups(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(studyGroupService.getMyGroups(userDetails.getUsername()));
     }
 }

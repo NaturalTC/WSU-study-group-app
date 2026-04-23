@@ -20,16 +20,22 @@ api.interceptors.request.use((config) => {
   return config
 })
 
+const PUBLIC_PATHS = ['/', '/login', '/register', '/verify-pending', '/verify-success', '/verify-error', '/forgot-password', '/reset-password']
+
 // Response interceptor — runs on every response before your .then() sees it.
-// If the server returns 401 (token expired or invalid), log the user out automatically.
+// If the server returns 401/403 on a protected page, clear the token and redirect to login.
+// On public pages (verify, login, register, etc.) just clear the token — don't redirect,
+// because the user may have a stale token and is intentionally on a public flow.
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 || error.response?.status === 403) {
       localStorage.removeItem('token')
-      window.location.href = '/login'
+      const isPublicPage = PUBLIC_PATHS.includes(window.location.pathname)
+      if (!isPublicPage) {
+        window.location.href = '/login'
+      }
     }
-    // Re-throw so the calling code can still catch and show the error message
     return Promise.reject(error)
   }
 )

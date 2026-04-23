@@ -148,6 +148,25 @@ public class AuthService {
         return new AuthResponse(token, "Login successful");
     }
 
+    public void resendVerification(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("No account found with that email"));
+
+        if (user.isVerified()) {
+            throw new RuntimeException("This account is already verified. You can log in.");
+        }
+
+        String verificationToken = UUID.randomUUID().toString();
+        user.setVerificationToken(verificationToken);
+        userRepository.save(user);
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("Verify your WSU Study Group account");
+        message.setText("Click to verify your account: " + baseUrl + "/auth/verify?token=" + verificationToken);
+        mailSender.send(message);
+    }
+
     public void forgotPassword(ForgotPasswordRequest request)
     {
         User user = userRepository.findByEmail(request.getEmail())
