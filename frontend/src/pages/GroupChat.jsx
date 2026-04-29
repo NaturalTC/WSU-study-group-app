@@ -5,6 +5,7 @@ import SockJS from 'sockjs-client'
 import AppHeader from '../components/AppHeader'
 import ChatMessage from '../components/ChatMessage'
 import MembersSidebar from '../components/MembersSidebar'
+import ScheduleEventModal from '../components/ScheduleEventModal'
 import { useAuth } from '../context/AuthContext'
 import api from '../api/axios'
 
@@ -24,7 +25,8 @@ function GroupChat() {
   const [input, setInput]         = useState('')
   const [loading, setLoading]     = useState(true)
   const [connected, setConnected] = useState(false)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarOpen,   setSidebarOpen]   = useState(false)
+  const [scheduleOpen,  setScheduleOpen]  = useState(false)
 
   const stompClientRef = useRef(null)
   const messagesEndRef = useRef(null)
@@ -135,23 +137,23 @@ function GroupChat() {
   const memberCount  = group?.members?.length ?? 0
 
   return (
-    <div className="flex flex-col min-h-screen bg-wsu-chalk">
+    <div className="flex flex-col min-h-screen bg-wsu-chalk dark:bg-gray-950 transition-colors duration-300">
       <AppHeader />
 
       <main className="flex-1 pt-20 pb-0 max-w-7xl mx-auto w-full px-4 md:px-6">
         <div className="flex gap-6 h-[calc(100vh-5rem)] py-4">
 
           {/* ── Chat Area ─────────────────────────────────────── */}
-          <div className="flex-1 flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden min-w-0">
+          <div className="flex-1 flex flex-col bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden min-w-0">
 
             {/* Chat Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="lg:hidden w-8 h-8 flex items-center justify-center rounded-lg hover:bg-wsu-mist transition-colors"
+                  className="lg:hidden w-8 h-8 flex items-center justify-center rounded-lg hover:bg-wsu-mist dark:hover:bg-gray-800 transition-colors"
                 >
-                  <svg className="w-5 h-5 text-wsu-navy" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-wsu-navy dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                   </svg>
                 </button>
@@ -160,32 +162,42 @@ function GroupChat() {
                   {courseLetter}
                 </div>
                 <div>
-                  <h1 className="font-display text-lg text-wsu-navy leading-tight">
+                  <h1 className="font-display text-lg text-wsu-navy dark:text-white leading-tight">
                     {group?.name ?? 'Loading...'}
                   </h1>
                   <div className="flex items-center gap-2">
                     <span className={`w-2 h-2 rounded-full ${connected ? 'bg-green-500' : 'bg-gray-400'}`} />
-                    <span className="text-xs text-wsu-slate">
+                    <span className="text-xs text-wsu-slate dark:text-gray-400">
                       {memberCount} member{memberCount !== 1 ? 's' : ''} · {courseCode}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${
-                connected
-                  ? 'bg-green-50 border-green-100'
-                  : 'bg-gray-50 border-gray-200'
-              }`}>
-                <span className={`w-2 h-2 rounded-full ${connected ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
-                <span className={`text-xs font-semibold ${connected ? 'text-green-700' : 'text-gray-500'}`}>
-                  {connected ? 'Live' : 'Connecting...'}
-                </span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setScheduleOpen(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-semibold hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+                >
+                  <span>📅</span>
+                  <span className="hidden sm:inline">Schedule</span>
+                </button>
+
+                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${
+                  connected
+                    ? 'bg-green-50 dark:bg-green-900/20 border-green-100 dark:border-green-800'
+                    : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
+                }`}>
+                  <span className={`w-2 h-2 rounded-full ${connected ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
+                  <span className={`text-xs font-semibold ${connected ? 'text-green-700 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                    {connected ? 'Live' : 'Connecting...'}
+                  </span>
+                </div>
               </div>
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-1">
+            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-1 bg-wsu-chalk dark:bg-gray-950">
               {loading ? (
                 <div className="flex justify-center py-12">
                   <div className="animate-spin w-6 h-6 border-4 border-blue-700 border-t-transparent rounded-full" />
@@ -203,7 +215,7 @@ function GroupChat() {
             </div>
 
             {/* Input Area */}
-            <div className="px-6 py-4 border-t border-gray-100 bg-white">
+            <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
               <form onSubmit={handleSendMessage} className="flex gap-3">
                 <div className="flex-1">
                   <textarea
@@ -230,9 +242,9 @@ function GroupChat() {
                 </button>
               </form>
 
-              <p className="text-xs text-gray-400 mt-2 text-center">
-                Press <kbd className="bg-gray-100 px-1 rounded text-gray-500">Enter</kbd> to send ·{' '}
-                <kbd className="bg-gray-100 px-1 rounded text-gray-500">Shift+Enter</kbd> for new line
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-2 text-center">
+                Press <kbd className="bg-gray-100 dark:bg-gray-700 px-1 rounded text-gray-500 dark:text-gray-400">Enter</kbd> to send ·{' '}
+                <kbd className="bg-gray-100 dark:bg-gray-700 px-1 rounded text-gray-500 dark:text-gray-400">Shift+Enter</kbd> for new line
               </p>
             </div>
           </div>
@@ -241,8 +253,10 @@ function GroupChat() {
           <div className="hidden lg:block">
             <MembersSidebar
               activeGroupId={parsedGroupId}
+              currentGroup={group}
               members={group?.members ?? []}
               myGroups={myGroups}
+              onSchedule={() => setScheduleOpen(true)}
             />
           </div>
 
@@ -253,7 +267,7 @@ function GroupChat() {
                 className="absolute inset-0 bg-black/40 backdrop-blur-sm"
                 onClick={() => setSidebarOpen(false)}
               />
-              <div className="relative ml-auto w-80 h-full bg-wsu-chalk p-4 overflow-y-auto shadow-2xl animate-fade-in">
+              <div className="relative ml-auto w-80 h-full bg-wsu-chalk dark:bg-gray-900 p-4 overflow-y-auto shadow-2xl animate-fade-in">
                 <button
                   onClick={() => setSidebarOpen(false)}
                   className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-wsu-mist transition-colors text-wsu-slate"
@@ -263,9 +277,10 @@ function GroupChat() {
                 <div className="mt-8">
                   <MembersSidebar
                     activeGroupId={parsedGroupId}
-                    members={group?.members ?? []}
                     currentGroup={group}
+                    members={group?.members ?? []}
                     myGroups={myGroups}
+                    onSchedule={() => { setSidebarOpen(false); setScheduleOpen(true) }}
                   />
                 </div>
               </div>
@@ -274,6 +289,14 @@ function GroupChat() {
 
         </div>
       </main>
+
+      {scheduleOpen && group && (
+        <ScheduleEventModal
+          groupId={parsedGroupId}
+          groupName={group.name}
+          onClose={() => setScheduleOpen(false)}
+        />
+      )}
     </div>
   )
 }

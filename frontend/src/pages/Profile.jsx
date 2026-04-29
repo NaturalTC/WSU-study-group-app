@@ -58,13 +58,13 @@ function Profile() {
     })()
 
     return (
-        <div className="flex flex-col min-h-screen bg-wsu-chalk">
+        <div className="flex flex-col min-h-screen bg-wsu-chalk dark:bg-gray-950 transition-colors duration-300">
             <AppHeader />
 
             <main className="flex-1 pt-20">
 
                 {/* ── Profile Banner ── */}
-                <div className="bg-white border-b border-gray-100">
+                <div className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
                     <div className="max-w-4xl mx-auto px-6 py-8">
                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
 
@@ -75,7 +75,7 @@ function Profile() {
 
                             {/* Info */}
                             <div className="flex-1 min-w-0">
-                                <h1 className="font-display text-2xl text-wsu-navy font-bold leading-tight">
+                                <h1 className="font-display text-2xl text-wsu-navy dark:text-white font-bold leading-tight">
                                     {profile?.name}
                                 </h1>
                                 <div className="flex flex-wrap items-center gap-2 mt-1.5">
@@ -108,19 +108,19 @@ function Profile() {
                         </div>
 
                         {/* Stats */}
-                        <div className="flex gap-6 mt-6 pt-6 border-t border-gray-100">
+                        <div className="flex gap-6 mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
                             <div>
-                                <p className="text-xl font-display font-bold text-wsu-navy">
+                                <p className="text-xl font-display font-bold text-wsu-navy dark:text-white">
                                     {dataLoading ? '—' : groups.length}
                                 </p>
-                                <p className="text-xs text-wsu-slate mt-0.5">Study Groups</p>
+                                <p className="text-xs text-wsu-slate dark:text-gray-400 mt-0.5">Study Groups</p>
                             </div>
-                            <div className="w-px bg-gray-100" />
+                            <div className="w-px bg-gray-100 dark:bg-gray-700" />
                             <div>
-                                <p className="text-xl font-display font-bold text-wsu-navy">
+                                <p className="text-xl font-display font-bold text-wsu-navy dark:text-white">
                                     {profile?.points ?? 0}
                                 </p>
-                                <p className="text-xs text-wsu-slate mt-0.5">Points</p>
+                                <p className="text-xs text-wsu-slate dark:text-gray-400 mt-0.5">Points 🏆</p>
                             </div>
                         </div>
                     </div>
@@ -129,7 +129,7 @@ function Profile() {
                 {/* ── Study Groups ── */}
                 <div className="max-w-4xl mx-auto px-6 py-8">
                     <div className="flex items-center justify-between mb-5">
-                        <h2 className="font-display text-xl text-wsu-navy font-bold">My Study Groups</h2>
+                        <h2 className="font-display text-xl text-wsu-navy dark:text-white font-bold">My Study Groups</h2>
                         <Link to="/study-groups" className="text-sm text-blue-700 font-semibold hover:underline">
                             Browse all →
                         </Link>

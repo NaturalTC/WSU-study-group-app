@@ -19,6 +19,11 @@ body {
   color: #1B2A4A;
 }
 
+.dark body {
+  background-color: #030712;
+  color: #F9FAFB;
+}
+
 /* ── Reusable utility classes ── */
 .btn-primary {
   @apply bg-wsu-blue text-white font-semibold px-6 py-3 rounded-lg 
