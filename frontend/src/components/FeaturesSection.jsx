@@ -101,7 +101,7 @@ function FeaturesSection() {
           </h2>
           <p className="section-subtitle mx-auto">
             From AI-powered tutoring to group coordination and gamified rewards —
-            WSU StudyGroup has every tool to help you succeed.
+            StudyNest has every tool to help you succeed.
           </p>
         </div>
 
@@ -178,13 +178,13 @@ function FeaturesSection() {
 
             <div className="relative z-10">
               <span className="inline-block text-wsu-gold font-semibold text-sm uppercase tracking-widest mb-4">
-                About WSU StudyGroup
+                About StudyNest
               </span>
               <h2 className="font-display text-3xl md:text-4xl text-white mb-6">
                 Made by WSU students, for WSU students
               </h2>
               <p className="text-white/70 max-w-2xl mx-auto text-lg leading-relaxed mb-8">
-                WSU StudyGroup was built as a Software Engineering final project
+                StudyNest was built as a Software Engineering final project
                 to solve a real problem — connecting students who want to study
                 together but have no easy way to find each other.
               </p>

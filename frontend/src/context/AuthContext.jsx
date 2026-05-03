@@ -36,6 +36,18 @@ export function AuthProvider({ children }) {
     }
   }
 
+  const demoLogin = () => {
+    localStorage.setItem('token', 'demo')
+    setProfile({
+      id:     'demo',
+      name:   'Demo Student',
+      major:  'Computer Science',
+      year:   'Junior',
+      bio:    'Previewing StudyNest in demo mode.',
+      points: 430,
+    })
+  }
+
   const logout = () => {
     localStorage.removeItem('token')
     setProfile(null)
@@ -43,7 +55,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ profile, setProfile, login, logout, loading }}>
+    <AuthContext.Provider value={{ profile, setProfile, login, demoLogin, logout, loading }}>
       {children}
     </AuthContext.Provider>
   )

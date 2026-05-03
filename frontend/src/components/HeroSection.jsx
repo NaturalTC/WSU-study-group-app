@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom'
 import { useEffect, useRef } from 'react'
+import wsuPhoto from '../assets/wsu-photo.jpeg'
 
 function HeroSection() {
   const heroRef = useRef(null)
 
-  // Reveal animation on mount
   useEffect(() => {
     const elements = heroRef.current?.querySelectorAll('.reveal')
     elements?.forEach((el, i) => {
@@ -17,11 +17,20 @@ function HeroSection() {
   return (
     <section
       ref={heroRef}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden bg-wsu-navy"
+      className="relative min-h-screen flex items-center justify-center overflow-hidden"
     >
-      {/* Background decorative circles */}
-      <div className="absolute top-[-80px] right-[-80px] w-[400px] h-[400px] bg-wsu-crimson opacity-10 rounded-full blur-3xl" />
-      <div className="absolute bottom-[-60px] left-[-60px] w-[300px] h-[300px] bg-wsu-gold opacity-10 rounded-full blur-3xl" />
+      {/* WSU campus photo background */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${wsuPhoto})` }}
+      />
+
+      {/* Dark overlay for readability */}
+      <div className="absolute inset-0 bg-wsu-navy/75" />
+
+      {/* Subtle gold accent blobs */}
+      <div className="absolute top-[-80px] right-[-80px] w-[400px] h-[400px] bg-wsu-gold opacity-10 rounded-full blur-3xl" />
+      <div className="absolute bottom-[-60px] left-[-60px] w-[300px] h-[300px] bg-blue-500 opacity-10 rounded-full blur-3xl" />
 
       {/* Grid pattern overlay */}
       <div
@@ -37,8 +46,8 @@ function HeroSection() {
 
         {/* Badge */}
         <div className="reveal inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white text-sm font-medium px-4 py-2 rounded-full mb-8 backdrop-blur-sm">
-          <span className="w-2 h-2 bg-wsu-gold rounded-full animate-pulse2" />
-          Now available for WSU students
+          <span className="text-base">🦉</span>
+          Westfield State University — Go Owls!
         </div>
 
         {/* Headline */}
@@ -76,11 +85,6 @@ function HeroSection() {
             </div>
           ))}
         </div>
-
-        {/* TODO: Replace stat values above with real data from:
-            GET /api/stats
-            Expected response: { studentCount, groupCount, courseCount }
-        */}
       </div>
 
       {/* Scroll indicator */}
