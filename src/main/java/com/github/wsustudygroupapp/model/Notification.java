@@ -21,6 +21,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Notification {
 
+    public enum NotificationType {
+        SESSION_SCHEDULED,
+        BADGE_EARNED,
+        MEMBER_JOINED
+    }
+
     /** Auto-generated primary key. */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,6 +41,15 @@ public class Notification {
     @Column(nullable = false)
     private String message;
 
+    /** Categorizes the notification so the frontend can render a different icon per type. */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private NotificationType type;
+
+    /** ID of the related entity (group, session, badge) for deep-linking on the frontend. */
+    @Column
+    private Long relatedEntityId;
+
     /** False until the student opens the notification. Used to show the unread badge count. */
     @Column(nullable = false)
     private boolean isRead = false;
@@ -43,8 +58,8 @@ public class Notification {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    // TODO: Brian Torres — add a NotificationType enum (SESSION_SCHEDULED, BADGE_EARNED, MEMBER_JOINED)
-    //       so the frontend can render a different icon per type
-    // TODO: Brian Torres — add an optional relatedEntityId field to deep-link
-    //       (e.g. clicking a SESSION_SCHEDULED notification opens that group's chat)
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 }
