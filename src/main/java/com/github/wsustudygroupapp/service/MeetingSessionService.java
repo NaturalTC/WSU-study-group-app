@@ -3,6 +3,7 @@ package com.github.wsustudygroupapp.service;
 import com.github.wsustudygroupapp.dto.MeetingSessionRequest;
 import com.github.wsustudygroupapp.exception.ResourceNotFoundException;
 import com.github.wsustudygroupapp.model.MeetingSession;
+import com.github.wsustudygroupapp.model.Notification;
 import com.github.wsustudygroupapp.model.Profile;
 import com.github.wsustudygroupapp.model.StudyGroup;
 import com.github.wsustudygroupapp.model.User;
@@ -51,7 +52,8 @@ public class MeetingSessionService {
         MeetingSession savedSession = meetingSessionRepository.save(session);
 
         String message = "New study session scheduled: " + request.getScheduledAt() + " at " + request.getLocation();
-        notificationService.notifyGroupMembers(group, message, scheduler.getId());
+        notificationService.notifyGroupMembers(group, message, Notification.NotificationType.SESSION_SCHEDULED,
+                savedSession.getId(), scheduler.getId());
 
         return savedSession;
     }

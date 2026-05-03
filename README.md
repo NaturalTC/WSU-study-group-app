@@ -8,14 +8,14 @@ A full-stack web application designed exclusively for Westfield State University
 
 ## Team
 
-| Name | GitHub |
-|------|--------|
-| Jose Jimenez | [@NaturalTC](https://github.com/NaturalTC) |
-| Hayden Parker | — |
-| Eric Melnik | — |
-| Michael Mayberry | — |
-| Brian Torres | — |
-| Maicheal Shenouda | — |
+| Name | GitHub                                      |
+|------|---------------------------------------------|
+| Jose Jimenez | [@NaturalTC](https://github.com/NaturalTC)  |
+| Hayden Parker | —                                           |
+| Eric Melnik | —                                           |
+| Michael Mayberry | —                                           |
+| Brian Torres | [@btorres561](https://github.com/btorres561) |
+| Maicheal Shenouda | —                                           |
 
 ---
 
