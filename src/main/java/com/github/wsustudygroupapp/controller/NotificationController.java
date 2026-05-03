@@ -8,9 +8,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-// TODO: Brian Torres — exposes notification endpoints
-// All routes here require a valid JWT token
-
+/**
+ * Exposes notification endpoints for the logged-in student.
+ * All routes require a valid JWT token (configured in SecurityConfig).
+ * authentication.getName() returns the email stored in the JWT by JwtAuthFilter.
+ */
 @RestController
 @RequestMapping("/notifications")
 public class NotificationController {
@@ -21,37 +23,30 @@ public class NotificationController {
         this.notificationService = notificationService;
     }
 
-    // TODO: extract the logged-in user's profile ID from the Authentication principal
-    // TODO: call notificationService.getNotifications(profileId)
-    // TODO: return 200 with the list of NotificationResponse DTOs
+    /** Returns all notifications for the logged-in student, newest first. */
     @GetMapping
     public ResponseEntity<List<NotificationResponse>> getNotifications(Authentication authentication) {
-        return null;
+        return ResponseEntity.ok(notificationService.getNotifications(authentication.getName()));
     }
 
-    // TODO: extract the logged-in user's profile ID from the Authentication principal
-    // TODO: call notificationService.getUnreadCount(profileId)
-    // TODO: return 200 with the integer count
-    // Used by the frontend to show the red dot number on the notification bell
+    /** Returns the count of unread notifications. Used by the frontend to show the red dot on the bell. */
     @GetMapping("/unread-count")
     public ResponseEntity<Integer> getUnreadCount(Authentication authentication) {
-        return null;
+        return ResponseEntity.ok(notificationService.getUnreadCount(authentication.getName()));
     }
 
-    // TODO: extract the logged-in user's profile ID from the Authentication principal
-    // TODO: call notificationService.markAsRead(notificationId, profileId)
-    // TODO: return 204 No Content
+    /** Marks a single notification as read. Returns 403 if the notification belongs to another student. */
     @PatchMapping("/{notificationId}/read")
     public ResponseEntity<Void> markAsRead(@PathVariable Long notificationId,
                                            Authentication authentication) {
-        return null;
+        notificationService.markAsRead(notificationId, authentication.getName());
+        return ResponseEntity.noContent().build();
     }
 
-    // TODO: extract the logged-in user's profile ID from the Authentication principal
-    // TODO: call notificationService.markAllAsRead(profileId)
-    // TODO: return 204 No Content
+    /** Marks all of the logged-in student's unread notifications as read. */
     @PatchMapping("/read-all")
     public ResponseEntity<Void> markAllAsRead(Authentication authentication) {
-        return null;
+        notificationService.markAllAsRead(authentication.getName());
+        return ResponseEntity.noContent().build();
     }
 }
