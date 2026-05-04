@@ -56,7 +56,6 @@ function Leaderboard() {
   const myRankLabel = getRankLabel(myPoints)
 
   const topThree = leaders.slice(0, 3)
-  const rest     = leaders.slice(3)
 
   return (
     <div className="flex flex-col min-h-screen bg-wsu-chalk dark:bg-gray-900 transition-colors duration-300">
