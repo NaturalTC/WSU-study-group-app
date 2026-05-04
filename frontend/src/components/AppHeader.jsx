@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import { useEvents } from '../context/EventsContext'
+import { useToast } from '../context/ToastContext'
 import OwlLogo from './OwlLogo'
 
 function SunIcon() {
@@ -35,9 +36,20 @@ function formatEventDate(isoStr) {
 }
 
 function AppHeader() {
-    const { profile, logout }    = useAuth()
-    const { theme, toggleTheme } = useTheme()
+    const { profile, logout }          = useAuth()
+    const { theme, toggleTheme }       = useTheme()
     const { getUpcoming, removeEvent } = useEvents()
+    const { addToast }                 = useToast()
+
+    const handleThemeToggle = () => {
+        toggleTheme()
+        addToast({
+            title: theme === 'light' ? 'Dark mode enabled' : 'Light mode enabled',
+            description: theme === 'light' ? 'Easy on the eyes.' : 'Welcome back to the light.',
+            type: 'system',
+            duration: 2500,
+        })
+    }
     const location  = useLocation()
     const navigate  = useNavigate()
 
@@ -112,7 +124,7 @@ function AppHeader() {
 
                     {/* Theme toggle */}
                     <button
-                        onClick={toggleTheme}
+                        onClick={handleThemeToggle}
                         className="p-2 rounded-lg text-wsu-slate dark:text-gray-300 hover:bg-wsu-mist dark:hover:bg-gray-800 transition-colors"
                         aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
                     >
@@ -260,7 +272,7 @@ function AppHeader() {
                     ))}
                     <div className="pt-2 border-t border-gray-100 dark:border-gray-700 mt-2">
                         <button
-                            onClick={toggleTheme}
+                            onClick={handleThemeToggle}
                             className="flex items-center gap-2 w-full px-4 py-2.5 rounded-xl text-sm font-semibold text-wsu-slate dark:text-gray-300 hover:bg-wsu-mist dark:hover:bg-gray-800 transition-colors"
                         >
                             {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
