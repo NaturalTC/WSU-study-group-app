@@ -33,6 +33,7 @@ class MeetingSessionServiceTest {
     @Mock private ProfileRepository profileRepository;
     @Mock private UserRepository userRepository;
     @Mock private NotificationService notificationService;
+    @Mock private GamificationService gamificationService;
     @InjectMocks private MeetingSessionService meetingSessionService;
 
     private static final String EMAIL = "test@westfield.ma.edu";
