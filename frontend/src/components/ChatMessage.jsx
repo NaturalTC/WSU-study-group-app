@@ -33,7 +33,7 @@ function ChatMessage({ message, isOwn }) {
         <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed
           ${isOwn
             ? 'bg-blue-700 text-white rounded-tr-none'
-            : 'bg-white dark:bg-gray-700 text-wsu-navy dark:text-gray-100 border border-gray-100 dark:border-gray-600 shadow-sm rounded-tl-none'}`}
+            : 'bg-white text-wsu-navy border border-gray-100 shadow-sm rounded-tl-none'}`}
         >
           {message.text}
         </div>

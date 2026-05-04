@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import AppHeader from '../components/AppHeader'
 import { useAuth } from '../context/AuthContext'
 import api from '../api/axios'
-import campusPhoto from '../assets/CampusGreenGlobeFall2016_11-X2.jpg'
 
 const RANK_LABELS = [
   { min: 0,    label: 'Hatchling',     color: 'text-gray-500   dark:text-gray-400',   bg: 'bg-gray-100   dark:bg-gray-700' },
@@ -30,7 +29,8 @@ function Leaderboard() {
   const { profile } = useAuth()
   const [leaders, setLeaders]   = useState([])
   const [loading, setLoading]   = useState(true)
-  const [tab, setTab]           = useState('allTime') // allTime | weekly — weekly pending backend
+  const [error, setError]       = useState('')
+  const [tab, setTab]           = useState('allTime') // allTime | weekly
 
   const MOCK_LEADERS = [
     { id: 'u1', name: 'Sarah K.',     major: 'Computer Science', points: 1520 },
@@ -46,6 +46,7 @@ function Leaderboard() {
 
   useEffect(() => {
     setLoading(true)
+    setError('')
     api.get('/leaderboard')
       .then(res => setLeaders(Array.isArray(res.data) ? res.data : res.data?.leaderboard ?? []))
       .catch(() => setLeaders(MOCK_LEADERS))
@@ -57,19 +58,23 @@ function Leaderboard() {
   const myRankLabel = getRankLabel(myPoints)
 
   const topThree = leaders.slice(0, 3)
+  const rest     = leaders.slice(3)
 
   return (
-    <div className="flex flex-col min-h-screen bg-wsu-chalk dark:bg-gray-900 transition-colors duration-300">
+    <div className="flex flex-col min-h-screen bg-wsu-chalk dark:bg-gray-950 transition-colors duration-300">
       <AppHeader />
 
       <main className="flex-1 pt-20">
 
         {/* ── Hero Banner ── */}
-        <div className="relative bg-gradient-to-br from-wsu-navy via-blue-900 to-blue-800 text-white overflow-hidden">
-          <div className="absolute inset-0 bg-cover bg-top opacity-40" style={{ backgroundImage: `url(${campusPhoto})` }} />
-          <div className="relative max-w-5xl mx-auto px-6 py-16">
-            <div className="flex flex-col md:flex-row items-end justify-between gap-6">
+        <div className="bg-gradient-to-br from-wsu-navy via-blue-900 to-blue-800 text-white">
+          <div className="max-w-5xl mx-auto px-6 py-10">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">🦉</span>
+                  <span className="text-sm font-semibold text-blue-200 uppercase tracking-widest">WSU Leaderboard</span>
+                </div>
                 <h1 className="font-display text-3xl md:text-4xl font-bold leading-tight">
                   Owl Rankings
                 </h1>
@@ -121,7 +126,15 @@ function Leaderboard() {
               </div>
             )}
 
-            {!loading && leaders.length === 0 && (
+            {error && (
+              <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm px-6 py-14 text-center">
+                <div className="text-4xl mb-3">🦉</div>
+                <p className="text-wsu-navy dark:text-white font-semibold">{error}</p>
+                <p className="text-wsu-slate dark:text-gray-400 text-sm mt-1">Keep studying to earn points!</p>
+              </div>
+            )}
+
+            {!loading && !error && leaders.length === 0 && (
               <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm px-6 py-14 text-center">
                 <div className="text-4xl mb-3">🏆</div>
                 <p className="text-wsu-navy dark:text-white font-semibold">No rankings yet</p>
@@ -129,7 +142,7 @@ function Leaderboard() {
               </div>
             )}
 
-            {!loading && leaders.length > 0 && (
+            {!loading && !error && leaders.length > 0 && (
               <>
                 {/* Top 3 podium cards */}
                 <div className="grid grid-cols-3 gap-3 mb-4">
@@ -150,7 +163,7 @@ function Leaderboard() {
                         className={`flex flex-col items-center justify-end ${heights[visualIdx]} rounded-2xl bg-gradient-to-b ${podiumColors[visualIdx]} p-3 ${isMe ? 'ring-2 ring-blue-500' : ''}`}
                       >
                         <div className="text-xl mb-1">{medal}</div>
-                        <p className="text-xs font-bold text-wsu-navy text-center leading-tight truncate w-full">
+                        <p className="text-xs font-bold text-wsu-navy text-center leading-tight truncate w-full text-center">
                           {user.name?.split(' ')[0] ?? 'Student'}
                         </p>
                         <p className="text-xs font-semibold text-wsu-navy/70">
@@ -237,7 +250,7 @@ function Leaderboard() {
                         {current.label}
                       </span>
                       {next && (
-                        <span className="text-xs text-wsu-slate dark:text-gray-400">{next.label}</span>
+                        <span className="text-xs text-wsu-slate dark:text-gray-400">{next.label} →</span>
                       )}
                     </div>
                     <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden mb-2">

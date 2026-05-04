@@ -180,17 +180,17 @@ function GroupChat() {
   const memberCount  = group?.members?.length ?? 0
 
   return (
-    <div className="flex flex-col min-h-screen bg-wsu-chalk dark:bg-gray-900 transition-colors duration-300">
+    <div className="flex flex-col min-h-screen bg-wsu-chalk dark:bg-gray-950 transition-colors duration-300">
       <AppHeader />
 
       <main className="flex-1 pt-20 pb-0 max-w-7xl mx-auto w-full px-4 md:px-6">
         <div className="flex gap-6 h-[calc(100vh-5rem)] py-4">
 
           {/* ── Chat Area ─────────────────────────────────────── */}
-          <div className="flex-1 flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden min-w-0">
+          <div className="flex-1 flex flex-col bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden min-w-0">
 
             {/* Chat Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -240,7 +240,7 @@ function GroupChat() {
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-1 bg-wsu-chalk dark:bg-gray-900">
+            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-1 bg-wsu-chalk dark:bg-gray-950">
               {loading ? (
                 <div className="flex justify-center py-12">
                   <div className="animate-spin w-6 h-6 border-4 border-blue-700 border-t-transparent rounded-full" />
@@ -258,7 +258,7 @@ function GroupChat() {
             </div>
 
             {/* Input Area */}
-            <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800">
+            <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
               <form onSubmit={handleSendMessage} className="flex gap-3 items-end">
                 <textarea
                   ref={inputRef}
@@ -340,7 +340,7 @@ function GroupChat() {
                 className="absolute inset-0 bg-black/40 backdrop-blur-sm"
                 onClick={() => setSidebarOpen(false)}
               />
-              <div className="relative ml-auto w-80 h-full bg-wsu-chalk dark:bg-gray-800 p-4 overflow-y-auto shadow-2xl animate-fade-in">
+              <div className="relative ml-auto w-80 h-full bg-wsu-chalk dark:bg-gray-900 p-4 overflow-y-auto shadow-2xl animate-fade-in">
                 <button
                   onClick={() => setSidebarOpen(false)}
                   className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-wsu-mist transition-colors text-wsu-slate"
