@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import AppHeader from '../components/AppHeader'
 import StudyGroupCard from '../components/StudyGroupCard'
 import api from '../api/axios'
+import campusPhoto from '../assets/WSUCampusStock2013_033-L.jpg'
 
 function StudyGroups() {
   const [groups, setGroups]               = useState([])
@@ -97,14 +98,17 @@ function StudyGroups() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-wsu-chalk dark:bg-gray-900 transition-colors duration-300">
+    <div
+      className="flex flex-col min-h-screen bg-cover bg-center bg-fixed transition-colors duration-300"
+      style={{ backgroundImage: `url(${campusPhoto})` }}
+    >
       <AppHeader />
 
       <main className="flex-1 pt-20 pb-16">
 
         {/* ── Hero Banner ── */}
-        <div className="bg-gradient-to-br from-wsu-navy via-blue-900 to-blue-800 text-white">
-          <div className="max-w-5xl mx-auto px-6 py-10">
+        <div className="relative bg-gradient-to-br from-wsu-navy/90 via-blue-900/90 to-blue-800/90 text-white overflow-hidden">
+          <div className="relative max-w-5xl mx-auto px-6 py-16">
             <div className="flex flex-col md:flex-row items-end justify-between gap-6">
               <div>
                 <h1 className="font-display text-3xl md:text-4xl font-bold leading-tight">
@@ -181,8 +185,8 @@ function StudyGroups() {
             </div>
           ) : filteredGroups.length > 0 ? (
             <>
-              <p className="text-sm text-wsu-slate dark:text-gray-400 mb-6">
-                Showing <span className="font-semibold text-wsu-navy dark:text-white">{filteredGroups.length}</span> group{filteredGroups.length !== 1 ? 's' : ''}
+              <p className="text-sm text-white/80 mb-6">
+                Showing <span className="font-semibold text-white">{filteredGroups.length}</span> group{filteredGroups.length !== 1 ? 's' : ''}
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredGroups.map(group => (

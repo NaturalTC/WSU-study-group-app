@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import AppHeader from '../components/AppHeader'
 import { useAuth } from '../context/AuthContext'
 import api from '../api/axios'
+import campusPhoto from '../assets/CampusGreenGlobeFall2016_11-X2.jpg'
 
 const RANK_LABELS = [
   { min: 0,    label: 'Hatchling',     color: 'text-gray-500   dark:text-gray-400',   bg: 'bg-gray-100   dark:bg-gray-700' },
@@ -64,8 +65,9 @@ function Leaderboard() {
       <main className="flex-1 pt-20">
 
         {/* ── Hero Banner ── */}
-        <div className="bg-gradient-to-br from-wsu-navy via-blue-900 to-blue-800 text-white">
-          <div className="max-w-5xl mx-auto px-6 py-10">
+        <div className="relative bg-gradient-to-br from-wsu-navy via-blue-900 to-blue-800 text-white overflow-hidden">
+          <div className="absolute inset-0 bg-cover bg-top opacity-40" style={{ backgroundImage: `url(${campusPhoto})` }} />
+          <div className="relative max-w-5xl mx-auto px-6 py-16">
             <div className="flex flex-col md:flex-row items-end justify-between gap-6">
               <div>
                 <h1 className="font-display text-3xl md:text-4xl font-bold leading-tight">
@@ -148,7 +150,7 @@ function Leaderboard() {
                         className={`flex flex-col items-center justify-end ${heights[visualIdx]} rounded-2xl bg-gradient-to-b ${podiumColors[visualIdx]} p-3 ${isMe ? 'ring-2 ring-blue-500' : ''}`}
                       >
                         <div className="text-xl mb-1">{medal}</div>
-                        <p className="text-xs font-bold text-wsu-navy text-center leading-tight truncate w-full text-center">
+                        <p className="text-xs font-bold text-wsu-navy text-center leading-tight truncate w-full">
                           {user.name?.split(' ')[0] ?? 'Student'}
                         </p>
                         <p className="text-xs font-semibold text-wsu-navy/70">
