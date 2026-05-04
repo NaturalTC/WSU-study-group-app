@@ -57,7 +57,7 @@ public class Profile {
     // ── Sprint 2 fields ───────────────────────────────────────────────
 
     /** Total gamification points earned by this student. Incremented by GamificationService. */
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "INT NOT NULL DEFAULT 0")
     private int points = 0;
 
     // TODO: Maicheal Shenouda — add a @OneToMany to UserBadge so profile.getBadges() works

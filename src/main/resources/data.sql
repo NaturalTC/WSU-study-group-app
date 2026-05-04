@@ -887,6 +887,9 @@ INSERT IGNORE INTO course_table (department_code, course_code, course_name) VALU
 ('THEA', 'THEA 0398', 'Internship in Theatre'),
 ('THEA', 'THEA 0399', 'Independent Study');
 
+-- ── Gamification: ensure points column exists on profiles (safe on re-run) ──
+ALTER TABLE PROFILE_TABLE ADD COLUMN IF NOT EXISTS points INT NOT NULL DEFAULT 0;
+
 -- ── Gamification badges ──────────────────────────────────────────────────────
 INSERT IGNORE INTO badge_table (name, description, icon, point_value) VALUES
 ('First Group Join',    'Joined your first study group',     '👥', 10),
