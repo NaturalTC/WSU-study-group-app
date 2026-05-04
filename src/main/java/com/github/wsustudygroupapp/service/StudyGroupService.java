@@ -22,15 +22,18 @@ public class StudyGroupService {
     private final CourseRepository courseRepository;
     private final ProfileRepository profileRepository;
     private final UserRepository userRepository;
+    private final GamificationService gamificationService;
 
     public StudyGroupService(StudyGroupRepository studyGroupRepository,
                              CourseRepository courseRepository,
                              ProfileRepository profileRepository,
-                             UserRepository userRepository) {
+                             UserRepository userRepository,
+                             GamificationService gamificationService) {
         this.studyGroupRepository = studyGroupRepository;
         this.courseRepository = courseRepository;
         this.profileRepository = profileRepository;
         this.userRepository = userRepository;
+        this.gamificationService = gamificationService;
     }
 
     public StudyGroup getGroupById(Long groupId) {
@@ -65,7 +68,10 @@ public class StudyGroupService {
         members.add(creator);
         group.setMembers(members);
 
-        return studyGroupRepository.save(group);
+        StudyGroup saved = studyGroupRepository.save(group);
+        // TODO [DONE]: award points to the creator for starting a new group
+        gamificationService.awardPoints(creator.getId(), 15);
+        return saved;
     }
 
     public StudyGroup joinGroup(Long groupId, String email) {
@@ -77,7 +83,10 @@ public class StudyGroupService {
                 .anyMatch(member -> member.getId().equals(profile.getId()));
         if (!alreadyMember) {
             group.getMembers().add(profile);
-            return studyGroupRepository.save(group);
+            StudyGroup saved = studyGroupRepository.save(group);
+            // TODO [DONE]: award points to the student for joining a group
+            gamificationService.awardPoints(profile.getId(), 10);
+            return saved;
         }
 
         return group;

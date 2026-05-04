@@ -22,13 +22,16 @@ public class ChatService {
     private final MessageRepository messageRepository;
     private final StudyGroupRepository studyGroupRepository;
     private final ProfileRepository profileRepository;
+    private final GamificationService gamificationService;
 
     public ChatService(MessageRepository messageRepository,
                        StudyGroupRepository studyGroupRepository,
-                       ProfileRepository profileRepository) {
+                       ProfileRepository profileRepository,
+                       GamificationService gamificationService) {
         this.messageRepository = messageRepository;
         this.studyGroupRepository = studyGroupRepository;
         this.profileRepository = profileRepository;
+        this.gamificationService = gamificationService;
     }
 
     // TODO: return messageRepository.findByStudyGroupIdOrderBySentAtAsc(groupId)
@@ -58,6 +61,8 @@ public class ChatService {
         savedMessage.setContent(content);
         savedMessage.setSentAt(dto.getSentAt());
         messageRepository.save(savedMessage);
+        // TODO [DONE]: award points to the sender for participating in chat
+        gamificationService.awardPoints(sender.getId(), 1);
         return savedMessage;
     }
 }

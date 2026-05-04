@@ -886,3 +886,11 @@ INSERT IGNORE INTO course_table (department_code, course_code, course_name) VALU
 ('THEA', 'THEA 0390', 'Lighting Design'),
 ('THEA', 'THEA 0398', 'Internship in Theatre'),
 ('THEA', 'THEA 0399', 'Independent Study');
+
+-- ── Gamification badges ──────────────────────────────────────────────────────
+INSERT IGNORE INTO badge_table (name, description, icon, point_value) VALUES
+('First Group Join',    'Joined your first study group',     '👥', 10),
+('Group Starter',       'Created your first study group',    '🚀', 15),
+('Active Chatter',      'Sent 10 messages in group chats',   '💬', 20),
+('Session Scheduler',   'Scheduled your first study session','📅', 25),
+('Point Milestone 100', 'Reached 100 total points',          '🏆', 30);

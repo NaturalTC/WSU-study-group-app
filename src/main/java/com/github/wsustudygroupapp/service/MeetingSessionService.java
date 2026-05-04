@@ -28,17 +28,20 @@ public class MeetingSessionService {
     private final ProfileRepository profileRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final GamificationService gamificationService;
 
     public MeetingSessionService(MeetingSessionRepository meetingSessionRepository,
                                  StudyGroupRepository studyGroupRepository,
                                  ProfileRepository profileRepository,
                                  UserRepository userRepository,
-                                 NotificationService notificationService) {
+                                 NotificationService notificationService,
+                                 GamificationService gamificationService) {
         this.meetingSessionRepository = meetingSessionRepository;
         this.studyGroupRepository = studyGroupRepository;
         this.profileRepository = profileRepository;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
+        this.gamificationService = gamificationService;
     }
 
     /** Creates a new meeting session for a group and notifies all other members. */
@@ -55,6 +58,9 @@ public class MeetingSessionService {
         session.setNotes(request.getNotes());
 
         MeetingSession savedSession = meetingSessionRepository.save(session);
+
+        // TODO [DONE]: award points to the scheduler for booking a study session
+        gamificationService.awardPoints(scheduler.getId(), 25);
 
         String message = "New study session scheduled: " + request.getScheduledAt() + " at " + request.getLocation();
         notificationService.notifyGroupMembers(group, message, Notification.NotificationType.SESSION_SCHEDULED,
