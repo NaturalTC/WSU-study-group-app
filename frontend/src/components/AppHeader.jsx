@@ -71,7 +71,7 @@ function AppHeader() {
 
     const navLinks = [
         { label: 'Study Groups', to: '/study-groups' },
-        { label: 'Group Chat',   to: '/group-chat'   },
+        { label: 'Group Chats',  to: '/group-chat'   },
         { label: 'Leaderboard',  to: '/leaderboard'  },
     ]
 
@@ -150,7 +150,7 @@ function AppHeader() {
                         </button>
 
                         {bellOpen && (
-                            <div className="absolute right-0 top-11 w-80 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden animate-fade-in">
+                            <div className="absolute right-0 top-11 w-80 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden animate-fade-in">
                                 <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
                                     <p className="text-sm font-semibold text-wsu-navy dark:text-white">Upcoming Events</p>
                                     {upcoming.length > 0 && (
@@ -217,7 +217,7 @@ function AppHeader() {
                         </button>
 
                         {avatarOpen && (
-                            <div className="absolute right-0 top-11 w-52 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 py-1.5 animate-fade-in">
+                            <div className="absolute right-0 top-11 w-52 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 py-1.5 animate-fade-in">
                                 <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700 mb-1">
                                     <p className="text-xs font-semibold text-wsu-navy dark:text-white truncate">{profile?.name}</p>
                                     <p className="text-xs text-wsu-slate dark:text-gray-400 truncate">{profile?.major}</p>
@@ -254,7 +254,7 @@ function AppHeader() {
 
             {/* Mobile dropdown */}
             {mobileOpen && (
-                <div className="md:hidden border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 space-y-1 transition-colors duration-300">
+                <div className="md:hidden border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800 px-4 py-3 space-y-1 transition-colors duration-300">
                     {navLinks.map(link => (
                         <Link
                             key={link.to}

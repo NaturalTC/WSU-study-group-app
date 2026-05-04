@@ -66,13 +66,15 @@ body {
 
 /* ── Form input styles ── */
 .form-input {
-  @apply w-full border border-gray-200 rounded-lg px-4 py-3 text-wsu-navy 
-         bg-white focus:outline-none focus:ring-2 focus:ring-blue-700
-         focus:border-transparent transition-all duration-200 placeholder-gray-400;
+  @apply w-full border border-gray-200 dark:border-gray-600 rounded-lg px-4 py-3
+         text-wsu-navy dark:text-white bg-white dark:bg-gray-700
+         focus:outline-none focus:ring-2 focus:ring-blue-700
+         focus:border-transparent transition-all duration-200
+         placeholder-gray-400 dark:placeholder-gray-500;
 }
 
 .form-label {
-  @apply block text-sm font-semibold text-wsu-navy mb-1;
+  @apply block text-sm font-semibold text-wsu-navy dark:text-gray-200 mb-1;
 }
 
 /* ── Scroll animation helper ── */

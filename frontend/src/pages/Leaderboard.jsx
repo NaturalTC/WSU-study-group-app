@@ -61,7 +61,7 @@ function Leaderboard() {
   const rest     = leaders.slice(3)
 
   return (
-    <div className="flex flex-col min-h-screen bg-wsu-chalk dark:bg-gray-950 transition-colors duration-300">
+    <div className="flex flex-col min-h-screen bg-wsu-chalk dark:bg-gray-900 transition-colors duration-300">
       <AppHeader />
 
       <main className="flex-1 pt-20">
@@ -69,12 +69,8 @@ function Leaderboard() {
         {/* ── Hero Banner ── */}
         <div className="bg-gradient-to-br from-wsu-navy via-blue-900 to-blue-800 text-white">
           <div className="max-w-5xl mx-auto px-6 py-10">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex flex-col md:flex-row items-end justify-between gap-6">
               <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-2xl">🦉</span>
-                  <span className="text-sm font-semibold text-blue-200 uppercase tracking-widest">WSU Leaderboard</span>
-                </div>
                 <h1 className="font-display text-3xl md:text-4xl font-bold leading-tight">
                   Owl Rankings
                 </h1>
@@ -250,7 +246,7 @@ function Leaderboard() {
                         {current.label}
                       </span>
                       {next && (
-                        <span className="text-xs text-wsu-slate dark:text-gray-400">{next.label} →</span>
+                        <span className="text-xs text-wsu-slate dark:text-gray-400">{next.label}</span>
                       )}
                     </div>
                     <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden mb-2">
