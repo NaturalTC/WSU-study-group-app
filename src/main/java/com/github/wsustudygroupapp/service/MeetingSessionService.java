@@ -16,6 +16,10 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Handles scheduling, retrieval, and cancellation of study group meeting sessions.
+ * When a session is created, all group members (except the creator) are notified automatically.
+ */
 @Service
 public class MeetingSessionService {
 
@@ -37,6 +41,7 @@ public class MeetingSessionService {
         this.notificationService = notificationService;
     }
 
+    /** Creates a new meeting session for a group and notifies all other members. */
     public MeetingSession scheduleSession(String schedulerEmail, MeetingSessionRequest request) {
         Profile scheduler = currentProfile(schedulerEmail);
         StudyGroup group = studyGroupRepository.findById(request.getGroupId())
@@ -58,16 +63,19 @@ public class MeetingSessionService {
         return savedSession;
     }
 
+    /** Returns all future sessions across every group the student belongs to, ordered by date. */
     public List<MeetingSession> getUpcomingSessions(String email) {
         Profile profile = currentProfile(email);
         return meetingSessionRepository.findByStudyGroupMembersIdAndScheduledAtAfterOrderByScheduledAtAsc(
                 profile.getId(), LocalDateTime.now());
     }
 
+    /** Returns all sessions for a specific group, ordered by scheduled time. Used on the group dashboard. */
     public List<MeetingSession> getSessionsForGroup(Long groupId) {
         return meetingSessionRepository.findByStudyGroupIdOrderByScheduledAtAsc(groupId);
     }
 
+    /** Deletes a session. Only the student who originally scheduled it can cancel. */
     public void cancelSession(Long sessionId, String requestingEmail) {
         Profile requester = currentProfile(requestingEmail);
         MeetingSession session = meetingSessionRepository.findById(sessionId)
@@ -80,6 +88,7 @@ public class MeetingSessionService {
         meetingSessionRepository.delete(session);
     }
 
+    // resolves the logged-in user's Profile from their email — throws 404 if not found
     private Profile currentProfile(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + email));
