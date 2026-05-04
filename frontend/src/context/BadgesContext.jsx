@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect, useRef } from 'react'
+import { useToast } from './ToastContext'
 
 export const BADGE_DEFINITIONS = [
   // ── Logins ──────────────────────────────────────────────────────────────────
@@ -44,24 +45,50 @@ export const BADGE_DEFINITIONS = [
 // TODO: replace with api.get('/profiles/badges') when backend endpoint is ready.
 // Expected response shape: [{ id: string, earnedAt: ISO string }]
 const MOCK_EARNED = [
-  { id: 'login_1',   earnedAt: '2026-03-15T10:00:00Z' },
-  { id: 'login_10',  earnedAt: '2026-04-01T09:00:00Z' },
-  { id: 'streak_3',  earnedAt: '2026-03-18T08:00:00Z' },
-  { id: 'streak_7',  earnedAt: '2026-04-29T08:00:00Z' },
-  { id: 'msg_1',     earnedAt: '2026-03-15T11:00:00Z' },
-  { id: 'msg_25',    earnedAt: '2026-04-10T14:00:00Z' },
-  { id: 'emoji_1',   earnedAt: '2026-04-30T15:00:00Z' },
-  { id: 'group_1',   earnedAt: '2026-03-15T12:00:00Z' },
-  { id: 'group_3',   earnedAt: '2026-04-20T10:00:00Z' },
-  { id: 'pts_100',   earnedAt: '2026-03-20T14:00:00Z' },
-  { id: 'pts_500',   earnedAt: '2026-04-15T16:00:00Z' },
-  { id: 'help_1',    earnedAt: '2026-04-25T13:00:00Z' },
-  { id: 'session_1', earnedAt: '2026-04-28T10:00:00Z' },
+  // logins — tiers 1 through 5
+  { id: 'login_1',    earnedAt: '2026-03-15T10:00:00Z' },
+  { id: 'login_10',   earnedAt: '2026-04-01T09:00:00Z' },
+  { id: 'login_25',   earnedAt: '2026-04-15T09:00:00Z' },
+  { id: 'login_50',   earnedAt: '2026-04-28T09:00:00Z' },
+  { id: 'login_100',  earnedAt: '2026-05-01T09:00:00Z' },
+  // streak — tiers 1 through 4
+  { id: 'streak_3',   earnedAt: '2026-03-18T08:00:00Z' },
+  { id: 'streak_7',   earnedAt: '2026-04-29T08:00:00Z' },
+  { id: 'streak_14',  earnedAt: '2026-04-22T08:00:00Z' },
+  { id: 'streak_30',  earnedAt: '2026-05-02T08:00:00Z' },
+  // messages — tiers 1 through 3
+  { id: 'msg_1',      earnedAt: '2026-03-15T11:00:00Z' },
+  { id: 'msg_25',     earnedAt: '2026-04-10T14:00:00Z' },
+  { id: 'msg_100',    earnedAt: '2026-04-28T14:00:00Z' },
+  // emojis — tiers 1 through 3
+  { id: 'emoji_1',    earnedAt: '2026-04-30T15:00:00Z' },
+  { id: 'emoji_10',   earnedAt: '2026-05-01T15:00:00Z' },
+  { id: 'emoji_50',   earnedAt: '2026-05-02T15:00:00Z' },
+  // groups — tiers 1 through 3
+  { id: 'group_1',    earnedAt: '2026-03-15T12:00:00Z' },
+  { id: 'group_3',    earnedAt: '2026-04-20T10:00:00Z' },
+  { id: 'group_5',    earnedAt: '2026-05-01T10:00:00Z' },
+  // sessions — tiers 1 through 4
+  { id: 'session_1',  earnedAt: '2026-04-28T10:00:00Z' },
+  { id: 'session_5',  earnedAt: '2026-04-30T10:00:00Z' },
+  { id: 'session_10', earnedAt: '2026-05-02T10:00:00Z' },
+  { id: 'session_25', earnedAt: '2026-05-03T10:00:00Z' },
+  // points — tiers 1 through 4
+  { id: 'pts_100',    earnedAt: '2026-03-20T14:00:00Z' },
+  { id: 'pts_500',    earnedAt: '2026-04-15T16:00:00Z' },
+  { id: 'pts_1000',   earnedAt: '2026-04-29T16:00:00Z' },
+  { id: 'pts_5000',   earnedAt: '2026-05-03T16:00:00Z' },
+  // helper — tiers 1 through 3
+  { id: 'help_1',     earnedAt: '2026-04-25T13:00:00Z' },
+  { id: 'help_5',     earnedAt: '2026-05-01T13:00:00Z' },
+  { id: 'help_10',    earnedAt: '2026-05-03T13:00:00Z' },
 ]
 
 const BadgesContext = createContext(null)
 
 export function BadgesProvider({ children }) {
+  const { addToast }          = useToast()
+  const hasToasted            = useRef(false)
   const [raw, setRaw]         = useState([])
   const [seenIds, setSeenIds] = useState(() => {
     try { return new Set(JSON.parse(localStorage.getItem('wsu-seen-badges') ?? '[]')) }
@@ -72,6 +99,51 @@ export function BadgesProvider({ children }) {
     // TODO: api.get('/profiles/badges').then(res => setRaw(res.data)).catch(() => setRaw(MOCK_EARNED))
     setRaw(MOCK_EARNED)
   }, [])
+
+  // Fire toasts once per session for newly earned badges
+  useEffect(() => {
+    if (raw.length === 0 || hasToasted.current) return
+    hasToasted.current = true
+
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    const fresh = raw
+      .map(e => {
+        const def = BADGE_DEFINITIONS.find(b => b.id === e.id)
+        return def ? { ...def, earnedAt: e.earnedAt } : null
+      })
+      .filter(b => b && new Date(b.earnedAt) > sevenDaysAgo && !seenIds.has(b.id))
+      .sort((a, b) => b.tier - a.tier)
+
+    if (fresh.length === 0) return
+
+    const show = fresh.slice(0, 3)
+    show.forEach((badge, i) => {
+      setTimeout(() => {
+        addToast({
+          title: 'New Badge Earned!',
+          description: badge.name,
+          type: 'badge',
+          duration: 5000,
+        })
+      }, i * 600)
+    })
+
+    if (fresh.length > 3) {
+      setTimeout(() => {
+        addToast({
+          title: `+${fresh.length - 3} more badges earned`,
+          description: 'Check your profile to see them all.',
+          type: 'badge',
+          duration: 5000,
+        })
+      }, show.length * 600)
+    }
+
+    // Mark all as seen so toasts don't re-fire on next load
+    const next = new Set([...seenIds, ...fresh.map(b => b.id)])
+    setSeenIds(next)
+    localStorage.setItem('wsu-seen-badges', JSON.stringify([...next]))
+  }, [raw])
 
   const earned = raw
     .map(e => {
