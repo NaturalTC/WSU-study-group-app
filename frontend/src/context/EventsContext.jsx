@@ -27,8 +27,12 @@ export function EventsProvider({ children }) {
       groupName,
     }
     try {
-      const res = await api.post(`/groups/${groupId}/events`, { title, eventDate, notes })
-      if (res.data?.id) ev.id = res.data.id
+      await api.post('/meetings', {
+        groupId,
+        scheduledAt: new Date(eventDate).toISOString().slice(0, 19),
+        location:    title,
+        notes:       notes || null,
+      })
     } catch {}
     persist({ ...byGroup, [groupId]: [...(byGroup[groupId] ?? []), ev] })
     return ev

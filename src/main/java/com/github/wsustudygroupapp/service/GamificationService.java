@@ -24,6 +24,7 @@ public class GamificationService {
     private final MessageRepository messageRepository;
     private final MeetingSessionRepository meetingSessionRepository;
     private final UserCourseRepository userCourseRepository;
+    private final NotificationService notificationService;
 
     public GamificationService(ProfileRepository profileRepository,
                                 BadgeRepository badgeRepository,
@@ -31,7 +32,8 @@ public class GamificationService {
                                 StudyGroupRepository studyGroupRepository,
                                 MessageRepository messageRepository,
                                 MeetingSessionRepository meetingSessionRepository,
-                                UserCourseRepository userCourseRepository) {
+                                UserCourseRepository userCourseRepository,
+                                NotificationService notificationService) {
         this.profileRepository = profileRepository;
         this.badgeRepository = badgeRepository;
         this.userBadgeRepository = userBadgeRepository;
@@ -39,6 +41,7 @@ public class GamificationService {
         this.messageRepository = messageRepository;
         this.meetingSessionRepository = meetingSessionRepository;
         this.userCourseRepository = userCourseRepository;
+        this.notificationService = notificationService;
     }
 
     // TODO [DONE]: find the profile by profileId — throw ResourceNotFoundException if missing
@@ -73,6 +76,7 @@ public class GamificationService {
         userBadgeRepository.save(userBadge);
         profile.setPoints(profile.getPoints() + badge.getPointValue());
         profileRepository.save(profile);
+        notificationService.notifyBadgeEarned(profile, badge);
     }
 
     // TODO [DONE]: call awardBadge() for each badge whose threshold the profile now meets
