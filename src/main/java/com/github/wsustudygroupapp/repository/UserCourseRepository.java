@@ -18,6 +18,9 @@ public interface UserCourseRepository extends JpaRepository<UserCourse, Long> {
     /** Returns all course enrollments for a given student profile. */
     List<UserCourse> findByProfileId(Long profileId);
 
+    /** Returns all enrollments in a given course. Used by GamificationService for course leaderboard. */
+    List<UserCourse> findByCourseId(Long courseId);
+
     /** Returns true if the student is already enrolled in this course+section+semester. Used to prevent duplicate enrollments. */
     boolean existsByProfileIdAndCourseIdAndSectionAndSemester(Long profileId, Long courseId, String section, String semester);
 
