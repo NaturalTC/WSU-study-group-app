@@ -10,9 +10,31 @@ import { useAuth } from '../context/AuthContext'
 import api from '../api/axios'
 
 function formatTime(isoStr) {
-  const d = isoStr ? new Date(isoStr) : new Date()
-  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  const d    = isoStr ? new Date(isoStr) : new Date()
+  const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+
+  const today     = new Date(); today.setHours(0, 0, 0, 0)
+  const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1)
+  const dDay      = new Date(d);    dDay.setHours(0, 0, 0, 0)
+
+  if (dDay.getTime() === today.getTime())     return `Today · ${time}`
+  if (dDay.getTime() === yesterday.getTime()) return `Yesterday · ${time}`
+  return d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ` · ${time}`
 }
+
+function EmojiPickerIcon() {
+  return (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <circle cx="11" cy="13" r="8" strokeWidth={1.5} />
+      <circle cx="8.5" cy="11.5" r="0.75" fill="currentColor" stroke="none" />
+      <circle cx="13.5" cy="11.5" r="0.75" fill="currentColor" stroke="none" />
+      <path strokeLinecap="round" strokeWidth={1.5} d="M8.5 15.5c.5 1 1.5 1.5 2.5 1.5s2-.5 2.5-1.5" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M20 3v4M18 5h4" />
+    </svg>
+  )
+}
+
+const QUICK_EMOJIS = ['👍', '😂', '🔥']
 
 function GroupChat() {
   const { groupId } = useParams()
@@ -27,10 +49,12 @@ function GroupChat() {
   const [connected, setConnected] = useState(false)
   const [sidebarOpen,   setSidebarOpen]   = useState(false)
   const [scheduleOpen,  setScheduleOpen]  = useState(false)
+  const [emojiOpen,     setEmojiOpen]     = useState(false)
 
   const stompClientRef = useRef(null)
   const messagesEndRef = useRef(null)
   const inputRef       = useRef(null)
+  const emojiRef       = useRef(null)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -109,20 +133,39 @@ function GroupChat() {
     }
   }, [parsedGroupId])
 
-  const handleSendMessage = (e) => {
-    e.preventDefault()
-    if (!input.trim() || !connected) return
+  useEffect(() => {
+    const handler = (e) => { if (emojiRef.current && !emojiRef.current.contains(e.target)) setEmojiOpen(false) }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
 
+  const sendMessage = (content) => {
+    if (!content.trim() || !connected) return
     stompClientRef.current.publish({
       destination: `/app/chat/${parsedGroupId}`,
       body: JSON.stringify({
         studyGroupId: parsedGroupId,
         senderName: profile?.name ?? 'Unknown',
-        content: input.trim(),
+        content: content.trim(),
       }),
     })
+  }
 
+  const handleSendMessage = (e) => {
+    e.preventDefault()
+    if (!input.trim() || !connected) return
+    sendMessage(input)
     setInput('')
+    if (inputRef.current) {
+      inputRef.current.style.height = ''
+      inputRef.current.style.overflowY = 'hidden'
+    }
+    inputRef.current?.focus()
+  }
+
+  const handleEmojiSend = (emoji) => {
+    sendMessage(emoji)
+    setEmojiOpen(false)
     inputRef.current?.focus()
   }
 
@@ -216,29 +259,59 @@ function GroupChat() {
 
             {/* Input Area */}
             <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
-              <form onSubmit={handleSendMessage} className="flex gap-3">
-                <div className="flex-1">
-                  <textarea
-                    ref={inputRef}
-                    rows={1}
-                    value={input}
-                    onChange={e => setInput(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    placeholder={connected ? 'Message your group...' : 'Connecting to chat...'}
+              <form onSubmit={handleSendMessage} className="flex gap-3 items-end">
+                <textarea
+                  ref={inputRef}
+                  rows={1}
+                  value={input}
+                  onChange={e => {
+                    setInput(e.target.value)
+                    e.target.style.height = 'auto'
+                    const next = e.target.scrollHeight
+                    e.target.style.height = `${Math.min(next, 160)}px`
+                    e.target.style.overflowY = next > 160 ? 'auto' : 'hidden'
+                  }}
+                  onKeyDown={handleKeyDown}
+                  placeholder={connected ? 'Message your group...' : 'Connecting to chat...'}
+                  disabled={!connected}
+                  className="form-input resize-none disabled:opacity-60 disabled:cursor-not-allowed flex-1 min-w-0 h-12 !py-2.5 overflow-hidden"
+                />
+                <div className="relative flex-shrink-0 h-12" ref={emojiRef}>
+                  <button
+                    type="button"
+                    onClick={() => setEmojiOpen(p => !p)}
                     disabled={!connected}
-                    className="form-input resize-none py-3 leading-relaxed disabled:opacity-60 disabled:cursor-not-allowed"
-                    style={{ minHeight: '48px', maxHeight: '120px' }}
-                  />
+                    className="px-3 h-12 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-wsu-mist dark:hover:bg-gray-700 text-wsu-slate dark:text-gray-300 transition-all duration-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                    aria-label="Send emoji"
+                  >
+                    <EmojiPickerIcon />
+                  </button>
+                  {emojiOpen && (
+                    <div className="absolute bottom-full mb-2 right-0 flex gap-1 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-lg p-2">
+                      {QUICK_EMOJIS.map(emoji => (
+                        <button
+                          key={emoji}
+                          type="button"
+                          onClick={() => handleEmojiSend(emoji)}
+                          className="text-xl p-1.5 rounded-lg hover:bg-wsu-mist dark:hover:bg-gray-700 transition-colors"
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <button
                   type="submit"
                   disabled={!input.trim() || !connected}
-                  className="bg-blue-700 hover:bg-blue-800 text-white px-5 py-3 rounded-lg font-semibold transition-all duration-200 shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 flex-shrink-0"
+                  className="bg-blue-700 hover:bg-blue-800 text-white px-5 h-12 rounded-lg font-semibold transition-all duration-200 shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 flex-shrink-0"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                  </svg>
-                  <span className="hidden sm:inline">Send</span>
+                  <span className="flex items-center gap-2 -translate-x-1">
+                    <svg className="w-4 h-4 -rotate-45 -translate-y-px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                    <span className="hidden sm:inline leading-none">Send</span>
+                  </span>
                 </button>
               </form>
 
