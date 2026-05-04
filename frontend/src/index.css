@@ -41,16 +41,16 @@ body {
 }
 
 .card {
-  @apply bg-white rounded-2xl shadow-md p-6 hover:shadow-xl 
+  @apply bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 hover:shadow-xl
          transition-shadow duration-300;
 }
 
 .section-title {
-  @apply font-display text-3xl md:text-4xl text-wsu-navy mb-4;
+  @apply font-display text-3xl md:text-4xl text-wsu-navy dark:text-white mb-4;
 }
 
 .section-subtitle {
-  @apply text-wsu-slate text-lg max-w-2xl mx-auto;
+  @apply text-wsu-slate dark:text-gray-400 text-lg max-w-2xl mx-auto;
 }
 
 /* Badge shapes are rendered as inline SVG in BadgeIcon.jsx */
@@ -66,13 +66,15 @@ body {
 
 /* ── Form input styles ── */
 .form-input {
-  @apply w-full border border-gray-200 rounded-lg px-4 py-3 text-wsu-navy 
-         bg-white focus:outline-none focus:ring-2 focus:ring-blue-700
-         focus:border-transparent transition-all duration-200 placeholder-gray-400;
+  @apply w-full border border-gray-200 dark:border-gray-600 rounded-lg px-4 py-3
+         text-wsu-navy dark:text-white bg-white dark:bg-gray-700
+         focus:outline-none focus:ring-2 focus:ring-blue-700
+         focus:border-transparent transition-all duration-200
+         placeholder-gray-400 dark:placeholder-gray-500;
 }
 
 .form-label {
-  @apply block text-sm font-semibold text-wsu-navy mb-1;
+  @apply block text-sm font-semibold text-wsu-navy dark:text-gray-200 mb-1;
 }
 
 /* ── Scroll animation helper ── */
