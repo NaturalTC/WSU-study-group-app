@@ -41,16 +41,16 @@ body {
 }
 
 .card {
-  @apply bg-white rounded-2xl shadow-md p-6 hover:shadow-xl 
+  @apply bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 hover:shadow-xl
          transition-shadow duration-300;
 }
 
 .section-title {
-  @apply font-display text-3xl md:text-4xl text-wsu-navy mb-4;
+  @apply font-display text-3xl md:text-4xl text-wsu-navy dark:text-white mb-4;
 }
 
 .section-subtitle {
-  @apply text-wsu-slate text-lg max-w-2xl mx-auto;
+  @apply text-wsu-slate dark:text-gray-400 text-lg max-w-2xl mx-auto;
 }
 
 /* Badge shapes are rendered as inline SVG in BadgeIcon.jsx */

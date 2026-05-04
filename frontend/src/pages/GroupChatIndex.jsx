@@ -2,10 +2,36 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import AppHeader from '../components/AppHeader'
 import api from '../api/axios'
+import campusPhoto from '../assets/WSUCampusStock2013_063-L.jpg'
+
+function getCourseGradient(courseCode) {
+  const prefix = (courseCode ?? '').split(' ')[0].toUpperCase()
+  if (prefix.startsWith('CAIS') || prefix.startsWith('CIS') || prefix.startsWith('CS'))
+    return 'from-blue-500 to-indigo-700'
+  if (prefix.startsWith('MATH') || prefix.startsWith('STAT'))
+    return 'from-violet-500 to-purple-700'
+  if (prefix.startsWith('BIOL') || prefix.startsWith('CHEM') || prefix.startsWith('PHYS') || prefix.startsWith('ENVS'))
+    return 'from-emerald-500 to-teal-700'
+  if (prefix.startsWith('PSYC') || prefix.startsWith('SOCI') || prefix.startsWith('ANTH'))
+    return 'from-orange-500 to-amber-600'
+  if (prefix.startsWith('HIST') || prefix.startsWith('ENGL') || prefix.startsWith('PHIL') || prefix.startsWith('LITR'))
+    return 'from-rose-500 to-red-700'
+  if (prefix.startsWith('BUSN') || prefix.startsWith('ACCT') || prefix.startsWith('MGMT') || prefix.startsWith('MKTG'))
+    return 'from-cyan-600 to-blue-700'
+  if (prefix.startsWith('NURS') || prefix.startsWith('HLTH'))
+    return 'from-teal-500 to-cyan-600'
+  if (prefix.startsWith('CRJU') || prefix.startsWith('POLI'))
+    return 'from-slate-500 to-gray-700'
+  if (prefix.startsWith('COMM') || prefix.startsWith('JOUR'))
+    return 'from-pink-500 to-rose-600'
+  if (prefix.startsWith('EDUC'))
+    return 'from-amber-500 to-yellow-600'
+  return 'from-wsu-navy to-blue-900'
+}
 
 export default function GroupChatIndex() {
-    const [groups, setGroups]     = useState([])
-    const [loading, setLoading]   = useState(true)
+    const [groups, setGroups]   = useState([])
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         api.get('/groups/my')
@@ -15,15 +41,18 @@ export default function GroupChatIndex() {
     }, [])
 
     return (
-        <div className="flex flex-col min-h-screen bg-wsu-chalk dark:bg-gray-900 transition-colors duration-300">
+        <div
+            className="flex flex-col min-h-screen bg-cover bg-center bg-fixed transition-colors duration-300"
+            style={{ backgroundImage: `url(${campusPhoto})` }}
+        >
             <AppHeader />
 
             <main className="flex-1 pt-24 pb-12">
                 <div className="max-w-2xl mx-auto px-6">
 
                     <div className="mb-8">
-                        <h1 className="font-display text-3xl md:text-4xl text-wsu-navy dark:text-white font-bold leading-tight">Group Chats</h1>
-                        <p className="text-wsu-slate dark:text-gray-400 text-sm mt-1">Select a group to open its chat.</p>
+                        <h1 className="font-display text-3xl md:text-4xl text-white font-bold leading-tight drop-shadow-md">Group Chats</h1>
+                        <p className="text-white/80 text-sm mt-1 drop-shadow">Select a group to open its chat.</p>
                     </div>
 
                     {loading ? (
@@ -54,8 +83,8 @@ export default function GroupChatIndex() {
                                     to={`/group-chat/${group.id}`}
                                     className="flex items-center gap-4 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm px-5 py-4 hover:shadow-md hover:border-blue-100 dark:hover:border-blue-800 transition-all duration-200 group"
                                 >
-                                    {/* Icon */}
-                                    <div className="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-700 dark:text-blue-400 font-display font-bold text-base flex-shrink-0">
+                                    {/* Gradient icon */}
+                                    <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${getCourseGradient(group.course?.courseCode)} flex items-center justify-center text-white font-display font-bold text-base flex-shrink-0 shadow-sm`}>
                                         {group.course?.courseCode?.split(' ')[0]?.charAt(0) ?? 'G'}
                                     </div>
 

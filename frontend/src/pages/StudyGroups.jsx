@@ -104,10 +104,10 @@ function StudyGroups() {
     >
       <AppHeader />
 
-      <main className="flex-1 pt-20 pb-16">
+      <main className="flex-1 pt-16 pb-16">
 
         {/* ── Hero Banner ── */}
-        <div className="relative bg-gradient-to-br from-wsu-navy/90 via-blue-900/90 to-blue-800/90 text-white overflow-hidden">
+        <div className="relative bg-gradient-to-br from-wsu-navy/75 via-blue-900/75 to-blue-800/75 text-white overflow-hidden">
           <div className="relative max-w-5xl mx-auto px-6 py-16">
             <div className="flex flex-col md:flex-row items-end justify-between gap-6">
               <div>

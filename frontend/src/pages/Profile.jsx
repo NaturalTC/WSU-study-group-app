@@ -88,7 +88,7 @@ function Profile() {
         <div className="flex flex-col min-h-screen bg-wsu-chalk dark:bg-gray-900 transition-colors duration-300">
             <AppHeader />
 
-            <main className="flex-1 pt-20">
+            <main className="flex-1 pt-16">
 
                 {/* ── Profile Banner ── */}
                 <div className="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">

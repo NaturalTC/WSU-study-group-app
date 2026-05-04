@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import AppHeader from '../components/AppHeader'
 import { useAuth } from '../context/AuthContext'
 import api from '../api/axios'
-import campusPhoto from '../assets/CampusGreenGlobeFall2016_11-X2.jpg'
+import campusPhoto from '../assets/DroneShow_Sept2025-63-X4.jpg'
 
 const RANK_LABELS = [
   { min: 0,    label: 'Hatchling',     color: 'text-gray-500   dark:text-gray-400',   bg: 'bg-gray-100   dark:bg-gray-700' },
@@ -59,15 +59,17 @@ function Leaderboard() {
   const topThree = leaders.slice(0, 3)
 
   return (
-    <div className="flex flex-col min-h-screen bg-wsu-chalk dark:bg-gray-900 transition-colors duration-300">
+    <div
+      className="flex flex-col min-h-screen bg-cover bg-center bg-fixed transition-colors duration-300"
+      style={{ backgroundImage: `url(${campusPhoto})` }}
+    >
       <AppHeader />
 
-      <main className="flex-1 pt-20">
+      <main className="flex-1 pt-16">
 
         {/* ── Hero Banner ── */}
-        <div className="relative bg-gradient-to-br from-wsu-navy via-blue-900 to-blue-800 text-white overflow-hidden">
-          <div className="absolute inset-0 bg-cover bg-top opacity-40" style={{ backgroundImage: `url(${campusPhoto})` }} />
-          <div className="relative max-w-5xl mx-auto px-6 py-16">
+        <div className="bg-gradient-to-br from-wsu-navy/75 via-blue-900/75 to-blue-800/75 text-white">
+          <div className="max-w-5xl mx-auto px-6 py-16">
             <div className="flex flex-col md:flex-row items-end justify-between gap-6">
               <div>
                 <h1 className="font-display text-3xl md:text-4xl font-bold leading-tight">
