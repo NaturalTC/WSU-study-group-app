@@ -77,15 +77,16 @@ const SHAPES = {
   },
 }
 
-// Colors match leaderboard rank tiers exactly:
-// 1=Hatchling(gray) 2=Fledgling(green) 3=NightOwl(blue) 4=NestGuardian(purple) 5=WiseOwl(gold)
-// Face is white→tinted-edge gradient so numerals stay readable on a bright background.
+// Badge tier colors — independent achievement progression, not tied to leaderboard ranks.
+// 1=Bronze · 2=Silver · 3=Gold · 4=Emerald · 5=Amethyst
+// Badge tier colors — independent achievement progression, not tied to leaderboard ranks.
+// 1=Bronze · 2=Silver · 3=Gold · 4=Emerald · 5=Amethyst
 const TIER_COLORS = {
-  1: { frameLight: '#e2e8f0', frameMid: '#94a3b8', frameDark: '#475569', faceCenter: '#f8fafc', faceEdge: '#e2e8f0', numColor: '#334155' },
-  2: { frameLight: '#bbf7d0', frameMid: '#4ade80', frameDark: '#15803d', faceCenter: '#f0fdf4', faceEdge: '#bbf7d0', numColor: '#14532d' },
-  3: { frameLight: '#bfdbfe', frameMid: '#60a5fa', frameDark: '#1d4ed8', faceCenter: '#eff6ff', faceEdge: '#bfdbfe', numColor: '#1e3a8a' },
-  4: { frameLight: '#e9d5ff', frameMid: '#c084fc', frameDark: '#7e22ce', faceCenter: '#faf5ff', faceEdge: '#e9d5ff', numColor: '#581c87' },
-  5: { frameLight: '#fef08a', frameMid: '#fbbf24', frameDark: '#b45309', faceCenter: '#fffbeb', faceEdge: '#fef08a', numColor: '#92400e' },
+  1: { frameLight: '#f5a44c', frameMid: '#d4641a', frameDark: '#8b3a08', faceCenter: '#fff5e8', faceEdge: '#ffd4a0', numColor: '#7a2e06' },
+  2: { frameLight: '#d0e4f8', frameMid: '#7898c0', frameDark: '#3a5878', faceCenter: '#f0f6ff', faceEdge: '#b8d0ec', numColor: '#2e4868' },
+  3: { frameLight: '#ffe040', frameMid: '#f0aa00', frameDark: '#a07000', faceCenter: '#fffce0', faceEdge: '#ffe880', numColor: '#785000' },
+  4: { frameLight: '#3aeaa0', frameMid: '#00b860', frameDark: '#006838', faceCenter: '#e8ffee', faceEdge: '#80ffb8', numColor: '#005030' },
+  5: { frameLight: '#cc66ff', frameMid: '#9900ee', frameDark: '#5a0090', faceCenter: '#f8e8ff', faceEdge: '#e0a0ff', numColor: '#6600a0' },
 }
 
 const SIZE_CLASSES = { sm: 'w-8 h-8', md: 'w-10 h-10', lg: 'w-14 h-14' }

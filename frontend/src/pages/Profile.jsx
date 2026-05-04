@@ -155,16 +155,29 @@ function Profile() {
                             </div>
                             <div className="w-px self-stretch bg-gray-100 dark:bg-gray-700" />
                             <div>
-                                <div className="h-8 flex items-end">
-                                    <button
-                                        onClick={() => setShowBadgesModal(true)}
-                                        disabled={badges.length === 0}
-                                        className="text-3xl leading-none font-display font-bold text-wsu-navy dark:text-white hover:text-blue-700 dark:hover:text-blue-400 transition-colors disabled:hover:text-wsu-navy disabled:cursor-default"
-                                    >
-                                        {badges.length}
-                                    </button>
+                                <div className="h-8 flex items-center">
+                                    {badges.length === 0 ? (
+                                        <p className="text-3xl leading-none font-display font-bold text-wsu-slate dark:text-gray-500">—</p>
+                                    ) : (
+                                        <div
+                                            className="flex items-center -space-x-3 cursor-pointer"
+                                            onClick={() => setShowBadgesModal(true)}
+                                        >
+                                            {[...topBadges].reverse().map((badge, i) => (
+                                                <div key={badge.id} className="relative" style={{ zIndex: i }}>
+                                                    <BadgeIcon badge={badge} size="sm" />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
-                                <p className="text-xs text-wsu-slate dark:text-gray-400 mt-1">Badges</p>
+                                <button
+                                    onClick={() => setShowBadgesModal(true)}
+                                    disabled={badges.length === 0}
+                                    className="text-xs text-wsu-slate dark:text-gray-400 mt-1 hover:text-blue-700 dark:hover:text-blue-400 hover:underline transition-colors disabled:cursor-default disabled:no-underline"
+                                >
+                                    Badges
+                                </button>
                             </div>
                         </div>
                     </div>
