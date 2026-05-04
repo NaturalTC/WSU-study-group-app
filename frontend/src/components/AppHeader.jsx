@@ -71,7 +71,7 @@ function AppHeader() {
 
     const navLinks = [
         { label: 'Study Groups', to: '/study-groups' },
-        { label: 'Group Chat',   to: '/group-chat'   },
+        { label: 'Group Chats',  to: '/group-chat'   },
         { label: 'Leaderboard',  to: '/leaderboard'  },
     ]
 
