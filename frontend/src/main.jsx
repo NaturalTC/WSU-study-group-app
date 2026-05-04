@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { EventsProvider } from './context/EventsContext'
+import { BadgesProvider } from './context/BadgesContext'
 import './index.css'
 import App from './App.jsx'
 
@@ -13,7 +14,9 @@ createRoot(document.getElementById('root')).render(
       <ThemeProvider>
         <AuthProvider>
           <EventsProvider>
-            <App />
+            <BadgesProvider>
+              <App />
+            </BadgesProvider>
           </EventsProvider>
         </AuthProvider>
       </ThemeProvider>

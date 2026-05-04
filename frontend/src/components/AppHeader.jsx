@@ -35,8 +35,8 @@ function formatEventDate(isoStr) {
 }
 
 function AppHeader() {
-    const { profile, logout }    = useAuth()
-    const { theme, toggleTheme } = useTheme()
+    const { profile, logout }          = useAuth()
+    const { theme, toggleTheme }       = useTheme()
     const { getUpcoming, removeEvent } = useEvents()
     const location  = useLocation()
     const navigate  = useNavigate()

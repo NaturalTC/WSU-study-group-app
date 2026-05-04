@@ -53,6 +53,8 @@ body {
   @apply text-wsu-slate text-lg max-w-2xl mx-auto;
 }
 
+/* Badge shapes are rendered as inline SVG in BadgeIcon.jsx */
+
 /* ── Form input styles ── */
 .form-input {
   @apply w-full border border-gray-200 rounded-lg px-4 py-3 text-wsu-navy 
