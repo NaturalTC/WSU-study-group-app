@@ -29,8 +29,7 @@ function Leaderboard() {
   const { profile } = useAuth()
   const [leaders, setLeaders]   = useState([])
   const [loading, setLoading]   = useState(true)
-  const [error, setError]       = useState('')
-  const [tab, setTab]           = useState('allTime') // allTime | weekly
+  const [tab, setTab]           = useState('allTime') // allTime | weekly — weekly pending backend
 
   const MOCK_LEADERS = [
     { id: 'u1', name: 'Sarah K.',     major: 'Computer Science', points: 1520 },
@@ -46,7 +45,6 @@ function Leaderboard() {
 
   useEffect(() => {
     setLoading(true)
-    setError('')
     api.get('/leaderboard')
       .then(res => setLeaders(Array.isArray(res.data) ? res.data : res.data?.leaderboard ?? []))
       .catch(() => setLeaders(MOCK_LEADERS))
@@ -122,15 +120,7 @@ function Leaderboard() {
               </div>
             )}
 
-            {error && (
-              <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm px-6 py-14 text-center">
-                <div className="text-4xl mb-3">🦉</div>
-                <p className="text-wsu-navy dark:text-white font-semibold">{error}</p>
-                <p className="text-wsu-slate dark:text-gray-400 text-sm mt-1">Keep studying to earn points!</p>
-              </div>
-            )}
-
-            {!loading && !error && leaders.length === 0 && (
+            {!loading && leaders.length === 0 && (
               <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm px-6 py-14 text-center">
                 <div className="text-4xl mb-3">🏆</div>
                 <p className="text-wsu-navy dark:text-white font-semibold">No rankings yet</p>
@@ -138,7 +128,7 @@ function Leaderboard() {
               </div>
             )}
 
-            {!loading && !error && leaders.length > 0 && (
+            {!loading && leaders.length > 0 && (
               <>
                 {/* Top 3 podium cards */}
                 <div className="grid grid-cols-3 gap-3 mb-4">
