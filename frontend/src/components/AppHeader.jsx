@@ -57,7 +57,7 @@ function AppHeader() {
     const { theme, toggleTheme }                       = useTheme()
     const { getUpcoming, removeEvent }                 = useEvents()
     const { addToast }                                 = useToast()
-    const { notifications, unreadCount, markAllAsRead } = useNotifications()
+    const { notifications, unreadCount, markAllAsRead, clearAll } = useNotifications()
 
     const handleThemeToggle = () => {
         toggleTheme()
@@ -203,6 +203,18 @@ function AppHeader() {
                                 </div>
 
                                 {/* Notifications tab */}
+                                {bellTab === 'notifications' && (
+                                    notifications.length > 0 && (
+                                        <div className="flex justify-end px-4 py-1.5 border-b border-gray-100 dark:border-gray-700">
+                                            <button
+                                                onClick={clearAll}
+                                                className="text-xs text-red-500 hover:text-red-600 dark:hover:text-red-400 font-medium transition-colors px-2 py-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
+                                            >
+                                                Clear all
+                                            </button>
+                                        </div>
+                                    )
+                                )}
                                 {bellTab === 'notifications' && (
                                     notifications.length === 0 ? (
                                         <div className="px-4 py-8 text-center">

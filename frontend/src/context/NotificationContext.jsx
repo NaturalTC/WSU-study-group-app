@@ -45,8 +45,16 @@ export function NotificationProvider({ children }) {
     } catch {}
   }
 
+  const clearAll = async () => {
+    try {
+      await api.delete('/notifications')
+      setNotifications([])
+      setUnreadCount(0)
+    } catch {}
+  }
+
   return (
-    <NotificationContext.Provider value={{ notifications, unreadCount, markAsRead, markAllAsRead, refresh: fetchNotifications }}>
+    <NotificationContext.Provider value={{ notifications, unreadCount, markAsRead, markAllAsRead, clearAll, refresh: fetchNotifications }}>
       {children}
     </NotificationContext.Provider>
   )

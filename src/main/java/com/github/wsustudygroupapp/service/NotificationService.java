@@ -14,6 +14,7 @@ import com.github.wsustudygroupapp.repository.ProfileRepository;
 import com.github.wsustudygroupapp.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -65,6 +66,13 @@ public class NotificationService {
 
         notification.setRead(true);
         notificationRepository.save(notification);
+    }
+
+    /** Deletes all notifications for the logged-in student. */
+    @Transactional
+    public void clearAll(String email) {
+        Profile profile = currentProfile(email);
+        notificationRepository.deleteByRecipientId(profile.getId());
     }
 
     /** Marks all of a student's unread notifications as read. */
