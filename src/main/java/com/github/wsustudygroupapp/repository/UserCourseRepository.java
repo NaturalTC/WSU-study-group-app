@@ -42,4 +42,22 @@ public interface UserCourseRepository extends JpaRepository<UserCourse, Long> {
         @Param("semester") String semester,
         @Param("profileId") Long profileId
     );
+
+    /**
+     * Returns all enrollments for a course, excluding the requesting student.
+     * Section and semester filters are optional — passing null omits that condition.
+     */
+    @Query("""
+        SELECT uc FROM UserCourse uc
+        WHERE uc.course.id = :courseId
+        AND uc.profile.id != :profileId
+        AND (:section IS NULL OR uc.section = :section)
+        AND (:semester IS NULL OR uc.semester = :semester)
+    """)
+    List<UserCourse> findCourseEnrollments(
+        @Param("courseId") Long courseId,
+        @Param("profileId") Long profileId,
+        @Param("section") String section,
+        @Param("semester") String semester
+    );
 }

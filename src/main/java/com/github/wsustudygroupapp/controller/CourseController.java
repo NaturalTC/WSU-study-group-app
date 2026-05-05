@@ -61,13 +61,14 @@ public class CourseController {
         return ResponseEntity.noContent().build();
     }
 
-    // DONE: extract the logged-in user's profile ID
-    // DONE: call courseService.getClassmates(userCourseId, profileId)
-    // DONE: return 200 with the list of classmates
-    @GetMapping("/{userCourseId}/classmates")
-    public ResponseEntity<List<UserCourse>> getClassmates(Authentication authentication,
-                                                           @PathVariable Long userCourseId) {
-        return ResponseEntity.ok(courseService.getClassmates(userCourseId, authentication.getName()));
+    // all students in a course excluding yourself, with optional filters: GET /courses/{courseId}/students?section=001&semester=Fall+2026
+    @GetMapping("/{courseId}/students")
+    public ResponseEntity<List<UserCourse>> getEnrolledStudents(
+            Authentication authentication,
+            @PathVariable Long courseId,
+            @RequestParam(required = false) String section,
+            @RequestParam(required = false) String semester) {
+        return ResponseEntity.ok(courseService.getEnrolledStudents(courseId, section, semester, authentication.getName()));
     }
 
     // Search courses by keyword: GET /courses/search?q=biology

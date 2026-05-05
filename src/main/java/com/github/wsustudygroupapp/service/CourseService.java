@@ -87,19 +87,18 @@ public class CourseService {
         userCourseRepository.delete(enrollment);
     }
 
-    // DONE: find the UserCourse by ID to get courseId, section, semester
-    // DONE: call userCourseRepository.findClassmates(courseId, section, semester, profileId)
-    // DONE: return the list
-    public List<UserCourse> getClassmates(Long userCourseId, String email) {
+    /** Returns all students enrolled in a course excluding the requester, optionally filtered by section and/or semester. */
+    public List<UserCourse> getEnrolledStudents(Long courseId, String section, String semester, String email) {
+        if (!courseRepository.existsById(courseId)) {
+            throw new ResourceNotFoundException("Course not found: " + courseId);
+        }
         Profile profile = resolveProfile(email);
-        UserCourse enrollment = userCourseRepository.findById(userCourseId)
-                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found: " + userCourseId));
-        // find all students in the same course, section, and semester (excluding the requester)
-        return userCourseRepository.findClassmates(
-                enrollment.getCourse().getId(),
-                enrollment.getSection(),
-                enrollment.getSemester(),
-                profile.getId());
+        return userCourseRepository.findCourseEnrollments(
+                courseId,
+                profile.getId(),
+                (section != null && section.isBlank()) ? null : section,
+                (semester != null && semester.isBlank()) ? null : semester
+        );
     }
 
     // Plan C — search courses by keyword (e.g. "biology"), used for the frontend search bar

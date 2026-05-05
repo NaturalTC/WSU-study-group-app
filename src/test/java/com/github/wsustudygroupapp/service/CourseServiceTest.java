@@ -255,48 +255,67 @@ class CourseServiceTest {
         verify(userCourseRepository, times(1)).delete(mockEnrollment);
     }
 
-    // ── getClassmates ──────────────────────────────────────────────────────────
+    // ── getEnrolledStudents ────────────────────────────────────────────────────
 
     @Test
-    void getClassmates_enrollmentNotFound_throwsResourceNotFoundException() {
-        stubResolveProfile();
-        when(userCourseRepository.findById(100L)).thenReturn(Optional.empty());
+    void getEnrolledStudents_courseNotFound_throwsResourceNotFoundException() {
+        when(courseRepository.existsById(99L)).thenReturn(false);
         assertThrows(ResourceNotFoundException.class,
-                () -> courseService.getClassmates(100L, EMAIL));
+                () -> courseService.getEnrolledStudents(99L, null, null, EMAIL));
     }
 
     @Test
-    void getClassmates_queriesRepoWithCorrectCourseAndSectionAndSemester() {
+    void getEnrolledStudents_noFilters_returnsAllStudentsExcludingSelf() {
         stubResolveProfile();
-        when(userCourseRepository.findById(100L)).thenReturn(Optional.of(mockEnrollment));
-        when(userCourseRepository.findClassmates(10L, "001", "Fall 2026", 1L))
-                .thenReturn(List.of());
+        when(courseRepository.existsById(10L)).thenReturn(true);
+        when(userCourseRepository.findCourseEnrollments(10L, 1L, null, null)).thenReturn(List.of());
 
-        courseService.getClassmates(100L, EMAIL);
+        courseService.getEnrolledStudents(10L, null, null, EMAIL);
 
-        // verify the correct values are passed to the matching query
-        verify(userCourseRepository).findClassmates(10L, "001", "Fall 2026", 1L);
+        verify(userCourseRepository).findCourseEnrollments(10L, 1L, null, null);
     }
 
     @Test
-    void getClassmates_returnsClassmatesFromRepo() {
+    void getEnrolledStudents_withSectionFilter_passesSectionToRepo() {
         stubResolveProfile();
-        UserCourse classmate = new UserCourse();
-        when(userCourseRepository.findById(100L)).thenReturn(Optional.of(mockEnrollment));
-        when(userCourseRepository.findClassmates(10L, "001", "Fall 2026", 1L))
-                .thenReturn(List.of(classmate));
+        when(courseRepository.existsById(10L)).thenReturn(true);
+        when(userCourseRepository.findCourseEnrollments(10L, 1L, "001", null)).thenReturn(List.of());
 
-        assertEquals(1, courseService.getClassmates(100L, EMAIL).size());
+        courseService.getEnrolledStudents(10L, "001", null, EMAIL);
+
+        verify(userCourseRepository).findCourseEnrollments(10L, 1L, "001", null);
     }
 
     @Test
-    void getClassmates_noMatchingStudents_returnsEmptyList() {
+    void getEnrolledStudents_withSemesterFilter_passesSemesterToRepo() {
         stubResolveProfile();
-        when(userCourseRepository.findById(100L)).thenReturn(Optional.of(mockEnrollment));
-        when(userCourseRepository.findClassmates(10L, "001", "Fall 2026", 1L))
-                .thenReturn(List.of());
+        when(courseRepository.existsById(10L)).thenReturn(true);
+        when(userCourseRepository.findCourseEnrollments(10L, 1L, null, "Fall 2026")).thenReturn(List.of());
 
-        assertTrue(courseService.getClassmates(100L, EMAIL).isEmpty());
+        courseService.getEnrolledStudents(10L, null, "Fall 2026", EMAIL);
+
+        verify(userCourseRepository).findCourseEnrollments(10L, 1L, null, "Fall 2026");
+    }
+
+    @Test
+    void getEnrolledStudents_blankSection_treatedAsNull() {
+        stubResolveProfile();
+        when(courseRepository.existsById(10L)).thenReturn(true);
+        when(userCourseRepository.findCourseEnrollments(10L, 1L, null, null)).thenReturn(List.of());
+
+        courseService.getEnrolledStudents(10L, "   ", null, EMAIL);
+
+        verify(userCourseRepository).findCourseEnrollments(10L, 1L, null, null);
+    }
+
+    @Test
+    void getEnrolledStudents_returnsStudentsFromRepo() {
+        stubResolveProfile();
+        when(courseRepository.existsById(10L)).thenReturn(true);
+        UserCourse other = new UserCourse();
+        when(userCourseRepository.findCourseEnrollments(10L, 1L, null, null)).thenReturn(List.of(other));
+
+        assertEquals(1, courseService.getEnrolledStudents(10L, null, null, EMAIL).size());
     }
 
     // ── searchCourses ──────────────────────────────────────────────────────────

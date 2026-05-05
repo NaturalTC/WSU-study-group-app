@@ -17,4 +17,5 @@ public interface ProfileRepository extends JpaRepository<Profile, Long> {
     Optional<Profile> findByUserId(Long userId);
     Optional<Profile> findByName(String name);
     Optional<Profile> findByUserEmail(String email);
+
 }
