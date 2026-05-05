@@ -85,15 +85,15 @@ function Profile() {
     })()
 
     return (
-        <div className="flex flex-col min-h-screen bg-wsu-chalk dark:bg-gray-950 transition-colors duration-300">
+        <div className="flex flex-col min-h-screen bg-wsu-chalk dark:bg-gray-900 transition-colors duration-300">
             <AppHeader />
 
-            <main className="flex-1 pt-20">
+            <main className="flex-1 pt-16">
 
                 {/* ── Profile Banner ── */}
-                <div className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
+                <div className="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
                     <div className="max-w-4xl mx-auto px-6 py-8">
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+                        <div className="flex flex-col sm:flex-row items-start gap-6">
 
                             {/* Avatar */}
                             <div className="w-20 h-20 rounded-2xl bg-blue-700 flex items-center justify-center text-white font-display text-3xl font-bold shadow-md flex-shrink-0">
@@ -106,30 +106,27 @@ function Profile() {
                                     {profile?.name}
                                 </h1>
                                 <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                                    {profile?.major && (
+                                        <span className="text-sm text-wsu-slate dark:text-gray-300">{profile.major}</span>
+                                    )}
                                     {profile?.year && (
-                                        <span className="text-xs font-semibold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full">
+                                        <span className="text-xs font-semibold bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2.5 py-1 rounded-full">
                                             {profile.year}
                                         </span>
                                     )}
-                                    {profile?.major && (
-                                        <span className="text-sm text-wsu-slate">{profile.major}</span>
-                                    )}
                                 </div>
                                 {profile?.bio && (
-                                    <p className="text-sm text-wsu-slate mt-2 leading-relaxed max-w-lg">
+                                    <p className="text-sm text-wsu-slate dark:text-gray-300 mt-2 leading-relaxed max-w-lg">
                                         {profile.bio}
                                     </p>
                                 )}
                             </div>
 
-                            {/* Edit button */}
+                            {/* Edit link */}
                             <button
                                 onClick={openEdit}
-                                className="flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-xl border border-gray-200 text-wsu-navy hover:bg-wsu-mist hover:border-blue-200 transition-all duration-200 flex-shrink-0"
+                                className="text-sm font-semibold text-blue-700 dark:text-blue-400 hover:underline transition-colors flex-shrink-0"
                             >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 11l6-6 3 3-6 6H9v-3z" />
-                                </svg>
                                 Edit Profile
                             </button>
                         </div>
@@ -197,14 +194,14 @@ function Profile() {
                             <div className="animate-spin w-6 h-6 border-4 border-blue-700 border-t-transparent rounded-full" />
                         </div>
                     ) : groups.length === 0 ? (
-                        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-6 py-14 text-center">
-                            <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                                <svg className="w-6 h-6 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm px-6 py-14 text-center">
+                            <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                                <svg className="w-6 h-6 text-blue-700 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
                             </div>
-                            <p className="text-wsu-navy font-semibold mb-1">No study groups yet</p>
-                            <p className="text-wsu-slate text-sm mb-5">Join a group for your courses to start collaborating.</p>
+                            <p className="text-wsu-navy dark:text-white font-semibold mb-1">No study groups yet</p>
+                            <p className="text-wsu-slate dark:text-gray-400 text-sm mb-5">Join a group for your courses to start collaborating.</p>
                             <Link
                                 to="/study-groups"
                                 className="inline-flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-all duration-200"
@@ -215,29 +212,29 @@ function Profile() {
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             {groups.map(group => (
-                                <div key={group.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col gap-3 hover:shadow-md transition-shadow duration-200">
+                                <div key={group.id} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5 flex flex-col gap-3 hover:shadow-md transition-shadow duration-200">
                                     <div className="flex items-start justify-between gap-2">
-                                        <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-700 font-display font-bold text-sm flex-shrink-0">
+                                        <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-700 dark:text-blue-400 font-display font-bold text-sm flex-shrink-0">
                                             {group.course?.courseCode?.split(' ')[0]?.charAt(0) ?? 'G'}
                                         </div>
-                                        <span className="text-xs font-semibold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full">
+                                        <span className="text-xs font-semibold bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2.5 py-1 rounded-full">
                                             {group.course?.courseCode}
                                         </span>
                                     </div>
                                     <div>
-                                        <p className="font-semibold text-wsu-navy text-sm leading-snug">{group.name}</p>
-                                        <p className="text-xs text-wsu-slate mt-0.5">{group.course?.courseName}</p>
+                                        <p className="font-semibold text-wsu-navy dark:text-white text-sm leading-snug">{group.name}</p>
+                                        <p className="text-xs text-wsu-slate dark:text-gray-400 mt-0.5">{group.course?.courseName}</p>
                                     </div>
-                                    <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-50">
+                                    <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-50 dark:border-gray-700">
                                         <div className="flex items-center gap-1.5">
                                             <div className="flex -space-x-1.5">
                                                 {(group.members ?? []).slice(0, 3).map((m, i) => (
-                                                    <div key={i} className="w-6 h-6 rounded-full bg-wsu-navy text-white text-xs flex items-center justify-center border-2 border-white font-semibold">
+                                                    <div key={i} className="w-6 h-6 rounded-full bg-wsu-navy dark:bg-blue-800 text-white text-xs flex items-center justify-center border-2 border-white dark:border-gray-800 font-semibold">
                                                         {m.name?.charAt(0) ?? '?'}
                                                     </div>
                                                 ))}
                                             </div>
-                                            <span className="text-xs text-wsu-slate">{group.members?.length ?? 0} members</span>
+                                            <span className="text-xs text-wsu-slate dark:text-gray-400">{group.members?.length ?? 0} members</span>
                                         </div>
                                         <Link
                                             to={`/group-chat/${group.id}`}
@@ -256,7 +253,7 @@ function Profile() {
             {/* ── All Badges Modal ── */}
             {showBadgesModal && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-6 backdrop-blur-sm">
-                    <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] flex flex-col animate-fade-up">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] flex flex-col animate-fade-up">
 
                         {/* Header */}
                         <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-gray-100 dark:border-gray-700 flex-shrink-0">
@@ -312,7 +309,7 @@ function Profile() {
             {/* ── Edit Profile Modal ── */}
             {editOpen && (
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center sm:px-6 backdrop-blur-sm">
-                    <div className="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl shadow-2xl animate-fade-up">
+                    <div className="bg-white dark:bg-gray-800 w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl shadow-2xl animate-fade-up">
 
                         <div className="flex justify-center pt-3 pb-1 sm:hidden">
                             <div className="w-10 h-1 bg-gray-200 rounded-full" />
@@ -320,7 +317,7 @@ function Profile() {
 
                         <div className="px-6 pt-4 pb-6">
                             <div className="flex items-center justify-between mb-6">
-                                <h2 className="font-display text-xl text-wsu-navy">Edit Profile</h2>
+                                <h2 className="font-display text-xl text-wsu-navy dark:text-white">Edit Profile</h2>
                                 <button
                                     onClick={() => setEditOpen(false)}
                                     className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-wsu-mist text-wsu-slate text-xl leading-none transition-colors"

@@ -2,6 +2,7 @@ package com.github.wsustudygroupapp.service;
 
 import com.github.wsustudygroupapp.dto.NotificationResponse;
 import com.github.wsustudygroupapp.exception.ResourceNotFoundException;
+import com.github.wsustudygroupapp.model.Badge;
 import com.github.wsustudygroupapp.model.MeetingSession;
 import com.github.wsustudygroupapp.model.Notification;
 import com.github.wsustudygroupapp.model.Notification.NotificationType;
@@ -95,14 +96,41 @@ public class NotificationService {
         notificationRepository.saveAll(notifications);
     }
 
+    /** Notifies the recipient that they earned a badge. */
+    public void notifyBadgeEarned(Profile recipient, Badge badge) {
+        saveNotification(recipient, "You earned the '" + badge.getName() + "' badge!",
+                NotificationType.BADGE_EARNED, badge.getId());
+    }
+
+    /** Notifies all existing group members (except the joiner) that someone new joined. */
+    public void notifyMemberJoined(StudyGroup group, Profile joiner) {
+        notifyGroupMembers(group, joiner.getName() + " joined " + group.getName(),
+                NotificationType.MEMBER_JOINED, group.getId(), joiner.getId());
+        saveNotification(joiner, "You joined " + group.getName(),
+                NotificationType.MEMBER_JOINED, group.getId());
+    }
+
     /** Notifies all group members (except the scheduler) that a new session was scheduled. */
     public void notifySessionScheduled(MeetingSession session) {
         Profile scheduler = session.getScheduledBy();
         StudyGroup group = session.getStudyGroup();
-        String message = scheduler.getName() + " scheduled a session for "
+        String othersMessage = scheduler.getName() + " scheduled a session for "
                 + group.getName() + " on " + session.getScheduledAt().toLocalDate();
-        notifyGroupMembers(group, message, NotificationType.SESSION_SCHEDULED,
+        notifyGroupMembers(group, othersMessage, NotificationType.SESSION_SCHEDULED,
                 session.getId(), scheduler.getId());
+        saveNotification(scheduler, "You scheduled a session for "
+                + group.getName() + " on " + session.getScheduledAt().toLocalDate(),
+                NotificationType.SESSION_SCHEDULED, session.getId());
+    }
+
+    private void saveNotification(Profile recipient, String message, NotificationType type, Long relatedEntityId) {
+        Notification n = new Notification();
+        n.setRecipient(recipient);
+        n.setMessage(message);
+        n.setType(type);
+        n.setRelatedEntityId(relatedEntityId);
+        n.setRead(false);
+        notificationRepository.save(n);
     }
 
     private Profile currentProfile(String email) {

@@ -7,7 +7,34 @@ import ChatMessage from '../components/ChatMessage'
 import MembersSidebar from '../components/MembersSidebar'
 import ScheduleEventModal from '../components/ScheduleEventModal'
 import { useAuth } from '../context/AuthContext'
+import { useNotifications } from '../context/NotificationContext'
 import api from '../api/axios'
+import campusPhoto from '../assets/WSUCampusStock2013_063-L.jpg'
+
+function getCourseGradient(courseCode) {
+  const prefix = (courseCode ?? '').split(' ')[0].toUpperCase()
+  if (prefix.startsWith('CAIS') || prefix.startsWith('CIS') || prefix.startsWith('CS'))
+    return 'from-blue-500 to-indigo-700'
+  if (prefix.startsWith('MATH') || prefix.startsWith('STAT'))
+    return 'from-violet-500 to-purple-700'
+  if (prefix.startsWith('BIOL') || prefix.startsWith('CHEM') || prefix.startsWith('PHYS') || prefix.startsWith('ENVS'))
+    return 'from-emerald-500 to-teal-700'
+  if (prefix.startsWith('PSYC') || prefix.startsWith('SOCI') || prefix.startsWith('ANTH'))
+    return 'from-orange-500 to-amber-600'
+  if (prefix.startsWith('HIST') || prefix.startsWith('ENGL') || prefix.startsWith('PHIL') || prefix.startsWith('LITR'))
+    return 'from-rose-500 to-red-700'
+  if (prefix.startsWith('BUSN') || prefix.startsWith('ACCT') || prefix.startsWith('MGMT') || prefix.startsWith('MKTG'))
+    return 'from-cyan-600 to-blue-700'
+  if (prefix.startsWith('NURS') || prefix.startsWith('HLTH'))
+    return 'from-teal-500 to-cyan-600'
+  if (prefix.startsWith('CRJU') || prefix.startsWith('POLI'))
+    return 'from-slate-500 to-gray-700'
+  if (prefix.startsWith('COMM') || prefix.startsWith('JOUR'))
+    return 'from-pink-500 to-rose-600'
+  if (prefix.startsWith('EDUC'))
+    return 'from-amber-500 to-yellow-600'
+  return 'from-wsu-navy to-blue-900'
+}
 
 function formatTime(isoStr) {
   const d    = isoStr ? new Date(isoStr) : new Date()
@@ -40,6 +67,7 @@ function GroupChat() {
   const { groupId } = useParams()
   const parsedGroupId = parseInt(groupId)
   const { profile } = useAuth()
+  const { refresh: refreshNotifications } = useNotifications()
 
   const [group, setGroup]         = useState(null)
   const [myGroups, setMyGroups]   = useState([])
@@ -180,17 +208,20 @@ function GroupChat() {
   const memberCount  = group?.members?.length ?? 0
 
   return (
-    <div className="flex flex-col min-h-screen bg-wsu-chalk dark:bg-gray-950 transition-colors duration-300">
+    <div
+      className="flex flex-col min-h-screen bg-cover bg-center bg-fixed transition-colors duration-300"
+      style={{ backgroundImage: `url(${campusPhoto})` }}
+    >
       <AppHeader />
 
       <main className="flex-1 pt-20 pb-0 max-w-7xl mx-auto w-full px-4 md:px-6">
         <div className="flex gap-6 h-[calc(100vh-5rem)] py-4">
 
           {/* ── Chat Area ─────────────────────────────────────── */}
-          <div className="flex-1 flex flex-col bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden min-w-0">
+          <div className="flex-1 flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden min-w-0">
 
             {/* Chat Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800">
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -201,7 +232,7 @@ function GroupChat() {
                   </svg>
                 </button>
 
-                <div className="w-10 h-10 bg-blue-700 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                <div className={`w-10 h-10 bg-gradient-to-br ${getCourseGradient(courseCode)} rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0`}>
                   {courseLetter}
                 </div>
                 <div>
@@ -240,7 +271,7 @@ function GroupChat() {
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-1 bg-wsu-chalk dark:bg-gray-950">
+            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-1 bg-wsu-chalk dark:bg-gray-900">
               {loading ? (
                 <div className="flex justify-center py-12">
                   <div className="animate-spin w-6 h-6 border-4 border-blue-700 border-t-transparent rounded-full" />
@@ -258,7 +289,7 @@ function GroupChat() {
             </div>
 
             {/* Input Area */}
-            <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
+            <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800">
               <form onSubmit={handleSendMessage} className="flex gap-3 items-end">
                 <textarea
                   ref={inputRef}
@@ -340,7 +371,7 @@ function GroupChat() {
                 className="absolute inset-0 bg-black/40 backdrop-blur-sm"
                 onClick={() => setSidebarOpen(false)}
               />
-              <div className="relative ml-auto w-80 h-full bg-wsu-chalk dark:bg-gray-900 p-4 overflow-y-auto shadow-2xl animate-fade-in">
+              <div className="relative ml-auto w-80 h-full bg-wsu-chalk dark:bg-gray-800 p-4 overflow-y-auto shadow-2xl animate-fade-in">
                 <button
                   onClick={() => setSidebarOpen(false)}
                   className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-wsu-mist transition-colors text-wsu-slate"
@@ -367,7 +398,7 @@ function GroupChat() {
         <ScheduleEventModal
           groupId={parsedGroupId}
           groupName={group.name}
-          onClose={() => setScheduleOpen(false)}
+          onClose={() => { setScheduleOpen(false); refreshNotifications() }}
         />
       )}
     </div>

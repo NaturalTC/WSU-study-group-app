@@ -2,8 +2,11 @@ import { useState, useEffect } from 'react'
 import AppHeader from '../components/AppHeader'
 import StudyGroupCard from '../components/StudyGroupCard'
 import api from '../api/axios'
+import campusPhoto from '../assets/WSUCampusStock2013_033-L.jpg'
+import { useNotifications } from '../context/NotificationContext'
 
 function StudyGroups() {
+  const { refresh: refreshNotifications } = useNotifications()
   const [groups, setGroups]               = useState([])
   const [courses, setCourses]             = useState([])
   const [joinedGroupIds, setJoinedGroupIds] = useState(new Set())
@@ -56,6 +59,7 @@ function StudyGroups() {
     try {
       await api.post(`/groups/${group.id}/join`)
       setJoinedGroupIds(prev => new Set([...prev, group.id]))
+      refreshNotifications()
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to join group.')
     } finally {
@@ -97,28 +101,41 @@ function StudyGroups() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-wsu-chalk dark:bg-gray-950 transition-colors duration-300">
+    <div
+      className="flex flex-col min-h-screen bg-cover bg-center bg-fixed transition-colors duration-300"
+      style={{ backgroundImage: `url(${campusPhoto})` }}
+    >
       <AppHeader />
 
-      <main className="flex-1 pt-24 pb-16">
-        <div className="max-w-7xl mx-auto px-6">
+      <main className="flex-1 pt-16 pb-16">
 
-          {/* Page Header */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
-            <div>
-              <h1 className="font-display text-4xl text-wsu-navy dark:text-white mb-1">Study Groups</h1>
-              <p className="text-wsu-slate dark:text-gray-400">Find a group for your courses or start your own.</p>
+        {/* ── Hero Banner ── */}
+        <div className="relative bg-gradient-to-br from-wsu-navy/75 via-blue-900/75 to-blue-800/75 text-white overflow-hidden">
+          <div className="relative max-w-5xl mx-auto px-6 py-16">
+            <div className="flex flex-col md:flex-row items-end justify-between gap-6">
+              <div>
+                <h1 className="font-display text-3xl md:text-4xl font-bold leading-tight">Study Groups</h1>
+                <p className="text-blue-200 mt-1 text-sm">Find a group for your courses or start your own.</p>
+              </div>
+              <div className="bg-white/10 border border-white/20 backdrop-blur-sm rounded-2xl px-6 py-4 min-w-[200px] text-center flex-shrink-0">
+                <p className="text-xs text-blue-200 font-semibold uppercase tracking-wider mb-1">Ready to study?</p>
+                <p className="font-display text-4xl font-bold text-white">+</p>
+                <p className="text-xs mt-1 invisible">placeholder</p>
+                <button
+                  onClick={() => setShowCreateModal(true)}
+                  className="inline-block mt-2 bg-white/20 hover:bg-white/30 text-white text-xs font-semibold px-3 py-1 rounded-full transition-all duration-200"
+                >
+                  Create New Group
+                </button>
+              </div>
             </div>
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="bg-blue-700 hover:bg-blue-800 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200 shadow-md self-start md:self-auto"
-            >
-              + Create New Group
-            </button>
           </div>
+        </div>
+
+        <div className="max-w-5xl mx-auto px-6 pt-8 pb-0">
 
           {/* Search */}
-          <div className="relative mb-6">
+          <div className="relative mb-3">
             <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
@@ -133,13 +150,13 @@ function StudyGroups() {
 
           {/* Course Filter Tabs */}
           {!loading && coursesWithGroups.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-8">
+            <div className="flex flex-wrap gap-2 mb-4">
               <button
                 onClick={() => setActiveFilter('all')}
-                className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
                   activeFilter === 'all'
-                    ? 'bg-blue-700 text-white shadow'
-                    : 'bg-white dark:bg-gray-800 text-wsu-slate dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-blue-700 hover:text-blue-700'
+                    ? 'bg-blue-700 text-white shadow-sm'
+                    : 'bg-white dark:bg-gray-800 text-wsu-slate dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-wsu-mist dark:hover:bg-gray-700'
                 }`}
               >
                 All
@@ -148,10 +165,10 @@ function StudyGroups() {
                 <button
                   key={c.id}
                   onClick={() => setActiveFilter(String(c.id))}
-                  className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
+                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
                     activeFilter === String(c.id)
-                      ? 'bg-blue-700 text-white shadow'
-                      : 'bg-white dark:bg-gray-800 text-wsu-slate dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-blue-700 hover:text-blue-700'
+                      ? 'bg-blue-700 text-white shadow-sm'
+                      : 'bg-white dark:bg-gray-800 text-wsu-slate dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-wsu-mist dark:hover:bg-gray-700'
                   }`}
                 >
                   {c.courseCode}
@@ -167,8 +184,8 @@ function StudyGroups() {
             </div>
           ) : filteredGroups.length > 0 ? (
             <>
-              <p className="text-sm text-wsu-slate dark:text-gray-400 mb-6">
-                Showing <span className="font-semibold text-wsu-navy dark:text-white">{filteredGroups.length}</span> group{filteredGroups.length !== 1 ? 's' : ''}
+              <p className="text-sm text-white/80 mb-6">
+                Showing <span className="font-semibold text-white">{filteredGroups.length}</span> group{filteredGroups.length !== 1 ? 's' : ''}
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredGroups.map(group => (

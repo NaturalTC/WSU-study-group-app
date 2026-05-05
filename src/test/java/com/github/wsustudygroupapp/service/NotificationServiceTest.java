@@ -272,7 +272,6 @@ class NotificationServiceTest {
         verify(notificationRepository).saveAll(captor.capture());
 
         List<Notification> saved = captor.getValue();
-        // member1 (id=1) is excluded — only member2 and member3 should be notified
         assertEquals(2, saved.size());
         assertTrue(saved.stream().noneMatch(n -> n.getRecipient().getId().equals(1L)));
     }
