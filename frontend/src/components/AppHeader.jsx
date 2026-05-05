@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import { useEvents } from '../context/EventsContext'
 import { useToast } from '../context/ToastContext'
+import { useNotifications } from '../context/NotificationContext'
 import OwlLogo from './OwlLogo'
 
 function SunIcon() {
@@ -35,11 +36,28 @@ function formatEventDate(isoStr) {
   return d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }) + ` · ${time}`
 }
 
+function formatTimeAgo(isoStr) {
+  const diff = Date.now() - new Date(isoStr).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1)  return 'Just now'
+  if (mins < 60) return `${mins}m ago`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24)  return `${hrs}h ago`
+  return `${Math.floor(hrs / 24)}d ago`
+}
+
+const NOTIF_ICON = {
+  SESSION_SCHEDULED: '📅',
+  BADGE_EARNED:      '🏆',
+  MEMBER_JOINED:     '👋',
+}
+
 function AppHeader() {
-    const { profile, logout }          = useAuth()
-    const { theme, toggleTheme }       = useTheme()
-    const { getUpcoming, removeEvent } = useEvents()
-    const { addToast }                 = useToast()
+    const { profile, logout }                          = useAuth()
+    const { theme, toggleTheme }                       = useTheme()
+    const { getUpcoming, removeEvent }                 = useEvents()
+    const { addToast }                                 = useToast()
+    const { notifications, unreadCount, markAllAsRead, clearAll } = useNotifications()
 
     const handleThemeToggle = () => {
         toggleTheme()
@@ -56,11 +74,20 @@ function AppHeader() {
     const [mobileOpen, setMobileOpen] = useState(false)
     const [avatarOpen, setAvatarOpen] = useState(false)
     const [bellOpen,   setBellOpen]   = useState(false)
+    const [bellTab,    setBellTab]    = useState('notifications')
 
     const avatarRef = useRef(null)
     const bellRef   = useRef(null)
 
-    const upcoming = getUpcoming()
+    const upcoming   = getUpcoming()
+    const totalBadge = unreadCount + upcoming.length
+
+    const openBell = () => {
+        const willOpen = !bellOpen
+        setBellOpen(willOpen)
+        setAvatarOpen(false)
+        if (willOpen) markAllAsRead()
+    }
 
     const initials = (() => {
         const parts = (profile?.name ?? '').trim().split(' ')
@@ -131,64 +158,121 @@ function AppHeader() {
                         {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
                     </button>
 
-                    {/* Bell / Reminders */}
+                    {/* Bell / Notifications */}
                     <div className="relative" ref={bellRef}>
                         <button
-                            onClick={() => { setBellOpen(p => !p); setAvatarOpen(false) }}
+                            onClick={openBell}
                             className="relative p-2 rounded-lg text-wsu-slate dark:text-gray-300 hover:bg-wsu-mist dark:hover:bg-gray-800 transition-colors"
-                            aria-label="Upcoming events"
+                            aria-label="Notifications"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                                     d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
-                            {upcoming.length > 0 && (
+                            {totalBadge > 0 && (
                                 <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                                    {upcoming.length > 9 ? '9+' : upcoming.length}
+                                    {totalBadge > 9 ? '9+' : totalBadge}
                                 </span>
                             )}
                         </button>
 
                         {bellOpen && (
                             <div className="absolute right-0 top-11 w-80 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden animate-fade-in">
-                                <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
-                                    <p className="text-sm font-semibold text-wsu-navy dark:text-white">Upcoming Events</p>
-                                    {upcoming.length > 0 && (
-                                        <span className="text-xs text-wsu-slate dark:text-gray-400">{upcoming.length} scheduled</span>
-                                    )}
+                                {/* Tabs */}
+                                <div className="flex border-b border-gray-100 dark:border-gray-700">
+                                    <button
+                                        onClick={() => setBellTab('notifications')}
+                                        className={`flex-1 px-4 py-2.5 text-xs font-semibold transition-colors ${
+                                            bellTab === 'notifications'
+                                                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+                                                : 'text-wsu-slate dark:text-gray-400 hover:text-wsu-navy dark:hover:text-white'
+                                        }`}
+                                    >
+                                        Notifications {unreadCount > 0 && <span className="ml-1 bg-red-500 text-white text-[10px] font-bold px-1 py-0.5 rounded-full">{unreadCount}</span>}
+                                    </button>
+                                    <button
+                                        onClick={() => setBellTab('events')}
+                                        className={`flex-1 px-4 py-2.5 text-xs font-semibold transition-colors ${
+                                            bellTab === 'events'
+                                                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+                                                : 'text-wsu-slate dark:text-gray-400 hover:text-wsu-navy dark:hover:text-white'
+                                        }`}
+                                    >
+                                        Reminders {upcoming.length > 0 && <span className="ml-1 bg-red-500 text-white text-[10px] font-bold px-1 py-0.5 rounded-full">{upcoming.length}</span>}
+                                    </button>
                                 </div>
 
-                                {upcoming.length === 0 ? (
-                                    <div className="px-4 py-8 text-center">
-                                        <div className="text-3xl mb-2">📅</div>
-                                        <p className="text-sm text-wsu-slate dark:text-gray-400">No upcoming events.</p>
-                                        <p className="text-xs text-wsu-slate dark:text-gray-500 mt-1">Open a group chat to schedule one.</p>
-                                    </div>
-                                ) : (
-                                    <ul className="max-h-72 overflow-y-auto divide-y divide-gray-50 dark:divide-gray-800">
-                                        {upcoming.map(ev => (
-                                            <li key={ev.id} className="flex items-start gap-3 px-4 py-3 hover:bg-wsu-mist dark:hover:bg-gray-800 transition-colors">
-                                                <div className="w-8 h-8 bg-blue-50 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                                                    <span className="text-sm">📅</span>
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-semibold text-wsu-navy dark:text-white truncate">{ev.title}</p>
-                                                    <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">{formatEventDate(ev.eventDate)}</p>
-                                                    <p className="text-xs text-wsu-slate dark:text-gray-400 truncate">{ev.groupName}</p>
-                                                    {ev.notes && (
-                                                        <p className="text-xs text-wsu-slate dark:text-gray-500 mt-0.5 line-clamp-1">{ev.notes}</p>
-                                                    )}
-                                                </div>
-                                                <button
-                                                    onClick={() => removeEvent(ev.groupId, ev.id)}
-                                                    className="text-gray-300 dark:text-gray-600 hover:text-red-400 dark:hover:text-red-400 text-lg leading-none flex-shrink-0 transition-colors"
-                                                    title="Remove reminder"
-                                                >
-                                                    ×
-                                                </button>
-                                            </li>
-                                        ))}
-                                    </ul>
+                                {/* Notifications tab */}
+                                {bellTab === 'notifications' && (
+                                    notifications.length > 0 && (
+                                        <div className="flex justify-end px-4 py-1.5 border-b border-gray-100 dark:border-gray-700">
+                                            <button
+                                                onClick={clearAll}
+                                                className="text-xs text-red-500 hover:text-red-600 dark:hover:text-red-400 font-medium transition-colors px-2 py-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
+                                            >
+                                                Clear all
+                                            </button>
+                                        </div>
+                                    )
+                                )}
+                                {bellTab === 'notifications' && (
+                                    notifications.length === 0 ? (
+                                        <div className="px-4 py-8 text-center">
+                                            <div className="text-3xl mb-2">🔔</div>
+                                            <p className="text-sm text-wsu-slate dark:text-gray-400">No notifications yet.</p>
+                                        </div>
+                                    ) : (
+                                        <ul className="max-h-72 overflow-y-auto divide-y divide-gray-50 dark:divide-gray-800">
+                                            {notifications.map(n => (
+                                                <li key={n.id} className={`flex items-start gap-3 px-4 py-3 transition-colors ${!n.read ? 'bg-blue-50/50 dark:bg-blue-900/10' : 'hover:bg-wsu-mist dark:hover:bg-gray-800'}`}>
+                                                    <div className="w-8 h-8 bg-blue-50 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                        <span className="text-sm">{NOTIF_ICON[n.type] ?? '🔔'}</span>
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className={`text-sm text-wsu-navy dark:text-white ${!n.read ? 'font-semibold' : ''}`}>{n.message}</p>
+                                                        <p className="text-xs text-wsu-slate dark:text-gray-400 mt-0.5">{formatTimeAgo(n.createdAt)}</p>
+                                                    </div>
+                                                    {!n.read && <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 mt-1.5" />}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )
+                                )}
+
+                                {/* Reminders tab */}
+                                {bellTab === 'events' && (
+                                    upcoming.length === 0 ? (
+                                        <div className="px-4 py-8 text-center">
+                                            <div className="text-3xl mb-2">📅</div>
+                                            <p className="text-sm text-wsu-slate dark:text-gray-400">No upcoming reminders.</p>
+                                            <p className="text-xs text-wsu-slate dark:text-gray-500 mt-1">Open a group chat to schedule one.</p>
+                                        </div>
+                                    ) : (
+                                        <ul className="max-h-72 overflow-y-auto divide-y divide-gray-50 dark:divide-gray-800">
+                                            {upcoming.map(ev => (
+                                                <li key={ev.id} className="flex items-start gap-3 px-4 py-3 hover:bg-wsu-mist dark:hover:bg-gray-800 transition-colors">
+                                                    <div className="w-8 h-8 bg-blue-50 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                        <span className="text-sm">📅</span>
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-sm font-semibold text-wsu-navy dark:text-white truncate">{ev.title}</p>
+                                                        <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">{formatEventDate(ev.eventDate)}</p>
+                                                        <p className="text-xs text-wsu-slate dark:text-gray-400 truncate">{ev.groupName}</p>
+                                                        {ev.notes && (
+                                                            <p className="text-xs text-wsu-slate dark:text-gray-500 mt-0.5 line-clamp-1">{ev.notes}</p>
+                                                        )}
+                                                    </div>
+                                                    <button
+                                                        onClick={() => removeEvent(ev.groupId, ev.id)}
+                                                        className="text-gray-300 dark:text-gray-600 hover:text-red-400 dark:hover:text-red-400 text-lg leading-none flex-shrink-0 transition-colors"
+                                                        title="Remove reminder"
+                                                    >
+                                                        ×
+                                                    </button>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )
                                 )}
                             </div>
                         )}

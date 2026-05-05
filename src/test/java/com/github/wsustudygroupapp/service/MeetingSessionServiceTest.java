@@ -135,7 +135,7 @@ class MeetingSessionServiceTest {
 
         meetingSessionService.scheduleSession(EMAIL, sessionRequest);
 
-        verify(notificationService, times(1)).notifyGroupMembers(eq(mockGroup), anyString(), any(), eq(10L), eq(1L));
+        verify(notificationService, times(1)).notifySessionScheduled(mockSession);
     }
 
     // ── getUpcomingSessions ───────────────────────────────────────────────────

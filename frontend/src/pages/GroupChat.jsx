@@ -7,6 +7,7 @@ import ChatMessage from '../components/ChatMessage'
 import MembersSidebar from '../components/MembersSidebar'
 import ScheduleEventModal from '../components/ScheduleEventModal'
 import { useAuth } from '../context/AuthContext'
+import { useNotifications } from '../context/NotificationContext'
 import api from '../api/axios'
 import campusPhoto from '../assets/WSUCampusStock2013_063-L.jpg'
 
@@ -66,6 +67,7 @@ function GroupChat() {
   const { groupId } = useParams()
   const parsedGroupId = parseInt(groupId)
   const { profile } = useAuth()
+  const { refresh: refreshNotifications } = useNotifications()
 
   const [group, setGroup]         = useState(null)
   const [myGroups, setMyGroups]   = useState([])
@@ -396,7 +398,7 @@ function GroupChat() {
         <ScheduleEventModal
           groupId={parsedGroupId}
           groupName={group.name}
-          onClose={() => setScheduleOpen(false)}
+          onClose={() => { setScheduleOpen(false); refreshNotifications() }}
         />
       )}
     </div>
