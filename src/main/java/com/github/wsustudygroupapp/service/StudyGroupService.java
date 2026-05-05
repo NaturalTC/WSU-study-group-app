@@ -10,7 +10,10 @@ import com.github.wsustudygroupapp.repository.CourseRepository;
 import com.github.wsustudygroupapp.repository.ProfileRepository;
 import com.github.wsustudygroupapp.repository.StudyGroupRepository;
 import com.github.wsustudygroupapp.repository.UserRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,17 +26,20 @@ public class StudyGroupService {
     private final ProfileRepository profileRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final PasswordEncoder passwordEncoder;
 
     public StudyGroupService(StudyGroupRepository studyGroupRepository,
                              CourseRepository courseRepository,
                              ProfileRepository profileRepository,
                              UserRepository userRepository,
-                             NotificationService notificationService) {
+                             NotificationService notificationService,
+                             PasswordEncoder passwordEncoder) {
         this.studyGroupRepository = studyGroupRepository;
         this.courseRepository = courseRepository;
         this.profileRepository = profileRepository;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public StudyGroup getGroupById(Long groupId) {
@@ -63,6 +69,9 @@ public class StudyGroupService {
         group.setName(request.getName());
         group.setCourse(course);
         group.setCreatedBy(creator);
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            group.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
 
         List<Profile> members = new ArrayList<>();
         members.add(creator);
@@ -71,21 +80,25 @@ public class StudyGroupService {
         return studyGroupRepository.save(group);
     }
 
-    public StudyGroup joinGroup(Long groupId, String email) {
+    public StudyGroup joinGroup(Long groupId, String password, String email) {
         Profile profile = currentProfile(email);
         StudyGroup group = studyGroupRepository.findById(groupId)
                 .orElseThrow(() -> new ResourceNotFoundException("Study group not found: " + groupId));
 
         boolean alreadyMember = group.getMembers().stream()
                 .anyMatch(member -> member.getId().equals(profile.getId()));
-        if (!alreadyMember) {
-            group.getMembers().add(profile);
-            StudyGroup saved = studyGroupRepository.save(group);
-            notificationService.notifyMemberJoined(saved, profile);
-            return saved;
+        if (alreadyMember) {
+            return group;
         }
 
-        return group;
+        if (group.getPassword() != null && !passwordEncoder.matches(password, group.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Incorrect group password");
+        }
+
+        group.getMembers().add(profile);
+        StudyGroup saved = studyGroupRepository.save(group);
+        notificationService.notifyMemberJoined(saved, profile);
+        return saved;
     }
 
     public void leaveGroup(Long groupId, String email) {

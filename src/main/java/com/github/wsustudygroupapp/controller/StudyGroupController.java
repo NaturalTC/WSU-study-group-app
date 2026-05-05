@@ -1,5 +1,6 @@
 package com.github.wsustudygroupapp.controller;
 
+import com.github.wsustudygroupapp.dto.JoinGroupRequest;
 import com.github.wsustudygroupapp.dto.StudyGroupRequest;
 import com.github.wsustudygroupapp.model.Message;
 import com.github.wsustudygroupapp.model.StudyGroup;
@@ -12,7 +13,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -53,11 +53,12 @@ public class StudyGroupController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdGroup);
     }
 
-    // join an existing group
+    // join an existing group — requires the group password in the request body
     @PostMapping("/{groupId}/join")
     public ResponseEntity<StudyGroup> joinGroup(@PathVariable Long groupId,
+                                                @RequestBody JoinGroupRequest request,
                                                 @AuthenticationPrincipal UserDetails userDetails) {
-        StudyGroup updatedGroup = studyGroupService.joinGroup(groupId, userDetails.getUsername());
+        StudyGroup updatedGroup = studyGroupService.joinGroup(groupId, request.getPassword(), userDetails.getUsername());
         return ResponseEntity.ok(updatedGroup);
     }
 
