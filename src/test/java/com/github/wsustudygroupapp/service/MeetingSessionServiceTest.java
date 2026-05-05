@@ -172,10 +172,12 @@ class MeetingSessionServiceTest {
 
     @Test
     void getSessionsForGroup_returnsSessionsOrderedByTime() {
+        stubCurrentProfile();
+        when(studyGroupRepository.findById(5L)).thenReturn(Optional.of(mockGroup));
         when(meetingSessionRepository.findByStudyGroupIdOrderByScheduledAtAsc(5L))
                 .thenReturn(List.of(mockSession));
 
-        List<MeetingSession> result = meetingSessionService.getSessionsForGroup(5L);
+        List<MeetingSession> result = meetingSessionService.getSessionsForGroup(5L, EMAIL);
 
         assertEquals(1, result.size());
         assertEquals(mockSession, result.get(0));
@@ -183,10 +185,12 @@ class MeetingSessionServiceTest {
 
     @Test
     void getSessionsForGroup_noSessions_returnsEmptyList() {
+        stubCurrentProfile();
+        when(studyGroupRepository.findById(5L)).thenReturn(Optional.of(mockGroup));
         when(meetingSessionRepository.findByStudyGroupIdOrderByScheduledAtAsc(5L))
                 .thenReturn(List.of());
 
-        assertTrue(meetingSessionService.getSessionsForGroup(5L).isEmpty());
+        assertTrue(meetingSessionService.getSessionsForGroup(5L, EMAIL).isEmpty());
     }
 
     // ── cancelSession ─────────────────────────────────────────────────────────

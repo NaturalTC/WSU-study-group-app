@@ -102,9 +102,10 @@ class MeetingSessionControllerTest {
 
     @Test
     void getSessionsForGroup_returns200WithSessionList() {
-        when(meetingSessionService.getSessionsForGroup(5L)).thenReturn(List.of(mockSession));
+        mockAuth();
+        when(meetingSessionService.getSessionsForGroup(5L, EMAIL)).thenReturn(List.of(mockSession));
 
-        ResponseEntity<List<MeetingSession>> response = meetingSessionController.getSessionsForGroup(5L);
+        ResponseEntity<List<MeetingSession>> response = meetingSessionController.getSessionsForGroup(5L, userDetails);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(1, response.getBody().size());
@@ -112,9 +113,10 @@ class MeetingSessionControllerTest {
 
     @Test
     void getSessionsForGroup_noSessions_returns200WithEmptyList() {
-        when(meetingSessionService.getSessionsForGroup(5L)).thenReturn(List.of());
+        mockAuth();
+        when(meetingSessionService.getSessionsForGroup(5L, EMAIL)).thenReturn(List.of());
 
-        ResponseEntity<List<MeetingSession>> response = meetingSessionController.getSessionsForGroup(5L);
+        ResponseEntity<List<MeetingSession>> response = meetingSessionController.getSessionsForGroup(5L, userDetails);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(response.getBody().isEmpty());
