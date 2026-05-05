@@ -16,6 +16,7 @@ import VerifyPending from './pages/VerifyPending'
 import VerifySuccess from './pages/VerifySuccess'
 import VerifyError from './pages/VerifyError'
 import Leaderboard from './pages/Leaderboard'
+import Meetings from './pages/Meetings'
 
 // Requires a token, but blocks users who already have a profile
 // (prevents someone from re-running setup and overwriting their data)
@@ -56,6 +57,7 @@ function App() {
       <Route path="/group-chat/:groupId" element={<ProtectedRoute><GroupChat /></ProtectedRoute>}    />
       <Route path="/change-password"     element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
       <Route path="/leaderboard"          element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
+      <Route path="/meetings"             element={<ProtectedRoute><Meetings /></ProtectedRoute>}    />
     </Routes>
   )
 }
