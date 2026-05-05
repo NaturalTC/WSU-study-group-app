@@ -192,33 +192,33 @@ class CourseControllerTest {
         assertEquals(HttpStatus.FORBIDDEN, ex.getStatusCode());
     }
 
-    // ── GET /courses/{userCourseId}/classmates ─────────────────────────────────
+    // ── GET /courses/{courseId}/students ──────────────────────────────────────
 
     @Test
-    void getClassmates_returns200WithClassmateList() {
+    void getEnrolledStudents_returns200WithStudentList() {
         mockAuth();
-        when(courseService.getClassmates(100L, EMAIL)).thenReturn(List.of(mockEnrollment));
-        ResponseEntity<List<UserCourse>> response = courseController.getClassmates(authentication, 100L);
+        when(courseService.getEnrolledStudents(10L, null, null, EMAIL)).thenReturn(List.of(mockEnrollment));
+        ResponseEntity<List<UserCourse>> response = courseController.getEnrolledStudents(authentication, 10L, null, null);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(1, response.getBody().size());
     }
 
     @Test
-    void getClassmates_noClassmates_returns200WithEmptyList() {
+    void getEnrolledStudents_noStudents_returns200WithEmptyList() {
         mockAuth();
-        when(courseService.getClassmates(100L, EMAIL)).thenReturn(List.of());
-        ResponseEntity<List<UserCourse>> response = courseController.getClassmates(authentication, 100L);
+        when(courseService.getEnrolledStudents(10L, null, null, EMAIL)).thenReturn(List.of());
+        ResponseEntity<List<UserCourse>> response = courseController.getEnrolledStudents(authentication, 10L, null, null);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(response.getBody().isEmpty());
     }
 
     @Test
-    void getClassmates_enrollmentNotFound_propagatesResourceNotFoundException() {
+    void getEnrolledStudents_courseNotFound_propagatesResourceNotFoundException() {
         mockAuth();
-        when(courseService.getClassmates(100L, EMAIL))
-                .thenThrow(new ResourceNotFoundException("Enrollment not found"));
+        when(courseService.getEnrolledStudents(99L, null, null, EMAIL))
+                .thenThrow(new ResourceNotFoundException("Course not found"));
         assertThrows(ResourceNotFoundException.class,
-                () -> courseController.getClassmates(authentication, 100L));
+                () -> courseController.getEnrolledStudents(authentication, 99L, null, null));
     }
 
     // ── GET /courses/search ────────────────────────────────────────────────────
