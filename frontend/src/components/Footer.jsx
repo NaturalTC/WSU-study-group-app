@@ -10,10 +10,10 @@ function Footer() {
         {/* Brand Column */}
         <div className="md:col-span-1">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-9 h-9 bg-blue-700 rounded-lg flex items-center justify-center shadow">
-              <span className="text-white font-display text-lg font-bold">W</span>
+            <div className="w-9 h-9 bg-wsu-navy rounded-xl flex items-center justify-center shadow">
+              <span className="text-white font-display text-lg font-bold">🦉</span>
             </div>
-            <span className="font-display text-xl text-white">WSU StudyGroup</span>
+            <span className="font-display text-xl text-white">StudyNest</span>
           </div>
           <p className="text-sm leading-relaxed text-white/50">
             The social study platform built exclusively for Westfield State University students.

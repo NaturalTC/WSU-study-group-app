@@ -97,7 +97,7 @@ function StudyGroups() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-wsu-chalk">
+    <div className="flex flex-col min-h-screen bg-wsu-chalk dark:bg-gray-950 transition-colors duration-300">
       <AppHeader />
 
       <main className="flex-1 pt-24 pb-16">
@@ -106,8 +106,8 @@ function StudyGroups() {
           {/* Page Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
             <div>
-              <h1 className="font-display text-4xl text-wsu-navy mb-1">Study Groups</h1>
-              <p className="text-wsu-slate">Find a group for your courses or start your own.</p>
+              <h1 className="font-display text-4xl text-wsu-navy dark:text-white mb-1">Study Groups</h1>
+              <p className="text-wsu-slate dark:text-gray-400">Find a group for your courses or start your own.</p>
             </div>
             <button
               onClick={() => setShowCreateModal(true)}
@@ -139,7 +139,7 @@ function StudyGroups() {
                 className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
                   activeFilter === 'all'
                     ? 'bg-blue-700 text-white shadow'
-                    : 'bg-white text-wsu-slate border border-gray-200 hover:border-blue-700 hover:text-blue-700'
+                    : 'bg-white dark:bg-gray-800 text-wsu-slate dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-blue-700 hover:text-blue-700'
                 }`}
               >
                 All
@@ -151,7 +151,7 @@ function StudyGroups() {
                   className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
                     activeFilter === String(c.id)
                       ? 'bg-blue-700 text-white shadow'
-                      : 'bg-white text-wsu-slate border border-gray-200 hover:border-blue-700 hover:text-blue-700'
+                      : 'bg-white dark:bg-gray-800 text-wsu-slate dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-blue-700 hover:text-blue-700'
                   }`}
                 >
                   {c.courseCode}
@@ -167,8 +167,8 @@ function StudyGroups() {
             </div>
           ) : filteredGroups.length > 0 ? (
             <>
-              <p className="text-sm text-wsu-slate mb-6">
-                Showing <span className="font-semibold text-wsu-navy">{filteredGroups.length}</span> group{filteredGroups.length !== 1 ? 's' : ''}
+              <p className="text-sm text-wsu-slate dark:text-gray-400 mb-6">
+                Showing <span className="font-semibold text-wsu-navy dark:text-white">{filteredGroups.length}</span> group{filteredGroups.length !== 1 ? 's' : ''}
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredGroups.map(group => (
@@ -186,8 +186,8 @@ function StudyGroups() {
             </>
           ) : (
             <div className="text-center py-24">
-              <h3 className="font-display text-2xl text-wsu-navy mb-2">No groups found</h3>
-              <p className="text-wsu-slate mb-6">
+              <h3 className="font-display text-2xl text-wsu-navy dark:text-white mb-2">No groups found</h3>
+              <p className="text-wsu-slate dark:text-gray-400 mb-6">
                 {groups.length === 0
                   ? 'No study groups exist yet. Be the first to create one!'
                   : 'Try a different search or create your own group.'}
@@ -206,30 +206,30 @@ function StudyGroups() {
       {/* View Details Modal */}
       {selectedGroup && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-6 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-8 animate-fade-up">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-lg w-full p-8 animate-fade-up">
             <div className="flex items-center justify-between mb-6">
-              <span className="bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full">
+              <span className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-semibold px-3 py-1 rounded-full">
                 {selectedGroup.course?.courseCode}
               </span>
-              <button onClick={() => setSelectedGroup(null)} className="text-gray-400 hover:text-wsu-navy text-2xl leading-none">×</button>
+              <button onClick={() => setSelectedGroup(null)} className="text-gray-400 hover:text-wsu-navy dark:hover:text-white text-2xl leading-none">×</button>
             </div>
-            <h2 className="font-display text-2xl text-wsu-navy mb-2">{selectedGroup.name}</h2>
-            <p className="text-wsu-slate text-sm mb-6">{selectedGroup.course?.courseName}</p>
+            <h2 className="font-display text-2xl text-wsu-navy dark:text-white mb-2">{selectedGroup.name}</h2>
+            <p className="text-wsu-slate dark:text-gray-400 text-sm mb-6">{selectedGroup.course?.courseName}</p>
             <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="bg-wsu-chalk rounded-xl p-4">
-                <div className="text-xs text-wsu-slate font-medium mb-0.5">Course</div>
-                <div className="text-sm text-wsu-navy font-semibold">{selectedGroup.course?.courseName}</div>
+              <div className="bg-wsu-chalk dark:bg-gray-800 rounded-xl p-4">
+                <div className="text-xs text-wsu-slate dark:text-gray-400 font-medium mb-0.5">Course</div>
+                <div className="text-sm text-wsu-navy dark:text-white font-semibold">{selectedGroup.course?.courseName}</div>
               </div>
-              <div className="bg-wsu-chalk rounded-xl p-4">
-                <div className="text-xs text-wsu-slate font-medium mb-0.5">Members</div>
-                <div className="text-sm text-wsu-navy font-semibold">{selectedGroup.members?.length ?? 0}</div>
+              <div className="bg-wsu-chalk dark:bg-gray-800 rounded-xl p-4">
+                <div className="text-xs text-wsu-slate dark:text-gray-400 font-medium mb-0.5">Members</div>
+                <div className="text-sm text-wsu-navy dark:text-white font-semibold">{selectedGroup.members?.length ?? 0}</div>
               </div>
             </div>
             <div className="mb-6">
-              <p className="text-xs font-semibold text-wsu-slate uppercase tracking-widest mb-3">Members</p>
+              <p className="text-xs font-semibold text-wsu-slate dark:text-gray-400 uppercase tracking-widest mb-3">Members</p>
               <div className="flex flex-wrap gap-2">
                 {(selectedGroup.members ?? []).map((m, i) => (
-                  <span key={i} className="bg-wsu-mist text-wsu-navy text-xs font-medium px-3 py-1 rounded-full">{m.name}</span>
+                  <span key={i} className="bg-wsu-mist dark:bg-gray-800 text-wsu-navy dark:text-gray-200 text-xs font-medium px-3 py-1 rounded-full">{m.name}</span>
                 ))}
               </div>
             </div>
@@ -258,12 +258,12 @@ function StudyGroups() {
       {/* Create Group Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-6 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-8 animate-fade-up">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-lg w-full p-8 animate-fade-up">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="font-display text-2xl text-wsu-navy">Create a Study Group</h2>
+              <h2 className="font-display text-2xl text-wsu-navy dark:text-white">Create a Study Group</h2>
               <button
                 onClick={() => { setShowCreateModal(false); setCreateError('') }}
-                className="text-gray-400 hover:text-wsu-navy text-2xl leading-none"
+                className="text-gray-400 hover:text-wsu-navy dark:hover:text-white text-2xl leading-none"
               >
                 ×
               </button>

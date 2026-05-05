@@ -19,6 +19,11 @@ body {
   color: #1B2A4A;
 }
 
+.dark body {
+  background-color: #030712;
+  color: #F9FAFB;
+}
+
 /* ── Reusable utility classes ── */
 .btn-primary {
   @apply bg-wsu-blue text-white font-semibold px-6 py-3 rounded-lg 
@@ -46,6 +51,17 @@ body {
 
 .section-subtitle {
   @apply text-wsu-slate text-lg max-w-2xl mx-auto;
+}
+
+/* Badge shapes are rendered as inline SVG in BadgeIcon.jsx */
+
+/* Toast slide-in from right */
+@keyframes toast-slide-in {
+  from { transform: translateX(calc(100% + 1.5rem)); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+.animate-toast-in {
+  animation: toast-slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* ── Form input styles ── */

@@ -1,16 +1,43 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import AppHeader from '../components/AppHeader'
+import BadgeIcon from '../components/BadgeIcon'
 import { useAuth } from '../context/AuthContext'
+import { useBadges } from '../context/BadgesContext'
 import api from '../api/axios'
 
 const YEAR_OPTIONS = ['Freshman', 'Sophomore', 'Junior', 'Senior']
 
+const CATEGORY_ORDER = ['logins', 'streak', 'messages', 'emojis', 'groups', 'sessions', 'points', 'helper']
+
+const CATEGORY_META = {
+  logins:   { label: 'Login Milestones',  hint: 'Log in to StudyNest to unlock these badges. Badges are awarded at 1, 10, 25, 50, and 100 logins.' },
+  streak:   { label: 'Login Streaks',     hint: 'Log in on consecutive days without missing one. Streaks of 3, 7, 14, and 30 days each earn a badge.' },
+  messages: { label: 'Messages Sent',     hint: 'Send messages in any group chat. Milestones at 1, 25, 100, and 500 messages.' },
+  emojis:   { label: 'Emojis Sent',       hint: 'Use the emoji button in group chat. Earned at 1, 10, and 50 emojis sent.' },
+  groups:   { label: 'Study Groups',      hint: 'Join study groups for your courses. Badges unlock at 1, 3, and 5 groups joined.' },
+  sessions: { label: 'Study Sessions',    hint: 'Attend scheduled study sessions. Milestones at 1, 5, 10, and 25 sessions.' },
+  points:   { label: 'Points Earned',     hint: 'Earn points through all your StudyNest activity. Awarded at 100, 500, 1,000, and 5,000 points.' },
+  helper:   { label: 'Helping Others',    hint: 'Help a classmate in a study group. Badges earned at 1, 5, and 10 assists.' },
+}
+
 function Profile() {
     const { profile, setProfile } = useAuth()
+    const { earned: badges }      = useBadges()
 
-    const [groups, setGroups]           = useState([])
-    const [dataLoading, setDataLoading] = useState(true)
+    const [groups, setGroups]               = useState([])
+    const [dataLoading, setDataLoading]     = useState(true)
+    const [showBadgesModal, setShowBadgesModal] = useState(false)
+
+    const topBadges = [...badges]
+        .sort((a, b) => b.tier - a.tier || new Date(b.earnedAt) - new Date(a.earnedAt))
+        .slice(0, 7)
+
+    const earnedByCategory = badges.reduce((acc, badge) => {
+        if (!acc[badge.category]) acc[badge.category] = []
+        acc[badge.category].push(badge)
+        return acc
+    }, {})
 
     const [editOpen, setEditOpen]       = useState(false)
     const [editForm, setEditForm]       = useState({ name: '', major: '', year: '', bio: '' })
@@ -58,13 +85,13 @@ function Profile() {
     })()
 
     return (
-        <div className="flex flex-col min-h-screen bg-wsu-chalk">
+        <div className="flex flex-col min-h-screen bg-wsu-chalk dark:bg-gray-950 transition-colors duration-300">
             <AppHeader />
 
             <main className="flex-1 pt-20">
 
                 {/* ── Profile Banner ── */}
-                <div className="bg-white border-b border-gray-100">
+                <div className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
                     <div className="max-w-4xl mx-auto px-6 py-8">
                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
 
@@ -75,7 +102,7 @@ function Profile() {
 
                             {/* Info */}
                             <div className="flex-1 min-w-0">
-                                <h1 className="font-display text-2xl text-wsu-navy font-bold leading-tight">
+                                <h1 className="font-display text-2xl text-wsu-navy dark:text-white font-bold leading-tight">
                                     {profile?.name}
                                 </h1>
                                 <div className="flex flex-wrap items-center gap-2 mt-1.5">
@@ -108,19 +135,49 @@ function Profile() {
                         </div>
 
                         {/* Stats */}
-                        <div className="flex gap-6 mt-6 pt-6 border-t border-gray-100">
+                        <div className="flex items-start gap-6 mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
                             <div>
-                                <p className="text-xl font-display font-bold text-wsu-navy">
-                                    {dataLoading ? '—' : groups.length}
-                                </p>
-                                <p className="text-xs text-wsu-slate mt-0.5">Study Groups</p>
+                                <div className="h-8 flex items-end">
+                                    <p className="text-3xl leading-none font-display font-bold text-wsu-navy dark:text-white">
+                                        {dataLoading ? '—' : groups.length}
+                                    </p>
+                                </div>
+                                <p className="text-xs text-wsu-slate dark:text-gray-400 mt-1">Study Groups</p>
                             </div>
-                            <div className="w-px bg-gray-100" />
+                            <div className="w-px self-stretch bg-gray-100 dark:bg-gray-700" />
                             <div>
-                                <p className="text-xl font-display font-bold text-wsu-navy">
-                                    {profile?.points ?? 0}
-                                </p>
-                                <p className="text-xs text-wsu-slate mt-0.5">Points</p>
+                                <div className="h-8 flex items-end">
+                                    <p className="text-3xl leading-none font-display font-bold text-wsu-navy dark:text-white">
+                                        {profile?.points ?? 0}
+                                    </p>
+                                </div>
+                                <p className="text-xs text-wsu-slate dark:text-gray-400 mt-1">Points</p>
+                            </div>
+                            <div className="w-px self-stretch bg-gray-100 dark:bg-gray-700" />
+                            <div>
+                                <div className="h-8 flex items-center">
+                                    {badges.length === 0 ? (
+                                        <p className="text-3xl leading-none font-display font-bold text-wsu-slate dark:text-gray-500">—</p>
+                                    ) : (
+                                        <div
+                                            className="flex items-center -space-x-3 cursor-pointer"
+                                            onClick={() => setShowBadgesModal(true)}
+                                        >
+                                            {[...topBadges].reverse().map((badge, i) => (
+                                                <div key={badge.id} className="relative" style={{ zIndex: i }}>
+                                                    <BadgeIcon badge={badge} size="sm" />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                                <button
+                                    onClick={() => setShowBadgesModal(true)}
+                                    disabled={badges.length === 0}
+                                    className="text-xs text-wsu-slate dark:text-gray-400 mt-1 hover:text-blue-700 dark:hover:text-blue-400 hover:underline transition-colors disabled:cursor-default disabled:no-underline"
+                                >
+                                    Badges
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -129,7 +186,7 @@ function Profile() {
                 {/* ── Study Groups ── */}
                 <div className="max-w-4xl mx-auto px-6 py-8">
                     <div className="flex items-center justify-between mb-5">
-                        <h2 className="font-display text-xl text-wsu-navy font-bold">My Study Groups</h2>
+                        <h2 className="font-display text-xl text-wsu-navy dark:text-white font-bold">My Study Groups</h2>
                         <Link to="/study-groups" className="text-sm text-blue-700 font-semibold hover:underline">
                             Browse all →
                         </Link>
@@ -195,6 +252,62 @@ function Profile() {
                     )}
                 </div>
             </main>
+
+            {/* ── All Badges Modal ── */}
+            {showBadgesModal && (
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-6 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] flex flex-col animate-fade-up">
+
+                        {/* Header */}
+                        <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-gray-100 dark:border-gray-700 flex-shrink-0">
+                            <div>
+                                <h2 className="font-display text-xl text-wsu-navy dark:text-white">All Badges</h2>
+                                <p className="text-xs text-wsu-slate dark:text-gray-400 mt-0.5">{badges.length} earned</p>
+                            </div>
+                            <button
+                                onClick={() => setShowBadgesModal(false)}
+                                className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-wsu-mist dark:hover:bg-gray-800 text-wsu-slate text-xl leading-none transition-colors"
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                        {/* Scrollable category tiles */}
+                        <div className="overflow-y-auto flex-1 px-5 py-5 grid grid-cols-2 gap-3 content-start">
+                            {CATEGORY_ORDER.map(cat => {
+                                const meta      = CATEGORY_META[cat]
+                                const catBadges = [...(earnedByCategory[cat] ?? [])].sort((a, b) => a.tier - b.tier)
+                                const hasEarned = catBadges.length > 0
+
+                                return hasEarned ? (
+                                    <div key={cat} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm px-5 py-4">
+                                        <p className="text-xs font-semibold text-wsu-slate dark:text-gray-400 uppercase tracking-widest mb-3">
+                                            {meta.label}
+                                        </p>
+                                        <div className="flex -space-x-3">
+                                            {catBadges.map((badge, i) => (
+                                                <div key={badge.id} className="relative" style={{ zIndex: i }}>
+                                                    <BadgeIcon badge={badge} size="md" />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div key={cat} className="bg-wsu-mist dark:bg-gray-800/60 rounded-2xl border border-gray-100 dark:border-gray-700 px-5 py-4">
+                                        <p className="text-xs font-semibold text-wsu-slate/60 dark:text-gray-500 uppercase tracking-widest mb-2">
+                                            {meta.label}
+                                        </p>
+                                        <div className="flex items-start gap-2.5">
+                                            <span className="text-sm flex-shrink-0 mt-0.5">🔒</span>
+                                            <p className="text-xs text-wsu-slate dark:text-gray-400 leading-relaxed">{meta.hint}</p>
+                                        </div>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* ── Edit Profile Modal ── */}
             {editOpen && (

@@ -3,10 +3,16 @@ import { Link, useNavigate } from 'react-router-dom'
 import api from '../api/axios'
 import { resendVerification } from '../api/auth'
 import { useAuth } from '../context/AuthContext'
+import OwlLogo from './OwlLogo'
 
 function LoginForm() {
   const navigate = useNavigate()
-  const { login } = useAuth()
+  const { login, demoLogin } = useAuth()
+
+  const handleDemo = () => {
+    demoLogin()
+    navigate('/leaderboard')
+  }
 
   const [formData, setFormData] = useState({
     email: '',
@@ -97,11 +103,11 @@ function LoginForm() {
 
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="w-12 h-12 bg-blue-700 rounded-xl flex items-center justify-center mx-auto mb-4 shadow">
-              <span className="text-white font-display text-xl font-bold">W</span>
+            <div className="w-12 h-12 bg-wsu-navy rounded-xl flex items-center justify-center mx-auto mb-4 shadow">
+              <OwlLogo size={32} />
             </div>
             <h1 className="font-display text-3xl text-wsu-navy mb-1">Welcome back</h1>
-            <p className="text-wsu-slate text-sm">Sign in to your WSU StudyGroup account</p>
+            <p className="text-wsu-slate text-sm">Sign in to your StudyNest account</p>
           </div>
 
           {/* Error Message */}
@@ -195,6 +201,16 @@ function LoginForm() {
             <span className="text-gray-400 text-xs">or</span>
             <hr className="flex-1 border-gray-200" />
           </div>
+
+          {/* Demo button */}
+          <button
+            type="button"
+            onClick={handleDemo}
+            className="w-full flex items-center justify-center gap-2 border-2 border-wsu-gold text-wsu-navy font-semibold px-6 py-3 rounded-lg hover:bg-wsu-gold/10 transition-all duration-200 mb-4"
+          >
+            <span className="text-lg">🦉</span>
+            Preview Demo (no login needed)
+          </button>
 
           {/* Register Link */}
           <p className="text-center text-sm text-wsu-slate">
