@@ -17,13 +17,15 @@ createRoot(document.getElementById('root')).render(
       <ThemeProvider>
         <AuthProvider>
           <ToastProvider>
-            <EventsProvider>
-              <MeetingsProvider>
-                <BadgesProvider>
-                  <App />
-                </BadgesProvider>
-              </MeetingsProvider>
-            </EventsProvider>
+            <NotificationProvider>
+              <EventsProvider>
+                <MeetingsProvider>
+                  <BadgesProvider>
+                    <App />
+                  </BadgesProvider>
+                </MeetingsProvider>
+              </EventsProvider>
+            </NotificationProvider>
           </ToastProvider>
         </AuthProvider>
       </ThemeProvider>
