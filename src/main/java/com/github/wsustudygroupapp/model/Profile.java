@@ -7,8 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 /**
  * Stores student-facing data for a registered user.
  * Kept separate from {@link User} so authentication logic stays isolated from app data.
@@ -48,11 +46,6 @@ public class Profile {
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
-
-    /** All courses this student is enrolled in, each with a specific section and semester. */
-    @JsonIgnore
-    @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserCourse> enrollments;
 
     @Column
     private String profilePicURL;

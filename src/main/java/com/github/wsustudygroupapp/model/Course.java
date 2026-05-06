@@ -1,13 +1,10 @@
 package com.github.wsustudygroupapp.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.List;
 
 /**
  * Represents a course from the WSU course catalog.
@@ -39,8 +36,4 @@ public class Course {
     @Column(nullable = false)
     private String courseName;
 
-    /** All student enrollments in this course across all sections and semesters. */
-    @JsonIgnore
-    @OneToMany(mappedBy = "course")
-    private List<UserCourse> enrollments;
 }
