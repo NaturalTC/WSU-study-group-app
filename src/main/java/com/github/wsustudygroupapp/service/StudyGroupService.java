@@ -10,6 +10,8 @@ import com.github.wsustudygroupapp.repository.CourseRepository;
 import com.github.wsustudygroupapp.repository.ProfileRepository;
 import com.github.wsustudygroupapp.repository.StudyGroupRepository;
 import com.github.wsustudygroupapp.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,25 +23,30 @@ import java.util.List;
 @Service
 public class StudyGroupService {
 
+    private static final Logger log = LoggerFactory.getLogger(StudyGroupService.class);
+
     private final StudyGroupRepository studyGroupRepository;
     private final CourseRepository courseRepository;
     private final ProfileRepository profileRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
     private final PasswordEncoder passwordEncoder;
+    private final GamificationService gamificationService;
 
     public StudyGroupService(StudyGroupRepository studyGroupRepository,
                              CourseRepository courseRepository,
                              ProfileRepository profileRepository,
                              UserRepository userRepository,
                              NotificationService notificationService,
-                             PasswordEncoder passwordEncoder) {
+                             PasswordEncoder passwordEncoder,
+                             GamificationService gamificationService) {
         this.studyGroupRepository = studyGroupRepository;
         this.courseRepository = courseRepository;
         this.profileRepository = profileRepository;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
         this.passwordEncoder = passwordEncoder;
+        this.gamificationService = gamificationService;
     }
 
     public StudyGroup getGroupById(Long groupId) {
@@ -77,7 +84,13 @@ public class StudyGroupService {
         members.add(creator);
         group.setMembers(members);
 
-        return studyGroupRepository.save(group);
+        StudyGroup saved = studyGroupRepository.save(group);
+        try {
+            gamificationService.awardPoints(creator.getId(), 15);
+        } catch (Exception e) {
+            log.error("Failed to award create-group points for profile {}: {}", creator.getId(), e.getMessage());
+        }
+        return saved;
     }
 
     public StudyGroup joinGroup(Long groupId, String password, String email) {
@@ -98,6 +111,11 @@ public class StudyGroupService {
         group.getMembers().add(profile);
         StudyGroup saved = studyGroupRepository.save(group);
         notificationService.notifyMemberJoined(saved, profile);
+        try {
+            gamificationService.awardPoints(profile.getId(), 10);
+        } catch (Exception e) {
+            log.error("Failed to award join-group points for profile {}: {}", profile.getId(), e.getMessage());
+        }
         return saved;
     }
 

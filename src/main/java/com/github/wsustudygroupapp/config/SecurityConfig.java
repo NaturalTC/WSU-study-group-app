@@ -49,7 +49,7 @@ public class SecurityConfig {
     {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(AbstractHttpConfigurer::disable) // no CSRF needed, we're stateless
+            .csrf(AbstractHttpConfigurer::disable) // no CSRF needed, we're stateless no cookies impossible for ( cross state reference
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // no sessions — JWT only
             )

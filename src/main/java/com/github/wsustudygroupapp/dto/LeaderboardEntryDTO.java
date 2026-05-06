@@ -1,5 +1,6 @@
 package com.github.wsustudygroupapp.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,9 +20,11 @@ public class LeaderboardEntryDTO {
     @Schema(description = "1-based rank position on the leaderboard", example = "1")
     private int rank;
 
+    @JsonProperty("id")
     @Schema(description = "Profile ID of the student", example = "12")
     private Long profileId;
 
+    @JsonProperty("name")
     @Schema(description = "Display name shown on the leaderboard", example = "Alex Johnson")
     private String displayName;
 

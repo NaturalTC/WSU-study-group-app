@@ -78,6 +78,9 @@ function GroupChat() {
   const [sidebarOpen,   setSidebarOpen]   = useState(false)
   const [scheduleOpen,  setScheduleOpen]  = useState(false)
   const [emojiOpen,     setEmojiOpen]     = useState(false)
+  const [aiOpen,        setAiOpen]        = useState(false)
+  const [aiInput,       setAiInput]       = useState('')
+  const [aiLoading,     setAiLoading]     = useState(false)
 
   const stompClientRef = useRef(null)
   const messagesEndRef = useRef(null)
@@ -104,7 +107,7 @@ function GroupChat() {
 
         const history = historyRes.data.map(msg => ({
           id: msg.id,
-          sender: msg.sender?.name ?? 'Unknown',
+          sender: msg.sender?.name ?? msg.senderName ?? 'Unknown',
           text: msg.content,
           timestamp: formatTime(msg.sentAt),
         }))
@@ -197,6 +200,32 @@ function GroupChat() {
     inputRef.current?.focus()
   }
 
+  const handleAskAi = async (e) => {
+    e.preventDefault()
+    const question = aiInput.trim()
+    if (!question || aiLoading || !connected) return
+    setAiInput('')
+    setAiLoading(true)
+    try {
+      await api.post('/ai/chat', {
+        groupId: parsedGroupId,
+        profileId: profile?.id,
+        message: question,
+      })
+      // Backend broadcasts the question + AI reply via WebSocket — they arrive through
+      // the existing /topic/chat/{groupId} subscription, so no local state update needed.
+    } catch {
+      setMessages(prev => [...prev, {
+        id: `ai-error-${Date.now()}`,
+        sender: 'AI Assistant',
+        text: 'Sorry, I had trouble answering that. Please try again.',
+        timestamp: formatTime(),
+      }])
+    } finally {
+      setAiLoading(false)
+    }
+  }
+
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       handleSendMessage(e)
@@ -255,6 +284,17 @@ function GroupChat() {
                 >
                   <span>📅</span>
                   <span className="hidden sm:inline">Schedule</span>
+                </button>
+
+                <button
+                  onClick={() => setAiOpen(p => !p)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold transition-colors ${
+                    aiOpen
+                      ? 'border-violet-300 dark:border-violet-700 bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300'
+                      : 'border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900/40'
+                  }`}
+                >
+                  <span className="hidden sm:inline">Ask AI</span>
                 </button>
 
                 <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${
@@ -351,6 +391,31 @@ function GroupChat() {
                 <kbd className="bg-gray-100 dark:bg-gray-700 px-1 rounded text-gray-500 dark:text-gray-400">Shift+Enter</kbd> for new line
               </p>
             </div>
+
+            {/* AI Input Panel */}
+            {aiOpen && (
+              <div className="px-6 py-3 border-t border-violet-100 dark:border-violet-900/30 bg-violet-50/60 dark:bg-violet-950/20">
+                <form onSubmit={handleAskAi} className="flex gap-3 items-center">
+                  <input
+                    type="text"
+                    value={aiInput}
+                    onChange={e => setAiInput(e.target.value)}
+                    placeholder="Ask the AI a study question..."
+                    disabled={aiLoading || !connected}
+                    className="form-input flex-1 min-w-0 h-10 !py-2 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                  />
+                  <button
+                    type="submit"
+                    disabled={!aiInput.trim() || aiLoading || !connected}
+                    className="flex-shrink-0 flex items-center justify-center gap-1.5 px-4 h-10 bg-violet-600 hover:bg-violet-700 text-white rounded-lg text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed min-w-[72px]"
+                  >
+                    {aiLoading
+                      ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      : 'Ask AI'}
+                  </button>
+                </form>
+              </div>
+            )}
           </div>
 
           {/* ── Desktop Sidebar ────────────────────────────────── */}

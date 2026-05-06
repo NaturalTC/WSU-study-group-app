@@ -7,6 +7,8 @@ import com.github.wsustudygroupapp.model.StudyGroup;
 import com.github.wsustudygroupapp.repository.MessageRepository;
 import com.github.wsustudygroupapp.repository.ProfileRepository;
 import com.github.wsustudygroupapp.repository.StudyGroupRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -19,16 +21,21 @@ import java.util.List;
 @Service
 public class ChatService {
 
+    private static final Logger log = LoggerFactory.getLogger(ChatService.class);
+
     private final MessageRepository messageRepository;
     private final StudyGroupRepository studyGroupRepository;
     private final ProfileRepository profileRepository;
+    private final GamificationService gamificationService;
 
     public ChatService(MessageRepository messageRepository,
                        StudyGroupRepository studyGroupRepository,
-                       ProfileRepository profileRepository) {
+                       ProfileRepository profileRepository,
+                       GamificationService gamificationService) {
         this.messageRepository = messageRepository;
         this.studyGroupRepository = studyGroupRepository;
         this.profileRepository = profileRepository;
+        this.gamificationService = gamificationService;
     }
 
     // TODO: return messageRepository.findByStudyGroupIdOrderBySentAtAsc(groupId)
@@ -42,6 +49,15 @@ public class ChatService {
     // TODO: build a new Message with content, sender, studyGroup, sentAt = now
     // TODO: save the message to the database
     // TODO: return the saved message
+    public Message saveSystemMessage(Long groupId, String senderName, String content, LocalDateTime sentAt) {
+        Message msg = new Message();
+        msg.setStudyGroup(studyGroupRepository.getReferenceById(groupId));
+        msg.setSenderName(senderName);
+        msg.setContent(content);
+        msg.setSentAt(sentAt);
+        return messageRepository.save(msg);
+    }
+
     public Message saveMessage(MessageDTO dto)
     {
         Long groupId = dto.getStudyGroupId();
@@ -58,6 +74,13 @@ public class ChatService {
         savedMessage.setContent(content);
         savedMessage.setSentAt(dto.getSentAt());
         messageRepository.save(savedMessage);
+        // TODO [DONE]: award points to the sender for participating in chat
+        // Wrapped in try-catch so a gamification error never breaks message delivery
+        try {
+            gamificationService.awardPoints(sender.getId(), 1);
+        } catch (Exception e) {
+            log.error("Failed to award points for message from profile {}: {}", sender.getId(), e.getMessage());
+        }
         return savedMessage;
     }
 }

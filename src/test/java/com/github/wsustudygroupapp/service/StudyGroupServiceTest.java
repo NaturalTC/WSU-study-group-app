@@ -36,6 +36,7 @@ class StudyGroupServiceTest {
     @Mock private UserRepository userRepository;
     @Mock private NotificationService notificationService;
     @Mock private PasswordEncoder passwordEncoder;
+    @Mock private GamificationService gamificationService;
     @InjectMocks private StudyGroupService studyGroupService;
 
     private static final String EMAIL = "student@westfield.ma.edu";

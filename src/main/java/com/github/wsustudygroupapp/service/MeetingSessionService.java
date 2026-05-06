@@ -3,14 +3,13 @@ package com.github.wsustudygroupapp.service;
 import com.github.wsustudygroupapp.dto.MeetingRescheduleRequest;
 import com.github.wsustudygroupapp.dto.MeetingSessionRequest;
 import com.github.wsustudygroupapp.exception.ResourceNotFoundException;
-import com.github.wsustudygroupapp.model.MeetingSession;
-import com.github.wsustudygroupapp.model.Profile;
-import com.github.wsustudygroupapp.model.StudyGroup;
-import com.github.wsustudygroupapp.model.User;
+import com.github.wsustudygroupapp.model.*;
 import com.github.wsustudygroupapp.repository.MeetingSessionRepository;
 import com.github.wsustudygroupapp.repository.ProfileRepository;
 import com.github.wsustudygroupapp.repository.StudyGroupRepository;
 import com.github.wsustudygroupapp.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -25,22 +24,27 @@ import java.util.List;
 @Service
 public class MeetingSessionService {
 
+    private static final Logger log = LoggerFactory.getLogger(MeetingSessionService.class);
+
     private final MeetingSessionRepository meetingSessionRepository;
     private final StudyGroupRepository studyGroupRepository;
     private final ProfileRepository profileRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final GamificationService gamificationService;
 
     public MeetingSessionService(MeetingSessionRepository meetingSessionRepository,
                                  StudyGroupRepository studyGroupRepository,
                                  ProfileRepository profileRepository,
                                  UserRepository userRepository,
-                                 NotificationService notificationService) {
+                                 NotificationService notificationService,
+                                 GamificationService gamificationService) {
         this.meetingSessionRepository = meetingSessionRepository;
         this.studyGroupRepository = studyGroupRepository;
         this.profileRepository = profileRepository;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
+        this.gamificationService = gamificationService;
     }
 
     /**
@@ -69,6 +73,12 @@ public class MeetingSessionService {
         session.setNotes(request.getNotes());
 
         MeetingSession savedSession = meetingSessionRepository.save(session);
+
+        try {
+            gamificationService.awardPoints(scheduler.getId(), 25);
+        } catch (Exception e) {
+            log.error("Failed to award points for session scheduled by profile {}: {}", scheduler.getId(), e.getMessage());
+        }
 
         String message = "New study session scheduled for " + request.getScheduledAt()
                 + (request.getLocation() != null && !request.getLocation().isBlank()
