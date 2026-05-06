@@ -77,9 +77,13 @@ function StudyGroupCard({ group, joined, joinLoading, onJoin, onLeave, onDelete,
         <div className="flex items-center gap-2 mt-auto">
           <div className="flex -space-x-2">
             {(group.members ?? []).slice(0, 4).map((member, i) => (
-              <div key={i} className="w-7 h-7 rounded-full bg-wsu-navy dark:bg-blue-800 text-white text-xs flex items-center justify-center border-2 border-white dark:border-gray-800 font-semibold">
-                {member.name?.charAt(0)?.toUpperCase() ?? '?'}
-              </div>
+              member.profilePicURL ? (
+                <img key={i} src={member.profilePicURL} alt={member.name} className="w-7 h-7 rounded-full object-cover border-2 border-white dark:border-gray-800" />
+              ) : (
+                <div key={i} className="w-7 h-7 rounded-full bg-wsu-navy dark:bg-blue-800 text-white text-xs flex items-center justify-center border-2 border-white dark:border-gray-800 font-semibold">
+                  {member.name?.charAt(0)?.toUpperCase() ?? '?'}
+                </div>
+              )
             ))}
           </div>
           <span className="text-xs text-wsu-slate dark:text-gray-400">

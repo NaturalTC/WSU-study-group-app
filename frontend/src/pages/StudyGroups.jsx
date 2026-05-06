@@ -320,7 +320,16 @@ function StudyGroups() {
               <p className="text-xs font-semibold text-wsu-slate dark:text-gray-400 uppercase tracking-widest mb-3">Members</p>
               <div className="flex flex-wrap gap-2">
                 {(selectedGroup.members ?? []).map((m, i) => (
-                  <span key={i} className="bg-wsu-mist dark:bg-gray-800 text-wsu-navy dark:text-gray-200 text-xs font-medium px-3 py-1 rounded-full">{m.name}</span>
+                  <div key={i} className="flex items-center gap-1.5 bg-wsu-mist dark:bg-gray-800 text-wsu-navy dark:text-gray-200 text-xs font-medium px-2 py-1 rounded-full">
+                    {m.profilePicURL ? (
+                      <img src={m.profilePicURL} alt={m.name} className="w-5 h-5 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-5 h-5 rounded-full bg-wsu-navy dark:bg-blue-800 text-white flex items-center justify-center text-[10px] font-bold">
+                        {m.name?.charAt(0)?.toUpperCase() ?? '?'}
+                      </div>
+                    )}
+                    {m.name}
+                  </div>
                 ))}
               </div>
             </div>
