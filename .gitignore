@@ -39,3 +39,5 @@ application-local.properties
 
 ### Claude ###
 CLAUDE.md
+
+application-prod.properties

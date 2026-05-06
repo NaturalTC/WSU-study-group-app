@@ -1,3 +1,5 @@
+import { useRef } from 'react'
+
 function getCourseGradient(courseCode) {
   const prefix = (courseCode ?? '').split(' ')[0].toUpperCase()
   if (prefix.startsWith('CAIS') || prefix.startsWith('CIS') || prefix.startsWith('CS'))
@@ -23,17 +25,24 @@ function getCourseGradient(courseCode) {
   return 'from-wsu-navy to-blue-900'
 }
 
-function StudyGroupCard({ group, joined, joinLoading, onJoin, onLeave, onDelete, isCreator, onViewDetails }) {
+function StudyGroupCard({ group, joined, joinLoading, picLoading, onJoin, onLeave, onDelete, onUploadPic, isCreator, onViewDetails }) {
   const memberCount = group.members?.length ?? 0
   const courseCode  = group.course?.courseCode ?? ''
   const prefix      = courseCode.split(' ')[0] ?? ''
   const gradient    = getCourseGradient(courseCode)
+  const fileInputRef = useRef(null)
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0]
+    if (file) onUploadPic(group, file)
+    e.target.value = ''
+  }
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.01] flex flex-col border border-transparent dark:border-gray-700 overflow-hidden">
 
       {/* Header — group pic if set, otherwise gradient */}
-      <div className={`h-24 relative overflow-hidden flex-shrink-0 ${group.groupPicURL ? '' : `bg-gradient-to-br ${gradient}`}`}>
+      <div className={`h-24 relative overflow-hidden flex-shrink-0 group/header ${group.groupPicURL ? '' : `bg-gradient-to-br ${gradient}`}`}>
         {group.groupPicURL ? (
           <img src={group.groupPicURL} alt={group.name} className="w-full h-full object-cover" />
         ) : (
@@ -43,6 +52,39 @@ function StudyGroupCard({ group, joined, joinLoading, onJoin, onLeave, onDelete,
             <div className="absolute right-16 top-2 w-10 h-10 rounded-full bg-white/10" />
           </>
         )}
+
+        {/* Camera upload overlay — creator only, appears on hover */}
+        {isCreator && (
+          <>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileChange}
+              disabled={picLoading}
+            />
+            <div
+              onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click() }}
+              className="absolute inset-0 bg-black/0 group-hover/header:bg-black/30 transition-all duration-200 cursor-pointer flex items-center justify-center"
+            >
+              <div className="opacity-0 group-hover/header:opacity-100 transition-opacity duration-200 flex flex-col items-center gap-1">
+                {picLoading ? (
+                  <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <svg className="w-6 h-6 text-white drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span className="text-white text-[10px] font-semibold drop-shadow">Change photo</span>
+                  </>
+                )}
+              </div>
+            </div>
+          </>
+        )}
+
         <div className="absolute top-3 right-3 flex items-center gap-1.5">
           {isCreator && (
             <button

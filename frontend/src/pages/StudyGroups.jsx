@@ -17,10 +17,16 @@ function StudyGroups() {
   const [activeFilter, setActiveFilter]   = useState('all')
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [selectedGroup, setSelectedGroup] = useState(null)
-  const [createForm, setCreateForm]       = useState({ name: '', courseId: '' })
+  const [createForm, setCreateForm]       = useState({ name: '', courseId: '', password: '' })
   const [createLoading, setCreateLoading] = useState(false)
   const [createError, setCreateError]     = useState('')
+  const [createShowPassword, setCreateShowPassword] = useState(false)
   const [joinLoading, setJoinLoading]     = useState(null)
+  const [passwordPromptGroup, setPasswordPromptGroup] = useState(null)
+  const [groupPassword, setGroupPassword] = useState('')
+  const [passwordError, setPasswordError] = useState('')
+  const [passwordLoading, setPasswordLoading] = useState(false)
+  const [showPasswordText, setShowPasswordText] = useState(false)
   const [picLoading, setPicLoading]       = useState(false)
   const [picError, setPicError]           = useState('')
 
@@ -61,15 +67,50 @@ function StudyGroups() {
     if (joinedGroupIds.has(group.id)) return
     setJoinLoading(group.id)
     try {
-      await api.post(`/groups/${group.id}/join`)
+      await api.post(`/groups/${group.id}/join`, {})
       setJoinedGroupIds(prev => new Set([...prev, group.id]))
       refreshNotifications()
       refreshProfile()
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to join group.')
+      if (err.response?.status === 403) {
+        setPasswordPromptGroup(group)
+        setGroupPassword('')
+        setPasswordError('')
+        setShowPasswordText(false)
+      } else {
+        alert(err.response?.data?.message || 'Failed to join group.')
+      }
     } finally {
       setJoinLoading(null)
     }
+  }
+
+  const handleJoinWithPassword = async (e) => {
+    e.preventDefault()
+    setPasswordLoading(true)
+    setPasswordError('')
+    try {
+      await api.post(`/groups/${passwordPromptGroup.id}/join`, { password: groupPassword })
+      setJoinedGroupIds(prev => new Set([...prev, passwordPromptGroup.id]))
+      refreshNotifications()
+      setPasswordPromptGroup(null)
+      setGroupPassword('')
+    } catch (err) {
+      if (err.response?.status === 403) {
+        setPasswordError('Incorrect password. Please try again.')
+      } else {
+        setPasswordError(err.response?.data?.message || 'Failed to join group.')
+      }
+    } finally {
+      setPasswordLoading(false)
+    }
+  }
+
+  const closePasswordPrompt = () => {
+    setPasswordPromptGroup(null)
+    setGroupPassword('')
+    setPasswordError('')
+    setShowPasswordText(false)
   }
 
   const handleLeave = async (group) => {
@@ -95,24 +136,26 @@ function StudyGroups() {
     }
   }
 
-  const handleGroupPicUpload = async (e) => {
-    const file = e.target.files?.[0]
+  const handleGroupPicUpload = async (group, file) => {
     if (!file) return
-    setPicLoading(true)
+    setPicLoading(group.id)
     setPicError('')
     try {
       const form = new FormData()
       form.append('file', file)
-      const res = await api.post(`/groups/${selectedGroup.id}/picture`, form, {
+      await api.post(`/groups/${group.id}/picture`, form, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
-      const updated = res.data
-      setGroups(prev => prev.map(g => g.id === updated.id ? updated : g))
-      setSelectedGroup(updated)
+      // Re-fetch all groups so every card gets the fresh URL
+      const res = await api.get('/groups')
+      setGroups(res.data)
+      if (selectedGroup?.id === group.id) {
+        setSelectedGroup(res.data.find(g => g.id === group.id) ?? null)
+      }
     } catch (err) {
       setPicError(err.response?.data?.message || 'Failed to upload picture.')
     } finally {
-      setPicLoading(false)
+      setPicLoading(null)
     }
   }
 
@@ -124,13 +167,15 @@ function StudyGroups() {
       const res = await api.post('/groups', {
         name: createForm.name,
         courseId: Number(createForm.courseId),
+        password: createForm.password || null,
       })
       const newGroup = res.data
       setGroups(prev => [...prev, newGroup])
       setJoinedGroupIds(prev => new Set([...prev, newGroup.id]))
       refreshProfile()
       setShowCreateModal(false)
-      setCreateForm({ name: '', courseId: '' })
+      setCreateForm({ name: '', courseId: '', password: '' })
+      setCreateShowPassword(false)
     } catch (err) {
       setCreateError(err.response?.data?.message || 'Failed to create group.')
     } finally {
@@ -232,9 +277,11 @@ function StudyGroups() {
                     group={group}
                     joined={joinedGroupIds.has(group.id)}
                     joinLoading={joinLoading === group.id}
+                    picLoading={picLoading === group.id}
                     onJoin={handleJoin}
                     onLeave={handleLeave}
                     onDelete={handleDelete}
+                    onUploadPic={handleGroupPicUpload}
                     isCreator={profile?.id === group.createdBy?.id}
                     onViewDetails={setSelectedGroup}
                   />
@@ -278,10 +325,16 @@ function StudyGroups() {
               )}
               {/* Camera upload — creator only */}
               {profile?.id === selectedGroup.createdBy?.id && (
-                <label className="absolute bottom-3 right-3 cursor-pointer group">
-                  <input type="file" accept="image/*" className="hidden" onChange={handleGroupPicUpload} disabled={picLoading} />
+                <label className="absolute bottom-3 right-3 cursor-pointer">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={e => { const f = e.target.files?.[0]; if (f) handleGroupPicUpload(selectedGroup, f); e.target.value = '' }}
+                    disabled={picLoading === selectedGroup.id}
+                  />
                   <div className="w-9 h-9 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/60 transition-all">
-                    {picLoading ? (
+                    {picLoading === selectedGroup.id ? (
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     ) : (
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -356,6 +409,78 @@ function StudyGroups() {
         </div>
       )}
 
+      {/* Password Prompt Modal */}
+      {passwordPromptGroup && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-6 backdrop-blur-sm">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-md w-full p-8 animate-fade-up">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-5 h-5 text-blue-700 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <h2 className="font-display text-xl text-wsu-navy dark:text-white">Password Required</h2>
+              </div>
+              <button onClick={closePasswordPrompt} className="text-gray-400 hover:text-wsu-navy dark:hover:text-white text-2xl leading-none">×</button>
+            </div>
+
+            <p className="text-sm text-wsu-slate dark:text-gray-400 mb-6">
+              <span className="font-semibold text-wsu-navy dark:text-white">{passwordPromptGroup.name}</span> is a password-protected group. Enter the password to join.
+            </p>
+
+            {passwordError && (
+              <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3 mb-4">
+                {passwordError}
+              </div>
+            )}
+
+            <form onSubmit={handleJoinWithPassword} className="space-y-4">
+              <div>
+                <label className="form-label">Group Password</label>
+                <div className="relative">
+                  <input
+                    type={showPasswordText ? 'text' : 'password'}
+                    required
+                    autoFocus
+                    placeholder="Enter group password"
+                    className="form-input !pr-12"
+                    value={groupPassword}
+                    onChange={e => setGroupPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPasswordText(p => !p)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-wsu-navy dark:hover:text-white"
+                  >
+                    {showPasswordText ? (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 4.411m0 0L21 21" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={closePasswordPrompt} className="btn-secondary flex-1 py-3">Cancel</button>
+                <button
+                  type="submit"
+                  disabled={passwordLoading || !groupPassword}
+                  className="flex-1 py-3 bg-blue-700 hover:bg-blue-800 text-white font-semibold rounded-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {passwordLoading ? 'Joining...' : 'Join Group'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Create Group Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-6 backdrop-blur-sm">
@@ -363,7 +488,7 @@ function StudyGroups() {
             <div className="flex items-center justify-between mb-6">
               <h2 className="font-display text-2xl text-wsu-navy dark:text-white">Create a Study Group</h2>
               <button
-                onClick={() => { setShowCreateModal(false); setCreateError('') }}
+                onClick={() => { setShowCreateModal(false); setCreateError(''); setCreateShowPassword(false) }}
                 className="text-gray-400 hover:text-wsu-navy dark:hover:text-white text-2xl leading-none"
               >
                 ×
@@ -402,10 +527,44 @@ function StudyGroups() {
                   ))}
                 </select>
               </div>
+              <div>
+                <label className="form-label">
+                  Password
+                  <span className="ml-1 text-wsu-slate dark:text-gray-400 font-normal text-xs">(optional)</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type={createShowPassword ? 'text' : 'password'}
+                    placeholder="Leave blank for an open group"
+                    className="form-input !pr-12"
+                    value={createForm.password}
+                    onChange={e => setCreateForm(p => ({ ...p, password: e.target.value }))}
+                  />
+                  {createForm.password && (
+                    <button
+                      type="button"
+                      onClick={() => setCreateShowPassword(p => !p)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-wsu-navy dark:hover:text-white"
+                    >
+                      {createShowPassword ? (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 4.411m0 0L21 21" />
+                        </svg>
+                      ) : (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                      )}
+                    </button>
+                  )}
+                </div>
+                <p className="text-xs text-wsu-slate dark:text-gray-400 mt-1">Members will need this password to join.</p>
+              </div>
               <div className="flex gap-3 pt-2">
                 <button
                   type="button"
-                  onClick={() => { setShowCreateModal(false); setCreateError('') }}
+                  onClick={() => { setShowCreateModal(false); setCreateError(''); setCreateShowPassword(false) }}
                   className="btn-secondary flex-1 py-3"
                 >
                   Cancel
