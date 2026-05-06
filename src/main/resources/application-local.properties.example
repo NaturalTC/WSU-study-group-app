@@ -7,20 +7,37 @@ spring.jpa.show-sql=true
 spring.sql.init.mode=always
 spring.jpa.defer-datasource-initialization=true
 
-# Mail (use a Gmail App Password)
+# Mail — use a Gmail App Password, NOT your real Gmail password
+# Generate one at: Google Account → Security → App Passwords
+# It will be 16 characters with no spaces e.g. abcdwxyzefghijkl
 spring.mail.host=smtp.gmail.com
 spring.mail.port=587
-spring.mail.username=yourgmail@gmail.com    - Use your personal email
-spring.mail.password=your-app-password      - Go to your google account and look for App Passwords and create one. Add it without any spaces
-                                              Ex: jdivjaidowwmsweg          should be 12 letters
+spring.mail.username=YOUR_GMAIL_ADDRESS
+spring.mail.password=YOUR_GMAIL_APP_PASSWORD
 spring.mail.properties.mail.smtp.auth=true
 spring.mail.properties.mail.smtp.starttls.enable=true
 
-# JWT
-app.jwt.secret=your-secret-key-here-make-it-long-and-random
+# JWT — must be a long random string, at least 32 characters
+app.jwt.secret=YOUR_JWT_SECRET_KEY
 app.jwt.expiration=86400000
 
 # App
 app.school-email-domain=@westfield.ma.edu
 app.base-url=http://localhost:8080
 app.frontend-url=http://localhost:5173
+
+# AWS S3 — used for profile picture uploads
+# IAM → Users → Security credentials → Create access key → Local code
+# Bucket: studynest-pfp (us-east-2), make sure the IAM user has s3:PutObject permission
+aws.access-key=YOUR_AWS_ACCESS_KEY
+aws.secret-key=YOUR_AWS_SECRET_KEY
+aws.s3.bucket=studynest-pfp
+aws.s3.region=us-east-2
+
+# File upload limit
+spring.servlet.multipart.max-file-size=5MB
+spring.servlet.multipart.max-request-size=5MB
+
+# AI study assistant — get your key at https://platform.openai.com/api-keys
+openai.api.key=YOUR_OPENAI_API_KEY
+openai.model=gpt-4o-mini

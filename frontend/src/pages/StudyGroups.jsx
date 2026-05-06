@@ -4,9 +4,11 @@ import StudyGroupCard from '../components/StudyGroupCard'
 import api from '../api/axios'
 import campusPhoto from '../assets/WSUCampusStock2013_033-L.jpg'
 import { useNotifications } from '../context/NotificationContext'
+import { useAuth } from '../context/AuthContext'
 
 function StudyGroups() {
   const { refresh: refreshNotifications } = useNotifications()
+  const { profile, refreshProfile } = useAuth()
   const [groups, setGroups]               = useState([])
   const [courses, setCourses]             = useState([])
   const [joinedGroupIds, setJoinedGroupIds] = useState(new Set())
@@ -60,6 +62,7 @@ function StudyGroups() {
       await api.post(`/groups/${group.id}/join`)
       setJoinedGroupIds(prev => new Set([...prev, group.id]))
       refreshNotifications()
+      refreshProfile()
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to join group.')
     } finally {
@@ -79,6 +82,17 @@ function StudyGroups() {
     }
   }
 
+  const handleDelete = async (group) => {
+    if (!window.confirm(`Delete "${group.name}"? This cannot be undone.`)) return
+    try {
+      await api.delete(`/groups/${group.id}`)
+      setGroups(prev => prev.filter(g => g.id !== group.id))
+      setJoinedGroupIds(prev => { const next = new Set(prev); next.delete(group.id); return next })
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to delete group.')
+    }
+  }
+
   const handleCreate = async (e) => {
     e.preventDefault()
     setCreateLoading(true)
@@ -91,6 +105,7 @@ function StudyGroups() {
       const newGroup = res.data
       setGroups(prev => [...prev, newGroup])
       setJoinedGroupIds(prev => new Set([...prev, newGroup.id]))
+      refreshProfile()
       setShowCreateModal(false)
       setCreateForm({ name: '', courseId: '' })
     } catch (err) {
@@ -196,6 +211,8 @@ function StudyGroups() {
                     joinLoading={joinLoading === group.id}
                     onJoin={handleJoin}
                     onLeave={handleLeave}
+                    onDelete={handleDelete}
+                    isCreator={profile?.id === group.createdBy?.id}
                     onViewDetails={setSelectedGroup}
                   />
                 ))}

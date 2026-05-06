@@ -66,7 +66,7 @@ const QUICK_EMOJIS = ['👍', '😂', '🔥']
 function GroupChat() {
   const { groupId } = useParams()
   const parsedGroupId = parseInt(groupId)
-  const { profile } = useAuth()
+  const { profile, refreshProfile } = useAuth()
   const { refresh: refreshNotifications } = useNotifications()
 
   const [group, setGroup]         = useState(null)
@@ -186,6 +186,7 @@ function GroupChat() {
     e.preventDefault()
     if (!input.trim() || !connected) return
     sendMessage(input)
+    refreshProfile()
     setInput('')
     if (inputRef.current) {
       inputRef.current.style.height = ''
@@ -196,6 +197,7 @@ function GroupChat() {
 
   const handleEmojiSend = (emoji) => {
     sendMessage(emoji)
+    refreshProfile()
     setEmojiOpen(false)
     inputRef.current?.focus()
   }
