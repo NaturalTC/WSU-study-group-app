@@ -7,6 +7,7 @@ import com.github.wsustudygroupapp.model.StudyGroup;
 import com.github.wsustudygroupapp.repository.MessageRepository;
 import com.github.wsustudygroupapp.repository.ProfileRepository;
 import com.github.wsustudygroupapp.repository.StudyGroupRepository;
+import com.github.wsustudygroupapp.service.ActiveDmTracker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,6 +40,9 @@ public class ChatServiceTest {
 
     @Mock
     private NotificationService notificationService;
+
+    @Mock
+    private ActiveDmTracker activeDmTracker;
 
     @InjectMocks
     private ChatService chatService;

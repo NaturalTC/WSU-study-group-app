@@ -7,6 +7,7 @@ import com.github.wsustudygroupapp.model.Notification.NotificationType;
 import com.github.wsustudygroupapp.repository.NotificationRepository;
 import com.github.wsustudygroupapp.repository.ProfileRepository;
 import com.github.wsustudygroupapp.repository.UserRepository;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +32,7 @@ class NotificationServiceTest {
     @Mock private NotificationRepository notificationRepository;
     @Mock private ProfileRepository profileRepository;
     @Mock private UserRepository userRepository;
+    @Mock private SimpMessagingTemplate messagingTemplate;
     @InjectMocks private NotificationService notificationService;
 
     private static final String EMAIL = "student@westfield.ma.edu";
