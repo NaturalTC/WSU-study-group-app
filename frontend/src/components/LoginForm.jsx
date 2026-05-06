@@ -7,12 +7,7 @@ import OwlLogo from './OwlLogo'
 
 function LoginForm() {
   const navigate = useNavigate()
-  const { login, demoLogin } = useAuth()
-
-  const handleDemo = () => {
-    demoLogin()
-    navigate('/leaderboard')
-  }
+  const { login } = useAuth()
 
   const [formData, setFormData] = useState({
     email: '',
@@ -201,16 +196,6 @@ function LoginForm() {
             <span className="text-gray-400 text-xs">or</span>
             <hr className="flex-1 border-gray-200" />
           </div>
-
-          {/* Demo button */}
-          <button
-            type="button"
-            onClick={handleDemo}
-            className="w-full flex items-center justify-center gap-2 border-2 border-wsu-gold text-wsu-navy font-semibold px-6 py-3 rounded-lg hover:bg-wsu-gold/10 transition-all duration-200 mb-4"
-          >
-            <span className="text-lg">🦉</span>
-            Preview Demo (no login needed)
-          </button>
 
           {/* Register Link */}
           <p className="text-center text-sm text-wsu-slate">

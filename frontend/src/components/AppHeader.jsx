@@ -100,6 +100,7 @@ function AppHeader() {
         { label: 'Study Groups', to: '/study-groups' },
         { label: 'Group Chats',  to: '/group-chat'   },
         { label: 'Meetings',     to: '/meetings'     },
+        { label: 'Friends',      to: '/friends'      },
         { label: 'Leaderboard',  to: '/leaderboard'  },
     ]
 

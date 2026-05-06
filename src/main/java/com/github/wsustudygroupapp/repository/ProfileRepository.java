@@ -17,4 +17,7 @@ public interface ProfileRepository extends JpaRepository<Profile, Long> {
     Optional<Profile> findByUserId(Long userId);
     Optional<Profile> findByName(String name);
     Optional<Profile> findByUserEmail(String email);
+
+    /** Case-insensitive partial name search — powers the friend search bar. */
+    java.util.List<Profile> findByNameContainingIgnoreCase(String name);
 }
