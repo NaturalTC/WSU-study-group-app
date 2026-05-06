@@ -48,13 +48,9 @@ class CourseControllerTest {
 
         mockEnrollment = new UserCourse();
         mockEnrollment.setId(100L);
-        mockEnrollment.setSection("001");
-        mockEnrollment.setSemester("Fall 2026");
 
         enrollRequest = new CourseEnrollRequest();
         enrollRequest.setCourseCode("CAIS 0236");
-        enrollRequest.setSection("001");
-        enrollRequest.setSemester("Fall 2026");
     }
 
     // stubs authentication.getName() — only called in tests that pass authentication to the controller
@@ -197,8 +193,8 @@ class CourseControllerTest {
     @Test
     void getEnrolledStudents_returns200WithStudentList() {
         mockAuth();
-        when(courseService.getEnrolledStudents(10L, null, null, EMAIL)).thenReturn(List.of(mockEnrollment));
-        ResponseEntity<List<UserCourse>> response = courseController.getEnrolledStudents(authentication, 10L, null, null);
+        when(courseService.getEnrolledStudents(10L, EMAIL)).thenReturn(List.of(mockEnrollment));
+        ResponseEntity<List<UserCourse>> response = courseController.getEnrolledStudents(authentication, 10L);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(1, response.getBody().size());
     }
@@ -206,8 +202,8 @@ class CourseControllerTest {
     @Test
     void getEnrolledStudents_noStudents_returns200WithEmptyList() {
         mockAuth();
-        when(courseService.getEnrolledStudents(10L, null, null, EMAIL)).thenReturn(List.of());
-        ResponseEntity<List<UserCourse>> response = courseController.getEnrolledStudents(authentication, 10L, null, null);
+        when(courseService.getEnrolledStudents(10L, EMAIL)).thenReturn(List.of());
+        ResponseEntity<List<UserCourse>> response = courseController.getEnrolledStudents(authentication, 10L);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(response.getBody().isEmpty());
     }
@@ -215,10 +211,10 @@ class CourseControllerTest {
     @Test
     void getEnrolledStudents_courseNotFound_propagatesResourceNotFoundException() {
         mockAuth();
-        when(courseService.getEnrolledStudents(99L, null, null, EMAIL))
+        when(courseService.getEnrolledStudents(99L, EMAIL))
                 .thenThrow(new ResourceNotFoundException("Course not found"));
         assertThrows(ResourceNotFoundException.class,
-                () -> courseController.getEnrolledStudents(authentication, 99L, null, null));
+                () -> courseController.getEnrolledStudents(authentication, 99L));
     }
 
     // ── GET /courses/search ────────────────────────────────────────────────────

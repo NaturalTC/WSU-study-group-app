@@ -68,13 +68,8 @@ class CourseServiceTest {
         mockEnrollment.setId(100L);
         mockEnrollment.setProfile(mockProfile);
         mockEnrollment.setCourse(mockCourse);
-        mockEnrollment.setSection("001");
-        mockEnrollment.setSemester("Fall 2026");
-
         enrollRequest = new CourseEnrollRequest();
         enrollRequest.setCourseCode("CAIS 0236");
-        enrollRequest.setSection("001");
-        enrollRequest.setSemester("Fall 2026");
     }
 
     // stubs the resolveProfile() helper used by most service methods
@@ -150,8 +145,7 @@ class CourseServiceTest {
     void enroll_alreadyEnrolledInSameSectionAndSemester_throws409Conflict() {
         stubResolveProfile();
         when(courseRepository.findByCourseCode("CAIS 0236")).thenReturn(Optional.of(mockCourse));
-        when(userCourseRepository.existsByProfileIdAndCourseIdAndSectionAndSemester(
-                1L, 10L, "001", "Fall 2026")).thenReturn(true);
+        when(userCourseRepository.existsByProfileIdAndCourseId(1L, 10L)).thenReturn(true);
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class,
                 () -> courseService.enroll(EMAIL, enrollRequest));
@@ -159,44 +153,23 @@ class CourseServiceTest {
     }
 
     @Test
-    void enroll_differentSectionSameCourse_doesNotThrowConflict() {
-        // enrolling in a different section of the same course should be allowed
-        stubResolveProfile();
-        CourseEnrollRequest differentSection = new CourseEnrollRequest();
-        differentSection.setCourseCode("CAIS 0236");
-        differentSection.setSection("002");
-        differentSection.setSemester("Fall 2026");
-
-        when(courseRepository.findByCourseCode("CAIS 0236")).thenReturn(Optional.of(mockCourse));
-        when(userCourseRepository.existsByProfileIdAndCourseIdAndSectionAndSemester(
-                1L, 10L, "002", "Fall 2026")).thenReturn(false);
-        when(userCourseRepository.save(any(UserCourse.class))).thenAnswer(inv -> inv.getArgument(0));
-
-        assertDoesNotThrow(() -> courseService.enroll(EMAIL, differentSection));
-    }
-
-    @Test
     void enroll_setsAllFieldsOnNewEnrollment() {
         stubResolveProfile();
         when(courseRepository.findByCourseCode("CAIS 0236")).thenReturn(Optional.of(mockCourse));
-        when(userCourseRepository.existsByProfileIdAndCourseIdAndSectionAndSemester(
-                1L, 10L, "001", "Fall 2026")).thenReturn(false);
+        when(userCourseRepository.existsByProfileIdAndCourseId(1L, 10L)).thenReturn(false);
         when(userCourseRepository.save(any(UserCourse.class))).thenAnswer(inv -> inv.getArgument(0));
 
         UserCourse result = courseService.enroll(EMAIL, enrollRequest);
 
         assertEquals(mockProfile, result.getProfile());
         assertEquals(mockCourse, result.getCourse());
-        assertEquals("001", result.getSection());
-        assertEquals("Fall 2026", result.getSemester());
     }
 
     @Test
     void enroll_persistsEnrollmentExactlyOnce() {
         stubResolveProfile();
         when(courseRepository.findByCourseCode("CAIS 0236")).thenReturn(Optional.of(mockCourse));
-        when(userCourseRepository.existsByProfileIdAndCourseIdAndSectionAndSemester(
-                1L, 10L, "001", "Fall 2026")).thenReturn(false);
+        when(userCourseRepository.existsByProfileIdAndCourseId(1L, 10L)).thenReturn(false);
         when(userCourseRepository.save(any(UserCourse.class))).thenReturn(mockEnrollment);
 
         courseService.enroll(EMAIL, enrollRequest);
@@ -261,51 +234,18 @@ class CourseServiceTest {
     void getEnrolledStudents_courseNotFound_throwsResourceNotFoundException() {
         when(courseRepository.existsById(99L)).thenReturn(false);
         assertThrows(ResourceNotFoundException.class,
-                () -> courseService.getEnrolledStudents(99L, null, null, EMAIL));
+                () -> courseService.getEnrolledStudents(99L, EMAIL));
     }
 
     @Test
-    void getEnrolledStudents_noFilters_returnsAllStudentsExcludingSelf() {
+    void getEnrolledStudents_returnsAllStudentsExcludingSelf() {
         stubResolveProfile();
         when(courseRepository.existsById(10L)).thenReturn(true);
-        when(userCourseRepository.findCourseEnrollments(10L, 1L, null, null)).thenReturn(List.of());
+        when(userCourseRepository.findCourseEnrollments(10L, 1L)).thenReturn(List.of());
 
-        courseService.getEnrolledStudents(10L, null, null, EMAIL);
+        courseService.getEnrolledStudents(10L, EMAIL);
 
-        verify(userCourseRepository).findCourseEnrollments(10L, 1L, null, null);
-    }
-
-    @Test
-    void getEnrolledStudents_withSectionFilter_passesSectionToRepo() {
-        stubResolveProfile();
-        when(courseRepository.existsById(10L)).thenReturn(true);
-        when(userCourseRepository.findCourseEnrollments(10L, 1L, "001", null)).thenReturn(List.of());
-
-        courseService.getEnrolledStudents(10L, "001", null, EMAIL);
-
-        verify(userCourseRepository).findCourseEnrollments(10L, 1L, "001", null);
-    }
-
-    @Test
-    void getEnrolledStudents_withSemesterFilter_passesSemesterToRepo() {
-        stubResolveProfile();
-        when(courseRepository.existsById(10L)).thenReturn(true);
-        when(userCourseRepository.findCourseEnrollments(10L, 1L, null, "Fall 2026")).thenReturn(List.of());
-
-        courseService.getEnrolledStudents(10L, null, "Fall 2026", EMAIL);
-
-        verify(userCourseRepository).findCourseEnrollments(10L, 1L, null, "Fall 2026");
-    }
-
-    @Test
-    void getEnrolledStudents_blankSection_treatedAsNull() {
-        stubResolveProfile();
-        when(courseRepository.existsById(10L)).thenReturn(true);
-        when(userCourseRepository.findCourseEnrollments(10L, 1L, null, null)).thenReturn(List.of());
-
-        courseService.getEnrolledStudents(10L, "   ", null, EMAIL);
-
-        verify(userCourseRepository).findCourseEnrollments(10L, 1L, null, null);
+        verify(userCourseRepository).findCourseEnrollments(10L, 1L);
     }
 
     @Test
@@ -313,9 +253,9 @@ class CourseServiceTest {
         stubResolveProfile();
         when(courseRepository.existsById(10L)).thenReturn(true);
         UserCourse other = new UserCourse();
-        when(userCourseRepository.findCourseEnrollments(10L, 1L, null, null)).thenReturn(List.of(other));
+        when(userCourseRepository.findCourseEnrollments(10L, 1L)).thenReturn(List.of(other));
 
-        assertEquals(1, courseService.getEnrolledStudents(10L, null, null, EMAIL).size());
+        assertEquals(1, courseService.getEnrolledStudents(10L, EMAIL).size());
     }
 
     // ── searchCourses ──────────────────────────────────────────────────────────

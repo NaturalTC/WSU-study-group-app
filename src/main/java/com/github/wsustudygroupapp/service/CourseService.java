@@ -61,15 +61,13 @@ public class CourseService {
         Course course = courseRepository.findByCourseCode(request.getCourseCode())
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + request.getCourseCode()));
         // prevent the same student from enrolling in the same course+section+semester twice
-        if (userCourseRepository.existsByProfileIdAndCourseIdAndSectionAndSemester(
-                profile.getId(), course.getId(), request.getSection(), request.getSemester())) {
+        if (userCourseRepository.existsByProfileIdAndCourseId(
+                profile.getId(), course.getId())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Already enrolled in this course section");
         }
         UserCourse enrollment = new UserCourse();
         enrollment.setProfile(profile);
         enrollment.setCourse(course);
-        enrollment.setSection(request.getSection());
-        enrollment.setSemester(request.getSemester());
         return userCourseRepository.save(enrollment);
     }
 
@@ -87,18 +85,13 @@ public class CourseService {
         userCourseRepository.delete(enrollment);
     }
 
-    /** Returns all students enrolled in a course excluding the requester, optionally filtered by section and/or semester. */
-    public List<UserCourse> getEnrolledStudents(Long courseId, String section, String semester, String email) {
+    /** Returns all students enrolled in a course excluding the requester. */
+    public List<UserCourse> getEnrolledStudents(Long courseId, String email) {
         if (!courseRepository.existsById(courseId)) {
             throw new ResourceNotFoundException("Course not found: " + courseId);
         }
         Profile profile = resolveProfile(email);
-        return userCourseRepository.findCourseEnrollments(
-                courseId,
-                profile.getId(),
-                (section != null && section.isBlank()) ? null : section,
-                (semester != null && semester.isBlank()) ? null : semester
-        );
+        return userCourseRepository.findCourseEnrollments(courseId, profile.getId());
     }
 
     // Plan C — search courses by keyword (e.g. "biology"), used for the frontend search bar

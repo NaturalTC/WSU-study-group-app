@@ -51,22 +51,25 @@ public class ChatService {
         return messageRepository.save(msg);
     }
 
-    public Message saveMessage(MessageDTO dto)
-    {
-        Long groupId = dto.getStudyGroupId();
-        String name = dto.getSenderName();
-        Profile sender = profileRepository.findByName(name).orElseThrow
-                (
-                    () -> new RuntimeException("Could not find profile")
-                );
-        StudyGroup studyGroup = studyGroupRepository.getReferenceById(groupId);
-        String content = dto.getContent();
+    public Message saveMessage(MessageDTO dto) {
+        Profile sender = profileRepository.findByName(dto.getSenderName())
+                .orElseThrow(() -> new RuntimeException("Could not find profile"));
+
         Message savedMessage = new Message();
-        savedMessage.setStudyGroup(studyGroup);
         savedMessage.setSender(sender);
-        savedMessage.setContent(content);
+        savedMessage.setContent(dto.getContent());
         savedMessage.setSentAt(dto.getSentAt());
-        messageRepository.save(savedMessage);
-        return savedMessage;
+
+        if (dto.getDmRoomId() != null) {
+            savedMessage.setDmRoomId(dto.getDmRoomId());
+        } else {
+            savedMessage.setStudyGroup(studyGroupRepository.getReferenceById(dto.getStudyGroupId()));
+        }
+
+        return messageRepository.save(savedMessage);
+    }
+
+    public List<Message> getDmHistory(String dmRoomId) {
+        return messageRepository.findByDmRoomIdOrderBySentAtAsc(dmRoomId);
     }
 }

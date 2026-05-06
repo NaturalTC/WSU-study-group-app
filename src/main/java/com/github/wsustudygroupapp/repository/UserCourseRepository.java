@@ -21,43 +21,33 @@ public interface UserCourseRepository extends JpaRepository<UserCourse, Long> {
     /** Returns all enrollments in a given course. Used by GamificationService for course leaderboard. */
     List<UserCourse> findByCourseId(Long courseId);
 
-    /** Returns true if the student is already enrolled in this course+section+semester. Used to prevent duplicate enrollments. */
-    boolean existsByProfileIdAndCourseIdAndSectionAndSemester(Long profileId, Long courseId, String section, String semester);
+    /** Returns true if the student is already enrolled in this course. Used to prevent duplicate enrollments. */
+    boolean existsByProfileIdAndCourseId(Long profileId, Long courseId);
 
     /**
-     * Core matching query — finds all students enrolled in the same course, section, and semester.
+     * Core matching query — finds all students enrolled in the same course.
      * Excludes the requesting student's own profile from the results.
-     * Two students are considered classmates only if all three values match exactly.
      */
     @Query("""
         SELECT uc FROM UserCourse uc
         WHERE uc.course.id = :courseId
-        AND uc.section = :section
-        AND uc.semester = :semester
         AND uc.profile.id != :profileId
     """)
     List<UserCourse> findClassmates(
         @Param("courseId") Long courseId,
-        @Param("section") String section,
-        @Param("semester") String semester,
         @Param("profileId") Long profileId
     );
 
     /**
      * Returns all enrollments for a course, excluding the requesting student.
-     * Section and semester filters are optional — passing null omits that condition.
      */
     @Query("""
         SELECT uc FROM UserCourse uc
         WHERE uc.course.id = :courseId
         AND uc.profile.id != :profileId
-        AND (:section IS NULL OR uc.section = :section)
-        AND (:semester IS NULL OR uc.semester = :semester)
     """)
     List<UserCourse> findCourseEnrollments(
         @Param("courseId") Long courseId,
-        @Param("profileId") Long profileId,
-        @Param("section") String section,
-        @Param("semester") String semester
+        @Param("profileId") Long profileId
     );
 }

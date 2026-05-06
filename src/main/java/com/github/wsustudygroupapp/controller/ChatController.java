@@ -6,9 +6,12 @@ import com.github.wsustudygroupapp.service.ChatService;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 // TODO: Brian — WebSocket message handler
 // This is NOT a @RestController — it uses @MessageMapping for WebSocket (STOMP)
@@ -30,12 +33,30 @@ public class ChatController {
     @MessageMapping("/chat/{groupId}")
     @SendTo("/topic/chat/{groupId}")
     public MessageDTO sendMessage(MessageDTO dto) {
-        // TODO: dto.setSentAt(LocalDateTime.now())
-        LocalDateTime sentAt = LocalDateTime.now();
-        dto.setSentAt(sentAt);
-        // TODO: chatService.saveMessage(dto)
+        dto.setSentAt(LocalDateTime.now());
         chatService.saveMessage(dto);
-        // TODO: return dto
         return dto;
+    }
+
+    @GetMapping("/chat/{groupId}/history")
+    @ResponseBody
+    public List<Message> getGroupHistory(@PathVariable Long groupId) {
+        return chatService.getHistory(groupId);
+    }
+
+    // Frontend connects to /topic/dm/{dmRoomId} and sends to /app/dm/{dmRoomId}
+    // dmRoomId is computed by the frontend as "dm-" + Math.min(id1,id2) + "-" + Math.max(id1,id2)
+    @MessageMapping("/dm/{dmRoomId}")
+    @SendTo("/topic/dm/{dmRoomId}")
+    public MessageDTO sendDm(MessageDTO dto) {
+        dto.setSentAt(LocalDateTime.now());
+        chatService.saveMessage(dto);
+        return dto;
+    }
+
+    @GetMapping("/dm/{dmRoomId}/history")
+    @ResponseBody
+    public List<Message> getDmHistory(@PathVariable String dmRoomId) {
+        return chatService.getDmHistory(dmRoomId);
     }
 }

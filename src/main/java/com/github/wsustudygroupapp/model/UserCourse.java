@@ -7,10 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Join entity linking a student's Profile to a Course with enrollment-specific data.
- * Stores which section and semester the student is in — not just which course.
- * This is what the classmate matching algorithm queries against:
- * two students are classmates if they share the same courseId, section, and semester.
+ * Join entity linking a student's Profile to a Course.
+ * Two students are classmates if they share the same courseId.
  */
 @Entity
 @Table(name = "USER_COURSE_TABLE")
@@ -35,11 +33,5 @@ public class UserCourse {
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
-    /** The specific section the student is in (e.g. "001", "002"). */
-    @Column(nullable = false, length = 10)
-    private String section;
 
-    /** The semester of enrollment (e.g. "Fall 2026", "Spring 2026"). */
-    @Column(nullable = false, length = 20)
-    private String semester;
 }

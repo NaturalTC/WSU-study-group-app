@@ -61,14 +61,12 @@ public class CourseController {
         return ResponseEntity.noContent().build();
     }
 
-    // all students in a course excluding yourself, with optional filters: GET /courses/{courseId}/students?section=001&semester=Fall+2026
+    // all students in a course excluding yourself: GET /courses/{courseId}/students
     @GetMapping("/{courseId}/students")
     public ResponseEntity<List<UserCourse>> getEnrolledStudents(
             Authentication authentication,
-            @PathVariable Long courseId,
-            @RequestParam(required = false) String section,
-            @RequestParam(required = false) String semester) {
-        return ResponseEntity.ok(courseService.getEnrolledStudents(courseId, section, semester, authentication.getName()));
+            @PathVariable Long courseId) {
+        return ResponseEntity.ok(courseService.getEnrolledStudents(courseId, authentication.getName()));
     }
 
     // Search courses by keyword: GET /courses/search?q=biology
