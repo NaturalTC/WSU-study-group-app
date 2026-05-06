@@ -1,8 +1,10 @@
 package com.github.wsustudygroupapp.controller;
 
+import com.github.wsustudygroupapp.dto.MeetingRescheduleRequest;
 import com.github.wsustudygroupapp.dto.MeetingSessionRequest;
 import com.github.wsustudygroupapp.model.MeetingSession;
 import com.github.wsustudygroupapp.service.MeetingSessionService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -29,7 +31,7 @@ public class MeetingSessionController {
 
     /** POST /meetings — schedule a new session for a study group (201 Created). */
     @PostMapping
-    public ResponseEntity<MeetingSession> scheduleSession(@RequestBody MeetingSessionRequest request,
+    public ResponseEntity<MeetingSession> scheduleSession(@Valid @RequestBody MeetingSessionRequest request,
                                                           @AuthenticationPrincipal UserDetails userDetails) {
         MeetingSession session = meetingSessionService.scheduleSession(userDetails.getUsername(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(session);
@@ -42,11 +44,22 @@ public class MeetingSessionController {
         return ResponseEntity.ok(sessions);
     }
 
-    /** GET /meetings/group/{groupId} — returns all sessions for a specific group (200 OK). */
+    /** GET /meetings/group/{groupId} — returns all sessions for a specific group (200 OK).
+     *  Caller must be a member of the group, otherwise 403. */
     @GetMapping("/group/{groupId}")
-    public ResponseEntity<List<MeetingSession>> getSessionsForGroup(@PathVariable Long groupId) {
-        List<MeetingSession> sessions = meetingSessionService.getSessionsForGroup(groupId);
+    public ResponseEntity<List<MeetingSession>> getSessionsForGroup(@PathVariable Long groupId,
+                                                                    @AuthenticationPrincipal UserDetails userDetails) {
+        List<MeetingSession> sessions = meetingSessionService.getSessionsForGroup(groupId, userDetails.getUsername());
         return ResponseEntity.ok(sessions);
+    }
+
+    /** PATCH /meetings/{sessionId} — reschedule an upcoming session (only the creator, 200 OK). */
+    @PatchMapping("/{sessionId}")
+    public ResponseEntity<MeetingSession> rescheduleSession(@PathVariable Long sessionId,
+                                                            @Valid @RequestBody MeetingRescheduleRequest request,
+                                                            @AuthenticationPrincipal UserDetails userDetails) {
+        MeetingSession session = meetingSessionService.rescheduleSession(sessionId, userDetails.getUsername(), request);
+        return ResponseEntity.ok(session);
     }
 
     /** DELETE /meetings/{sessionId} — cancel a session (only the creator can do this, 204 No Content). */
