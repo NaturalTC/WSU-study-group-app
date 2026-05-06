@@ -85,6 +85,7 @@ public class StudyGroupService {
         group.setMembers(members);
 
         StudyGroup saved = studyGroupRepository.save(group);
+        // Wrapped in try-catch so a gamification error never rolls back the group creation.
         try {
             gamificationService.awardPoints(creator.getId(), 15);
         } catch (Exception e) {
@@ -111,6 +112,7 @@ public class StudyGroupService {
         group.getMembers().add(profile);
         StudyGroup saved = studyGroupRepository.save(group);
         notificationService.notifyMemberJoined(saved, profile);
+        // Wrapped in try-catch so a gamification error never rolls back the group join.
         try {
             gamificationService.awardPoints(profile.getId(), 10);
         } catch (Exception e) {
@@ -126,6 +128,16 @@ public class StudyGroupService {
 
         group.getMembers().removeIf(member -> member.getId().equals(profile.getId()));
         studyGroupRepository.save(group);
+    }
+
+    public void deleteGroup(Long groupId, String email) {
+        Profile profile = currentProfile(email);
+        StudyGroup group = studyGroupRepository.findById(groupId)
+                .orElseThrow(() -> new ResourceNotFoundException("Study group not found: " + groupId));
+        if (!group.getCreatedBy().getId().equals(profile.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the group creator can delete this group");
+        }
+        studyGroupRepository.delete(group);
     }
 
     private Profile currentProfile(String email) {

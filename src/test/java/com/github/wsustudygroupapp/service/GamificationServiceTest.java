@@ -4,6 +4,7 @@ import com.github.wsustudygroupapp.dto.LeaderboardEntryDTO;
 import com.github.wsustudygroupapp.exception.ResourceNotFoundException;
 import com.github.wsustudygroupapp.model.*;
 import com.github.wsustudygroupapp.repository.*;
+import com.github.wsustudygroupapp.service.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +19,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+// Unit tests for GamificationService. All repositories are mocked (no real database needed).
+// See GamificationService.java for the implementation being tested.
 @ExtendWith(MockitoExtension.class)
 class GamificationServiceTest {
 
@@ -57,6 +60,51 @@ class GamificationServiceTest {
     }
 
     // ── awardPoints ───────────────────────────────────────────────────────────
+
+    @Test
+    void awardPoints_nullProfileId_throwsException() {
+        when(profileRepository.findById(null))
+                .thenThrow(new IllegalArgumentException("Id must not be null"));
+
+        assertThrows(Exception.class,
+                () -> gamificationService.awardPoints(null, 10));
+    }
+
+    @Test
+    void awardPoints_negativePoints_subtractsFromTotal() {
+        // documents current behavior — no guard exists, points go down
+        mockProfile.setPoints(50);
+        when(profileRepository.findById(1L)).thenReturn(Optional.of(mockProfile));
+        stubNoBadgeEligibility();
+
+        gamificationService.awardPoints(1L, -10);
+
+        assertEquals(40, mockProfile.getPoints());
+    }
+
+    @Test
+    void awardPoints_zeroPoints_doesNotChangeTotal() {
+        mockProfile.setPoints(50);
+        when(profileRepository.findById(1L)).thenReturn(Optional.of(mockProfile));
+        stubNoBadgeEligibility();
+
+        gamificationService.awardPoints(1L, 0);
+
+        assertEquals(50, mockProfile.getPoints());
+        // still saves even with no change — documents this behavior
+        verify(profileRepository, times(1)).save(mockProfile);
+    }
+
+    @Test
+    void awardPoints_saveFailure_exceptionPropagates() {
+        when(profileRepository.findById(1L)).thenReturn(Optional.of(mockProfile));
+        // no stubNoBadgeEligibility() — save throws before badge checks run
+        when(profileRepository.save(mockProfile))
+                .thenThrow(new RuntimeException("DB unavailable"));
+
+        assertThrows(RuntimeException.class,
+                () -> gamificationService.awardPoints(1L, 10));
+    }
 
     @Test
     void awardPoints_profileNotFound_throwsResourceNotFoundException() {
@@ -151,6 +199,27 @@ class GamificationServiceTest {
 
         assertEquals(30, mockProfile.getPoints());
         verify(profileRepository, atLeastOnce()).save(mockProfile);
+    }
+
+    @Test
+    void awardBadge_newBadge_sendsNotificationToProfile() {
+        when(badgeRepository.findByName("First Group Join")).thenReturn(Optional.of(mockBadge));
+        when(userBadgeRepository.existsByProfileIdAndBadgeId(1L, 10L)).thenReturn(false);
+        when(profileRepository.findById(1L)).thenReturn(Optional.of(mockProfile));
+
+        gamificationService.awardBadge(1L, "First Group Join");
+
+        verify(notificationService, times(1)).notifyBadgeEarned(mockProfile, mockBadge);
+    }
+
+    @Test
+    void awardBadge_alreadyEarned_doesNotSendNotification() {
+        when(badgeRepository.findByName("First Group Join")).thenReturn(Optional.of(mockBadge));
+        when(userBadgeRepository.existsByProfileIdAndBadgeId(1L, 10L)).thenReturn(true);
+
+        gamificationService.awardBadge(1L, "First Group Join");
+
+        verify(notificationService, never()).notifyBadgeEarned(any(), any());
     }
 
     // ── checkBadgeEligibility (tested via awardPoints) ────────────────────────
@@ -311,6 +380,29 @@ class GamificationServiceTest {
         List<LeaderboardEntryDTO> result = gamificationService.getGlobalLeaderboard(10);
 
         assertEquals(3, result.get(0).getBadgeCount());
+    }
+
+    @Test
+    void getGlobalLeaderboard_zeroTopN_returnsEmptyList() {
+        when(profileRepository.findAll()).thenReturn(List.of(
+                makeProfile(1L, "Alice", 100)
+        ));
+
+        List<LeaderboardEntryDTO> result = gamificationService.getGlobalLeaderboard(0);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void awardPoints_belowHundredPoints_doesNotAttemptMilestoneBadge() {
+        // profile reaches 99 points — one short of the milestone threshold
+        mockProfile.setPoints(98);
+        when(profileRepository.findById(1L)).thenReturn(Optional.of(mockProfile));
+        stubNoBadgeEligibility();
+
+        gamificationService.awardPoints(1L, 1);
+
+        verify(badgeRepository, never()).findByName("Point Milestone 100");
     }
 
     // ── getCourseLeaderboard ──────────────────────────────────────────────────

@@ -20,10 +20,13 @@ public class LeaderboardEntryDTO {
     @Schema(description = "1-based rank position on the leaderboard", example = "1")
     private int rank;
 
+    // @JsonProperty renames this field in the JSON response sent to the frontend.
+    // The Java field is called profileId, but the frontend expects the key "id".
     @JsonProperty("id")
     @Schema(description = "Profile ID of the student", example = "12")
     private Long profileId;
 
+    // Same rename pattern — Java field is displayName, frontend expects "name".
     @JsonProperty("name")
     @Schema(description = "Display name shown on the leaderboard", example = "Alex Johnson")
     private String displayName;

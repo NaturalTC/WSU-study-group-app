@@ -7,8 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 /**
  * Stores student-facing data for a registered user.
  * Kept separate from {@link User} so authentication logic stays isolated from app data.
@@ -49,17 +47,17 @@ public class Profile {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-    /** All courses this student is enrolled in, each with a specific section and semester. */
-    @JsonIgnore
-    @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserCourse> enrollments;
-
     @Column
     private String profilePicURL;
 
     // ── Sprint 2 fields ───────────────────────────────────────────────
 
-    /** Total gamification points earned by this student. Incremented by GamificationService. */
+    /**
+     * Total gamification points earned by this student. Incremented by GamificationService.
+     * columnDefinition is explicit so the database column gets a real DEFAULT 0 — without it,
+     * Hibernate only sets the Java-side default and the DB column may have no default at all,
+     * which causes issues when rows are inserted outside the app (e.g. data.sql, migration scripts).
+     */
     @Column(nullable = false, columnDefinition = "INT NOT NULL DEFAULT 0")
     private int points = 0;
 

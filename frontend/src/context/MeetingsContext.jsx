@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback } from 'react'
 import api from '../api/axios'
+import { useAuth } from './AuthContext'
 
 const MeetingsContext = createContext(null)
 
@@ -20,6 +21,7 @@ const MeetingsContext = createContext(null)
  *   • cancelSession(sessionId, groupId)           — DELETE /meetings/{id}
  */
 export function MeetingsProvider({ children }) {
+  const { refreshProfile } = useAuth()
   const [sessionsByGroup, setSessionsByGroup] = useState({})
   const [upcoming, setUpcoming]               = useState([])
   const [loadingUpcoming, setLoadingUpcoming] = useState(false)
@@ -67,6 +69,7 @@ export function MeetingsProvider({ children }) {
     })
     setUpcoming(prev => [...prev, session]
       .sort((a, b) => new Date(a.scheduledAt) - new Date(b.scheduledAt)))
+    refreshProfile()
     return session
   }
 

@@ -23,7 +23,7 @@ function getCourseGradient(courseCode) {
   return 'from-wsu-navy to-blue-900'
 }
 
-function StudyGroupCard({ group, joined, joinLoading, onJoin, onLeave, onViewDetails }) {
+function StudyGroupCard({ group, joined, joinLoading, onJoin, onLeave, onDelete, isCreator, onViewDetails }) {
   const memberCount = group.members?.length ?? 0
   const courseCode  = group.course?.courseCode ?? ''
   const prefix      = courseCode.split(' ')[0] ?? ''
@@ -39,7 +39,18 @@ function StudyGroupCard({ group, joined, joinLoading, onJoin, onLeave, onViewDet
         </span>
         <div className="absolute -left-4 -top-4 w-20 h-20 rounded-full bg-white/10" />
         <div className="absolute right-16 top-2 w-10 h-10 rounded-full bg-white/10" />
-        <div className="absolute top-3 right-3">
+        <div className="absolute top-3 right-3 flex items-center gap-1.5">
+          {isCreator && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onDelete(group) }}
+              className="w-7 h-7 flex items-center justify-center rounded-full bg-red-500/80 hover:bg-red-600 text-white transition-colors"
+              title="Delete group"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          )}
           {joined ? (
             <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-sm text-white">Joined</span>
           ) : (
