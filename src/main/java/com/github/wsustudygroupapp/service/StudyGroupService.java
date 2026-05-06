@@ -130,6 +130,16 @@ public class StudyGroupService {
         studyGroupRepository.save(group);
     }
 
+    public void deleteGroup(Long groupId, String email) {
+        Profile profile = currentProfile(email);
+        StudyGroup group = studyGroupRepository.findById(groupId)
+                .orElseThrow(() -> new ResourceNotFoundException("Study group not found: " + groupId));
+        if (!group.getCreatedBy().getId().equals(profile.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the group creator can delete this group");
+        }
+        studyGroupRepository.delete(group);
+    }
+
     private Profile currentProfile(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + email));
