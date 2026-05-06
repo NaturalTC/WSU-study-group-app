@@ -85,6 +85,7 @@ public class StudyGroupService {
         group.setMembers(members);
 
         StudyGroup saved = studyGroupRepository.save(group);
+        // Wrapped in try-catch so a gamification error never rolls back the group creation.
         try {
             gamificationService.awardPoints(creator.getId(), 15);
         } catch (Exception e) {
@@ -111,6 +112,7 @@ public class StudyGroupService {
         group.getMembers().add(profile);
         StudyGroup saved = studyGroupRepository.save(group);
         notificationService.notifyMemberJoined(saved, profile);
+        // Wrapped in try-catch so a gamification error never rolls back the group join.
         try {
             gamificationService.awardPoints(profile.getId(), 10);
         } catch (Exception e) {

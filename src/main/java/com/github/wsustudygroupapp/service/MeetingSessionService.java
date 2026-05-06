@@ -74,6 +74,7 @@ public class MeetingSessionService {
 
         MeetingSession savedSession = meetingSessionRepository.save(session);
 
+        // Wrapped in try-catch so a gamification error never rolls back the session creation.
         try {
             gamificationService.awardPoints(scheduler.getId(), 25);
         } catch (Exception e) {

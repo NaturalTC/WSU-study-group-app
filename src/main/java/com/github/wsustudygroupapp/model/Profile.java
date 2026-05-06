@@ -59,7 +59,12 @@ public class Profile {
 
     // ── Sprint 2 fields ───────────────────────────────────────────────
 
-    /** Total gamification points earned by this student. Incremented by GamificationService. */
+    /**
+     * Total gamification points earned by this student. Incremented by GamificationService.
+     * columnDefinition is explicit so the database column gets a real DEFAULT 0 — without it,
+     * Hibernate only sets the Java-side default and the DB column may have no default at all,
+     * which causes issues when rows are inserted outside the app (e.g. data.sql, migration scripts).
+     */
     @Column(nullable = false, columnDefinition = "INT NOT NULL DEFAULT 0")
     private int points = 0;
 
