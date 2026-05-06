@@ -10,7 +10,12 @@ import com.github.wsustudygroupapp.repository.CourseRepository;
 import com.github.wsustudygroupapp.repository.ProfileRepository;
 import com.github.wsustudygroupapp.repository.StudyGroupRepository;
 import com.github.wsustudygroupapp.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,21 +23,29 @@ import java.util.List;
 @Service
 public class StudyGroupService {
 
+    private static final Logger log = LoggerFactory.getLogger(StudyGroupService.class);
+
     private final StudyGroupRepository studyGroupRepository;
     private final CourseRepository courseRepository;
     private final ProfileRepository profileRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
+    private final PasswordEncoder passwordEncoder;
     private final GamificationService gamificationService;
 
     public StudyGroupService(StudyGroupRepository studyGroupRepository,
                              CourseRepository courseRepository,
                              ProfileRepository profileRepository,
                              UserRepository userRepository,
+                             NotificationService notificationService,
+                             PasswordEncoder passwordEncoder,
                              GamificationService gamificationService) {
         this.studyGroupRepository = studyGroupRepository;
         this.courseRepository = courseRepository;
         this.profileRepository = profileRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
+        this.passwordEncoder = passwordEncoder;
         this.gamificationService = gamificationService;
     }
 
@@ -63,33 +76,47 @@ public class StudyGroupService {
         group.setName(request.getName());
         group.setCourse(course);
         group.setCreatedBy(creator);
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            group.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
 
         List<Profile> members = new ArrayList<>();
         members.add(creator);
         group.setMembers(members);
 
         StudyGroup saved = studyGroupRepository.save(group);
-        // TODO [DONE]: award points to the creator for starting a new group
-        gamificationService.awardPoints(creator.getId(), 15);
+        try {
+            gamificationService.awardPoints(creator.getId(), 15);
+        } catch (Exception e) {
+            log.error("Failed to award create-group points for profile {}: {}", creator.getId(), e.getMessage());
+        }
         return saved;
     }
 
-    public StudyGroup joinGroup(Long groupId, String email) {
+    public StudyGroup joinGroup(Long groupId, String password, String email) {
         Profile profile = currentProfile(email);
         StudyGroup group = studyGroupRepository.findById(groupId)
                 .orElseThrow(() -> new ResourceNotFoundException("Study group not found: " + groupId));
 
         boolean alreadyMember = group.getMembers().stream()
                 .anyMatch(member -> member.getId().equals(profile.getId()));
-        if (!alreadyMember) {
-            group.getMembers().add(profile);
-            StudyGroup saved = studyGroupRepository.save(group);
-            // TODO [DONE]: award points to the student for joining a group
-            gamificationService.awardPoints(profile.getId(), 10);
-            return saved;
+        if (alreadyMember) {
+            return group;
         }
 
-        return group;
+        if (group.getPassword() != null && !passwordEncoder.matches(password, group.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Incorrect group password");
+        }
+
+        group.getMembers().add(profile);
+        StudyGroup saved = studyGroupRepository.save(group);
+        notificationService.notifyMemberJoined(saved, profile);
+        try {
+            gamificationService.awardPoints(profile.getId(), 10);
+        } catch (Exception e) {
+            log.error("Failed to award join-group points for profile {}: {}", profile.getId(), e.getMessage());
+        }
+        return saved;
     }
 
     public void leaveGroup(Long groupId, String email) {

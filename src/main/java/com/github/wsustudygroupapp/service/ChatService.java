@@ -49,6 +49,15 @@ public class ChatService {
     // TODO: build a new Message with content, sender, studyGroup, sentAt = now
     // TODO: save the message to the database
     // TODO: return the saved message
+    public Message saveSystemMessage(Long groupId, String senderName, String content, LocalDateTime sentAt) {
+        Message msg = new Message();
+        msg.setStudyGroup(studyGroupRepository.getReferenceById(groupId));
+        msg.setSenderName(senderName);
+        msg.setContent(content);
+        msg.setSentAt(sentAt);
+        return messageRepository.save(msg);
+    }
+
     public Message saveMessage(MessageDTO dto)
     {
         Long groupId = dto.getStudyGroupId();

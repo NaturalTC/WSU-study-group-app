@@ -12,6 +12,19 @@ export function AuthProvider({ children }) {
     const token = localStorage.getItem('token')
     if (!token) { setLoading(false); return }
 
+    if (token === 'demo') {
+      setProfile({
+        id:     'demo',
+        name:   'Demo Student',
+        major:  'Computer Science',
+        year:   'Junior',
+        bio:    'Previewing StudyNest in demo mode.',
+        points: 430,
+      })
+      setLoading(false)
+      return
+    }
+
     api.get('/profiles')
       .then(res => setProfile(res.data))
       .catch(() => {

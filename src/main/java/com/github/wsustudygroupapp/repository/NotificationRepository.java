@@ -21,4 +21,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
     /** Counts unread notifications. Used to show the red dot on the notification bell. */
     int countByRecipientIdAndIsReadFalse(Long profileId);
+
+    /** Deletes all notifications for a student. Used by the "Clear all" action in the bell dropdown. */
+    void deleteByRecipientId(Long profileId);
 }

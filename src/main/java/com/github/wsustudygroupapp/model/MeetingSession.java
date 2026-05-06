@@ -40,6 +40,10 @@ public class MeetingSession {
     @Column(nullable = false)
     private LocalDateTime scheduledAt;
 
+    /** How long the session is expected to run, in minutes. Optional — null = unspecified. */
+    @Column
+    private Integer durationMinutes;
+
     /** Where the session will take place (e.g. "Ely Library Rm 204" or "Zoom"). */
     @Column
     private String location;

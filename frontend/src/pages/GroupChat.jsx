@@ -7,7 +7,34 @@ import ChatMessage from '../components/ChatMessage'
 import MembersSidebar from '../components/MembersSidebar'
 import ScheduleEventModal from '../components/ScheduleEventModal'
 import { useAuth } from '../context/AuthContext'
+import { useNotifications } from '../context/NotificationContext'
 import api from '../api/axios'
+import campusPhoto from '../assets/WSUCampusStock2013_063-L.jpg'
+
+function getCourseGradient(courseCode) {
+  const prefix = (courseCode ?? '').split(' ')[0].toUpperCase()
+  if (prefix.startsWith('CAIS') || prefix.startsWith('CIS') || prefix.startsWith('CS'))
+    return 'from-blue-500 to-indigo-700'
+  if (prefix.startsWith('MATH') || prefix.startsWith('STAT'))
+    return 'from-violet-500 to-purple-700'
+  if (prefix.startsWith('BIOL') || prefix.startsWith('CHEM') || prefix.startsWith('PHYS') || prefix.startsWith('ENVS'))
+    return 'from-emerald-500 to-teal-700'
+  if (prefix.startsWith('PSYC') || prefix.startsWith('SOCI') || prefix.startsWith('ANTH'))
+    return 'from-orange-500 to-amber-600'
+  if (prefix.startsWith('HIST') || prefix.startsWith('ENGL') || prefix.startsWith('PHIL') || prefix.startsWith('LITR'))
+    return 'from-rose-500 to-red-700'
+  if (prefix.startsWith('BUSN') || prefix.startsWith('ACCT') || prefix.startsWith('MGMT') || prefix.startsWith('MKTG'))
+    return 'from-cyan-600 to-blue-700'
+  if (prefix.startsWith('NURS') || prefix.startsWith('HLTH'))
+    return 'from-teal-500 to-cyan-600'
+  if (prefix.startsWith('CRJU') || prefix.startsWith('POLI'))
+    return 'from-slate-500 to-gray-700'
+  if (prefix.startsWith('COMM') || prefix.startsWith('JOUR'))
+    return 'from-pink-500 to-rose-600'
+  if (prefix.startsWith('EDUC'))
+    return 'from-amber-500 to-yellow-600'
+  return 'from-wsu-navy to-blue-900'
+}
 
 function formatTime(isoStr) {
   const d    = isoStr ? new Date(isoStr) : new Date()
@@ -40,6 +67,7 @@ function GroupChat() {
   const { groupId } = useParams()
   const parsedGroupId = parseInt(groupId)
   const { profile } = useAuth()
+  const { refresh: refreshNotifications } = useNotifications()
 
   const [group, setGroup]         = useState(null)
   const [myGroups, setMyGroups]   = useState([])
@@ -50,6 +78,9 @@ function GroupChat() {
   const [sidebarOpen,   setSidebarOpen]   = useState(false)
   const [scheduleOpen,  setScheduleOpen]  = useState(false)
   const [emojiOpen,     setEmojiOpen]     = useState(false)
+  const [aiOpen,        setAiOpen]        = useState(false)
+  const [aiInput,       setAiInput]       = useState('')
+  const [aiLoading,     setAiLoading]     = useState(false)
 
   const stompClientRef = useRef(null)
   const messagesEndRef = useRef(null)
@@ -76,7 +107,7 @@ function GroupChat() {
 
         const history = historyRes.data.map(msg => ({
           id: msg.id,
-          sender: msg.sender?.name ?? 'Unknown',
+          sender: msg.sender?.name ?? msg.senderName ?? 'Unknown',
           text: msg.content,
           timestamp: formatTime(msg.sentAt),
         }))
@@ -169,6 +200,32 @@ function GroupChat() {
     inputRef.current?.focus()
   }
 
+  const handleAskAi = async (e) => {
+    e.preventDefault()
+    const question = aiInput.trim()
+    if (!question || aiLoading || !connected) return
+    setAiInput('')
+    setAiLoading(true)
+    try {
+      await api.post('/ai/chat', {
+        groupId: parsedGroupId,
+        profileId: profile?.id,
+        message: question,
+      })
+      // Backend broadcasts the question + AI reply via WebSocket — they arrive through
+      // the existing /topic/chat/{groupId} subscription, so no local state update needed.
+    } catch {
+      setMessages(prev => [...prev, {
+        id: `ai-error-${Date.now()}`,
+        sender: 'AI Assistant',
+        text: 'Sorry, I had trouble answering that. Please try again.',
+        timestamp: formatTime(),
+      }])
+    } finally {
+      setAiLoading(false)
+    }
+  }
+
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       handleSendMessage(e)
@@ -180,17 +237,20 @@ function GroupChat() {
   const memberCount  = group?.members?.length ?? 0
 
   return (
-    <div className="flex flex-col min-h-screen bg-wsu-chalk dark:bg-gray-950 transition-colors duration-300">
+    <div
+      className="flex flex-col min-h-screen bg-cover bg-center bg-fixed transition-colors duration-300"
+      style={{ backgroundImage: `url(${campusPhoto})` }}
+    >
       <AppHeader />
 
       <main className="flex-1 pt-20 pb-0 max-w-7xl mx-auto w-full px-4 md:px-6">
         <div className="flex gap-6 h-[calc(100vh-5rem)] py-4">
 
           {/* ── Chat Area ─────────────────────────────────────── */}
-          <div className="flex-1 flex flex-col bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden min-w-0">
+          <div className="flex-1 flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden min-w-0">
 
             {/* Chat Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800">
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -201,7 +261,7 @@ function GroupChat() {
                   </svg>
                 </button>
 
-                <div className="w-10 h-10 bg-blue-700 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                <div className={`w-10 h-10 bg-gradient-to-br ${getCourseGradient(courseCode)} rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0`}>
                   {courseLetter}
                 </div>
                 <div>
@@ -226,6 +286,17 @@ function GroupChat() {
                   <span className="hidden sm:inline">Schedule</span>
                 </button>
 
+                <button
+                  onClick={() => setAiOpen(p => !p)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold transition-colors ${
+                    aiOpen
+                      ? 'border-violet-300 dark:border-violet-700 bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300'
+                      : 'border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900/40'
+                  }`}
+                >
+                  <span className="hidden sm:inline">Ask AI</span>
+                </button>
+
                 <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${
                   connected
                     ? 'bg-green-50 dark:bg-green-900/20 border-green-100 dark:border-green-800'
@@ -240,7 +311,7 @@ function GroupChat() {
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-1 bg-wsu-chalk dark:bg-gray-950">
+            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-1 bg-wsu-chalk dark:bg-gray-900">
               {loading ? (
                 <div className="flex justify-center py-12">
                   <div className="animate-spin w-6 h-6 border-4 border-blue-700 border-t-transparent rounded-full" />
@@ -258,7 +329,7 @@ function GroupChat() {
             </div>
 
             {/* Input Area */}
-            <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
+            <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800">
               <form onSubmit={handleSendMessage} className="flex gap-3 items-end">
                 <textarea
                   ref={inputRef}
@@ -320,6 +391,31 @@ function GroupChat() {
                 <kbd className="bg-gray-100 dark:bg-gray-700 px-1 rounded text-gray-500 dark:text-gray-400">Shift+Enter</kbd> for new line
               </p>
             </div>
+
+            {/* AI Input Panel */}
+            {aiOpen && (
+              <div className="px-6 py-3 border-t border-violet-100 dark:border-violet-900/30 bg-violet-50/60 dark:bg-violet-950/20">
+                <form onSubmit={handleAskAi} className="flex gap-3 items-center">
+                  <input
+                    type="text"
+                    value={aiInput}
+                    onChange={e => setAiInput(e.target.value)}
+                    placeholder="Ask the AI a study question..."
+                    disabled={aiLoading || !connected}
+                    className="form-input flex-1 min-w-0 h-10 !py-2 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                  />
+                  <button
+                    type="submit"
+                    disabled={!aiInput.trim() || aiLoading || !connected}
+                    className="flex-shrink-0 flex items-center justify-center gap-1.5 px-4 h-10 bg-violet-600 hover:bg-violet-700 text-white rounded-lg text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed min-w-[72px]"
+                  >
+                    {aiLoading
+                      ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      : 'Ask AI'}
+                  </button>
+                </form>
+              </div>
+            )}
           </div>
 
           {/* ── Desktop Sidebar ────────────────────────────────── */}
@@ -340,7 +436,7 @@ function GroupChat() {
                 className="absolute inset-0 bg-black/40 backdrop-blur-sm"
                 onClick={() => setSidebarOpen(false)}
               />
-              <div className="relative ml-auto w-80 h-full bg-wsu-chalk dark:bg-gray-900 p-4 overflow-y-auto shadow-2xl animate-fade-in">
+              <div className="relative ml-auto w-80 h-full bg-wsu-chalk dark:bg-gray-800 p-4 overflow-y-auto shadow-2xl animate-fade-in">
                 <button
                   onClick={() => setSidebarOpen(false)}
                   className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-wsu-mist transition-colors text-wsu-slate"
@@ -367,7 +463,7 @@ function GroupChat() {
         <ScheduleEventModal
           groupId={parsedGroupId}
           groupName={group.name}
-          onClose={() => setScheduleOpen(false)}
+          onClose={() => { setScheduleOpen(false); refreshNotifications() }}
         />
       )}
     </div>

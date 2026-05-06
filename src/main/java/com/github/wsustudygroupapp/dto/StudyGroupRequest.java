@@ -17,4 +17,7 @@ public class StudyGroupRequest {
 
     @Schema(description = "ID of the course this group is for", example = "42")
     private Long courseId;
+
+    @Schema(description = "Password required to join this group", example = "cs201rocks")
+    private String password;
 }
