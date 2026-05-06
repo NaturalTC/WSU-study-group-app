@@ -136,24 +136,26 @@ function StudyGroups() {
     }
   }
 
-  const handleGroupPicUpload = async (e) => {
-    const file = e.target.files?.[0]
+  const handleGroupPicUpload = async (group, file) => {
     if (!file) return
-    setPicLoading(true)
+    setPicLoading(group.id)
     setPicError('')
     try {
       const form = new FormData()
       form.append('file', file)
-      const res = await api.post(`/groups/${selectedGroup.id}/picture`, form, {
+      await api.post(`/groups/${group.id}/picture`, form, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
-      const updated = res.data
-      setGroups(prev => prev.map(g => g.id === updated.id ? updated : g))
-      setSelectedGroup(updated)
+      // Re-fetch all groups so every card gets the fresh URL
+      const res = await api.get('/groups')
+      setGroups(res.data)
+      if (selectedGroup?.id === group.id) {
+        setSelectedGroup(res.data.find(g => g.id === group.id) ?? null)
+      }
     } catch (err) {
       setPicError(err.response?.data?.message || 'Failed to upload picture.')
     } finally {
-      setPicLoading(false)
+      setPicLoading(null)
     }
   }
 
@@ -275,9 +277,11 @@ function StudyGroups() {
                     group={group}
                     joined={joinedGroupIds.has(group.id)}
                     joinLoading={joinLoading === group.id}
+                    picLoading={picLoading === group.id}
                     onJoin={handleJoin}
                     onLeave={handleLeave}
                     onDelete={handleDelete}
+                    onUploadPic={handleGroupPicUpload}
                     isCreator={profile?.id === group.createdBy?.id}
                     onViewDetails={setSelectedGroup}
                   />
@@ -321,10 +325,16 @@ function StudyGroups() {
               )}
               {/* Camera upload — creator only */}
               {profile?.id === selectedGroup.createdBy?.id && (
-                <label className="absolute bottom-3 right-3 cursor-pointer group">
-                  <input type="file" accept="image/*" className="hidden" onChange={handleGroupPicUpload} disabled={picLoading} />
+                <label className="absolute bottom-3 right-3 cursor-pointer">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={e => { const f = e.target.files?.[0]; if (f) handleGroupPicUpload(selectedGroup, f); e.target.value = '' }}
+                    disabled={picLoading === selectedGroup.id}
+                  />
                   <div className="w-9 h-9 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/60 transition-all">
-                    {picLoading ? (
+                    {picLoading === selectedGroup.id ? (
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     ) : (
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

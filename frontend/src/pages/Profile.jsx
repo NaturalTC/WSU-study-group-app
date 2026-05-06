@@ -273,9 +273,13 @@ function Profile() {
                             {groups.map(group => (
                                 <div key={group.id} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5 flex flex-col gap-3 hover:shadow-md transition-shadow duration-200">
                                     <div className="flex items-start justify-between gap-2">
-                                        <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-700 dark:text-blue-400 font-display font-bold text-sm flex-shrink-0">
-                                            {group.course?.courseCode?.split(' ')[0]?.charAt(0) ?? 'G'}
-                                        </div>
+                                        {group.groupPicURL ? (
+                                            <img src={group.groupPicURL} alt={group.name} className="w-10 h-10 rounded-xl object-cover flex-shrink-0" />
+                                        ) : (
+                                            <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-700 dark:text-blue-400 font-display font-bold text-sm flex-shrink-0">
+                                                {group.course?.courseCode?.split(' ')[0]?.charAt(0) ?? 'G'}
+                                            </div>
+                                        )}
                                         <span className="text-xs font-semibold bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2.5 py-1 rounded-full">
                                             {group.course?.courseCode}
                                         </span>
@@ -288,9 +292,13 @@ function Profile() {
                                         <div className="flex items-center gap-1.5">
                                             <div className="flex -space-x-1.5">
                                                 {(group.members ?? []).slice(0, 3).map((m, i) => (
-                                                    <div key={i} className="w-6 h-6 rounded-full bg-wsu-navy dark:bg-blue-800 text-white text-xs flex items-center justify-center border-2 border-white dark:border-gray-800 font-semibold">
-                                                        {m.name?.charAt(0) ?? '?'}
-                                                    </div>
+                                                    m.profilePicURL ? (
+                                                        <img key={i} src={m.profilePicURL} alt={m.name} className="w-6 h-6 rounded-full object-cover border-2 border-white dark:border-gray-800" />
+                                                    ) : (
+                                                        <div key={i} className="w-6 h-6 rounded-full bg-wsu-navy dark:bg-blue-800 text-white text-xs flex items-center justify-center border-2 border-white dark:border-gray-800 font-semibold">
+                                                            {m.name?.charAt(0) ?? '?'}
+                                                        </div>
+                                                    )
                                                 ))}
                                             </div>
                                             <span className="text-xs text-wsu-slate dark:text-gray-400">{group.members?.length ?? 0} members</span>

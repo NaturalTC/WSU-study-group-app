@@ -47,7 +47,7 @@ public class Notification {
 
     /** Categorizes the notification so the frontend can render a different icon per type. */
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     private NotificationType type;
 
     /** ID of the related entity (group, session, badge) for deep-linking on the frontend. */

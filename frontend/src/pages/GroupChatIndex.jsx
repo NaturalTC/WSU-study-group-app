@@ -83,10 +83,14 @@ export default function GroupChatIndex() {
                                     to={`/group-chat/${group.id}`}
                                     className="flex items-center gap-4 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm px-5 py-4 hover:shadow-md hover:border-blue-100 dark:hover:border-blue-800 transition-all duration-200 group"
                                 >
-                                    {/* Gradient icon */}
-                                    <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${getCourseGradient(group.course?.courseCode)} flex items-center justify-center text-white font-display font-bold text-base flex-shrink-0 shadow-sm`}>
-                                        {group.course?.courseCode?.split(' ')[0]?.charAt(0) ?? 'G'}
-                                    </div>
+                                    {/* Group pic or gradient icon */}
+                                    {group.groupPicURL ? (
+                                        <img src={group.groupPicURL} alt={group.name} className="w-11 h-11 rounded-xl object-cover flex-shrink-0 shadow-sm" />
+                                    ) : (
+                                        <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${getCourseGradient(group.course?.courseCode)} flex items-center justify-center text-white font-display font-bold text-base flex-shrink-0 shadow-sm`}>
+                                            {group.course?.courseCode?.split(' ')[0]?.charAt(0) ?? 'G'}
+                                        </div>
+                                    )}
 
                                     {/* Info */}
                                     <div className="flex-1 min-w-0">
