@@ -62,6 +62,51 @@ class GamificationServiceTest {
     // ── awardPoints ───────────────────────────────────────────────────────────
 
     @Test
+    void awardPoints_nullProfileId_throwsException() {
+        when(profileRepository.findById(null))
+                .thenThrow(new IllegalArgumentException("Id must not be null"));
+
+        assertThrows(Exception.class,
+                () -> gamificationService.awardPoints(null, 10));
+    }
+
+    @Test
+    void awardPoints_negativePoints_subtractsFromTotal() {
+        // documents current behavior — no guard exists, points go down
+        mockProfile.setPoints(50);
+        when(profileRepository.findById(1L)).thenReturn(Optional.of(mockProfile));
+        stubNoBadgeEligibility();
+
+        gamificationService.awardPoints(1L, -10);
+
+        assertEquals(40, mockProfile.getPoints());
+    }
+
+    @Test
+    void awardPoints_zeroPoints_doesNotChangeTotal() {
+        mockProfile.setPoints(50);
+        when(profileRepository.findById(1L)).thenReturn(Optional.of(mockProfile));
+        stubNoBadgeEligibility();
+
+        gamificationService.awardPoints(1L, 0);
+
+        assertEquals(50, mockProfile.getPoints());
+        // still saves even with no change — documents this behavior
+        verify(profileRepository, times(1)).save(mockProfile);
+    }
+
+    @Test
+    void awardPoints_saveFailure_exceptionPropagates() {
+        when(profileRepository.findById(1L)).thenReturn(Optional.of(mockProfile));
+        // no stubNoBadgeEligibility() — save throws before badge checks run
+        when(profileRepository.save(mockProfile))
+                .thenThrow(new RuntimeException("DB unavailable"));
+
+        assertThrows(RuntimeException.class,
+                () -> gamificationService.awardPoints(1L, 10));
+    }
+
+    @Test
     void awardPoints_profileNotFound_throwsResourceNotFoundException() {
         when(profileRepository.findById(99L)).thenReturn(Optional.empty());
 
