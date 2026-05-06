@@ -2,6 +2,7 @@ package com.github.wsustudygroupapp.service;
 
 import com.github.wsustudygroupapp.dto.StudyGroupRequest;
 import com.github.wsustudygroupapp.exception.ResourceNotFoundException;
+import org.springframework.web.multipart.MultipartFile;
 import com.github.wsustudygroupapp.model.Course;
 import com.github.wsustudygroupapp.model.Profile;
 import com.github.wsustudygroupapp.model.StudyGroup;
@@ -32,6 +33,7 @@ public class StudyGroupService {
     private final NotificationService notificationService;
     private final PasswordEncoder passwordEncoder;
     private final GamificationService gamificationService;
+    private final S3Service s3Service;
 
     public StudyGroupService(StudyGroupRepository studyGroupRepository,
                              CourseRepository courseRepository,
@@ -39,7 +41,8 @@ public class StudyGroupService {
                              UserRepository userRepository,
                              NotificationService notificationService,
                              PasswordEncoder passwordEncoder,
-                             GamificationService gamificationService) {
+                             GamificationService gamificationService,
+                             S3Service s3Service) {
         this.studyGroupRepository = studyGroupRepository;
         this.courseRepository = courseRepository;
         this.profileRepository = profileRepository;
@@ -47,6 +50,7 @@ public class StudyGroupService {
         this.notificationService = notificationService;
         this.passwordEncoder = passwordEncoder;
         this.gamificationService = gamificationService;
+        this.s3Service = s3Service;
     }
 
     public StudyGroup getGroupById(Long groupId) {
@@ -128,6 +132,23 @@ public class StudyGroupService {
 
         group.getMembers().removeIf(member -> member.getId().equals(profile.getId()));
         studyGroupRepository.save(group);
+    }
+
+    public StudyGroup uploadGroupPicture(Long groupId, String email, MultipartFile file) throws java.io.IOException {
+        if (file.isEmpty()) throw new IllegalArgumentException("File cannot be empty");
+        if (!file.getContentType().startsWith("image/")) throw new IllegalArgumentException("File must be an image");
+        if (file.getSize() > 5 * 1024 * 1024) throw new IllegalArgumentException("File must be under 5MB");
+
+        Profile profile = currentProfile(email);
+        StudyGroup group = studyGroupRepository.findById(groupId)
+                .orElseThrow(() -> new ResourceNotFoundException("Study group not found: " + groupId));
+        if (!group.getCreatedBy().getId().equals(profile.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the group creator can update the group picture");
+        }
+
+        String url = s3Service.uploadGroupPicture(file, groupId);
+        group.setGroupPicURL(url);
+        return studyGroupRepository.save(group);
     }
 
     public void deleteGroup(Long groupId, String email) {
