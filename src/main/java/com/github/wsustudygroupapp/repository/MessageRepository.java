@@ -15,4 +15,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 
     /** Returns all messages for a study group sorted oldest to newest. Used to load chat history. */
     List<Message> findByStudyGroupIdOrderBySentAtAsc(Long studyGroupId);
+
+    /** Counts all messages sent by a specific student. Used by GamificationService for badge eligibility. */
+    int countBySenderId(Long senderId);
 }

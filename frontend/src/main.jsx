@@ -7,6 +7,7 @@ import { EventsProvider } from './context/EventsContext'
 import { MeetingsProvider } from './context/MeetingsContext'
 import { BadgesProvider } from './context/BadgesContext'
 import { ToastProvider } from './context/ToastContext'
+import { NotificationProvider } from './context/NotificationContext'
 import './index.css'
 import App from './App.jsx'
 

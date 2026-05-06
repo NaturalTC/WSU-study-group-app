@@ -26,4 +26,7 @@ public interface MeetingSessionRepository extends JpaRepository<MeetingSession, 
     List<MeetingSession> findByStudyGroupIdAndScheduledAtBetweenOrderByScheduledAtAsc(
         Long groupId, LocalDateTime start, LocalDateTime end
     );
+
+    /** Counts all sessions scheduled by a specific student. Used by GamificationService for badge eligibility. */
+    int countByScheduledById(Long profileId);
 }

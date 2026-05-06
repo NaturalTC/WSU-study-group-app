@@ -3,8 +3,10 @@ import AppHeader from '../components/AppHeader'
 import StudyGroupCard from '../components/StudyGroupCard'
 import api from '../api/axios'
 import campusPhoto from '../assets/WSUCampusStock2013_033-L.jpg'
+import { useNotifications } from '../context/NotificationContext'
 
 function StudyGroups() {
+  const { refresh: refreshNotifications } = useNotifications()
   const [groups, setGroups]               = useState([])
   const [courses, setCourses]             = useState([])
   const [joinedGroupIds, setJoinedGroupIds] = useState(new Set())
@@ -57,6 +59,7 @@ function StudyGroups() {
     try {
       await api.post(`/groups/${group.id}/join`)
       setJoinedGroupIds(prev => new Set([...prev, group.id]))
+      refreshNotifications()
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to join group.')
     } finally {

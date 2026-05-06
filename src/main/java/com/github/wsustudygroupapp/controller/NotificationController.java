@@ -49,4 +49,11 @@ public class NotificationController {
         notificationService.markAllAsRead(authentication.getName());
         return ResponseEntity.noContent().build();
     }
+
+    /** Deletes all notifications for the logged-in student. */
+    @DeleteMapping
+    public ResponseEntity<Void> clearAll(Authentication authentication) {
+        notificationService.clearAll(authentication.getName());
+        return ResponseEntity.noContent().build();
+    }
 }

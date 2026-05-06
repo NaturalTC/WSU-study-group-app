@@ -29,7 +29,8 @@ const PUBLIC_PATHS = ['/', '/login', '/register', '/verify-pending', '/verify-su
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401 || error.response?.status === 403) {
+    const token = localStorage.getItem('token')
+    if (error.response?.status === 401 && token !== 'demo') {
       localStorage.removeItem('token')
       const isPublicPage = PUBLIC_PATHS.includes(window.location.pathname)
       if (!isPublicPage) {

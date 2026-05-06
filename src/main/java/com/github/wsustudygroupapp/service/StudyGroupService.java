@@ -22,15 +22,18 @@ public class StudyGroupService {
     private final CourseRepository courseRepository;
     private final ProfileRepository profileRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     public StudyGroupService(StudyGroupRepository studyGroupRepository,
                              CourseRepository courseRepository,
                              ProfileRepository profileRepository,
-                             UserRepository userRepository) {
+                             UserRepository userRepository,
+                             NotificationService notificationService) {
         this.studyGroupRepository = studyGroupRepository;
         this.courseRepository = courseRepository;
         this.profileRepository = profileRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     public StudyGroup getGroupById(Long groupId) {
@@ -77,7 +80,9 @@ public class StudyGroupService {
                 .anyMatch(member -> member.getId().equals(profile.getId()));
         if (!alreadyMember) {
             group.getMembers().add(profile);
-            return studyGroupRepository.save(group);
+            StudyGroup saved = studyGroupRepository.save(group);
+            notificationService.notifyMemberJoined(saved, profile);
+            return saved;
         }
 
         return group;

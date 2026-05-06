@@ -4,7 +4,6 @@ import com.github.wsustudygroupapp.dto.MeetingRescheduleRequest;
 import com.github.wsustudygroupapp.dto.MeetingSessionRequest;
 import com.github.wsustudygroupapp.exception.ResourceNotFoundException;
 import com.github.wsustudygroupapp.model.MeetingSession;
-import com.github.wsustudygroupapp.model.Notification;
 import com.github.wsustudygroupapp.model.Profile;
 import com.github.wsustudygroupapp.model.StudyGroup;
 import com.github.wsustudygroupapp.model.User;
