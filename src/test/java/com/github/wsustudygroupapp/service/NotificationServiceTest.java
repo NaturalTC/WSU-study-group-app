@@ -310,6 +310,78 @@ class NotificationServiceTest {
         assertTrue(captor.getValue().isEmpty());
     }
 
+    // ── notifyDirectMessage ───────────────────────────────────────────────────
+
+    @Test
+    void notifyDirectMessage_savesNotificationWithSenderNameInMessage() {
+        Profile sender = new Profile();
+        sender.setId(2L);
+        sender.setName("Jordan Smith");
+
+        notificationService.notifyDirectMessage(mockProfile, sender);
+
+        ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
+        verify(notificationRepository).save(captor.capture());
+
+        assertTrue(captor.getValue().getMessage().contains("Jordan Smith"));
+    }
+
+    @Test
+    void notifyDirectMessage_usesDirectMessageType() {
+        Profile sender = new Profile();
+        sender.setId(2L);
+        sender.setName("Jordan Smith");
+
+        notificationService.notifyDirectMessage(mockProfile, sender);
+
+        ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
+        verify(notificationRepository).save(captor.capture());
+
+        assertEquals(NotificationType.DIRECT_MESSAGE, captor.getValue().getType());
+    }
+
+    @Test
+    void notifyDirectMessage_setsRelatedEntityIdToSendersProfileId() {
+        Profile sender = new Profile();
+        sender.setId(2L);
+        sender.setName("Jordan Smith");
+
+        notificationService.notifyDirectMessage(mockProfile, sender);
+
+        ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
+        verify(notificationRepository).save(captor.capture());
+
+        assertEquals(2L, captor.getValue().getRelatedEntityId());
+    }
+
+    @Test
+    void notifyDirectMessage_recipientIsCorrect() {
+        Profile sender = new Profile();
+        sender.setId(2L);
+        sender.setName("Jordan Smith");
+
+        notificationService.notifyDirectMessage(mockProfile, sender);
+
+        ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
+        verify(notificationRepository).save(captor.capture());
+
+        assertEquals(mockProfile, captor.getValue().getRecipient());
+    }
+
+    @Test
+    void notifyDirectMessage_isUnreadByDefault() {
+        Profile sender = new Profile();
+        sender.setId(2L);
+        sender.setName("Jordan Smith");
+
+        notificationService.notifyDirectMessage(mockProfile, sender);
+
+        ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
+        verify(notificationRepository).save(captor.capture());
+
+        assertFalse(captor.getValue().isRead());
+    }
+
     // ── notifySessionScheduled ────────────────────────────────────────────────
 
     @Test

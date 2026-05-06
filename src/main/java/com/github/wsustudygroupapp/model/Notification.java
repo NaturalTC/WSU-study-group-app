@@ -28,7 +28,8 @@ public class Notification {
         /** A scheduled session was cancelled by its creator. */
         SESSION_CANCELLED,
         BADGE_EARNED,
-        MEMBER_JOINED
+        MEMBER_JOINED,
+        DIRECT_MESSAGE
     }
 
     /** Auto-generated primary key. */

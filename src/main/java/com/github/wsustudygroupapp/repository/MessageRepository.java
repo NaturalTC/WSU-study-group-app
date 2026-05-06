@@ -18,4 +18,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 
     /** Counts all messages sent by a specific student. Used by GamificationService for badge eligibility. */
     int countBySenderId(Long senderId);
+
+    /** Returns all DMs in a room sorted oldest to newest. Used to load DM history. */
+    List<Message> findByDmRoomIdOrderBySentAtAsc(String dmRoomId);
 }

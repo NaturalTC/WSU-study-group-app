@@ -28,6 +28,7 @@ class GamificationServiceTest {
     @Mock private MessageRepository messageRepository;
     @Mock private MeetingSessionRepository meetingSessionRepository;
     @Mock private UserCourseRepository userCourseRepository;
+    @Mock private NotificationService notificationService;
     @InjectMocks private GamificationService gamificationService;
 
     private Profile mockProfile;

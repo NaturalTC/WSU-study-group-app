@@ -118,6 +118,14 @@ public class NotificationService {
                 NotificationType.MEMBER_JOINED, group.getId());
     }
 
+    /** Notifies the recipient that they have a new direct message from sender. */
+    public void notifyDirectMessage(Profile recipient, Profile sender) {
+        saveNotification(recipient,
+                sender.getName() + " sent you a message",
+                NotificationType.DIRECT_MESSAGE,
+                sender.getId());
+    }
+
     /** Notifies all group members (except the scheduler) that a new session was scheduled. */
     public void notifySessionScheduled(MeetingSession session) {
         Profile scheduler = session.getScheduledBy();

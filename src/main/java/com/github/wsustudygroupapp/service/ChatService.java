@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 // TODO: Brian — handles saving messages and loading chat history
 // getHistory() → load all past messages for a group when a student opens the chat
@@ -27,15 +28,18 @@ public class ChatService {
     private final StudyGroupRepository studyGroupRepository;
     private final ProfileRepository profileRepository;
     private final GamificationService gamificationService;
+    private final NotificationService notificationService;
 
     public ChatService(MessageRepository messageRepository,
                        StudyGroupRepository studyGroupRepository,
                        ProfileRepository profileRepository,
-                       GamificationService gamificationService) {
+                       GamificationService gamificationService,
+                       NotificationService notificationService) {
         this.messageRepository = messageRepository;
         this.studyGroupRepository = studyGroupRepository;
         this.profileRepository = profileRepository;
         this.gamificationService = gamificationService;
+        this.notificationService = notificationService;
     }
 
     // TODO: return messageRepository.findByStudyGroupIdOrderBySentAtAsc(groupId)
@@ -58,29 +62,48 @@ public class ChatService {
         return messageRepository.save(msg);
     }
 
-    public Message saveMessage(MessageDTO dto)
-    {
-        Long groupId = dto.getStudyGroupId();
-        String name = dto.getSenderName();
-        Profile sender = profileRepository.findByName(name).orElseThrow
-                (
-                    () -> new RuntimeException("Could not find profile")
-                );
-        StudyGroup studyGroup = studyGroupRepository.getReferenceById(groupId);
-        String content = dto.getContent();
+    public Message saveMessage(MessageDTO dto) {
+        Profile sender = profileRepository.findByName(dto.getSenderName())
+                .orElseThrow(() -> new RuntimeException("Could not find profile"));
+
         Message savedMessage = new Message();
-        savedMessage.setStudyGroup(studyGroup);
         savedMessage.setSender(sender);
-        savedMessage.setContent(content);
+        savedMessage.setContent(dto.getContent());
         savedMessage.setSentAt(dto.getSentAt());
+
+        if (dto.getDmRoomId() != null) {
+            savedMessage.setDmRoomId(dto.getDmRoomId());
+            notifyDmRecipient(dto.getDmRoomId(), sender);
+        } else {
+            savedMessage.setStudyGroup(studyGroupRepository.getReferenceById(dto.getStudyGroupId()));
+        }
+
         messageRepository.save(savedMessage);
-        // TODO [DONE]: award points to the sender for participating in chat
-        // Wrapped in try-catch so a gamification error never breaks message delivery
+
         try {
             gamificationService.awardPoints(sender.getId(), 1);
         } catch (Exception e) {
             log.error("Failed to award points for message from profile {}: {}", sender.getId(), e.getMessage());
         }
+
         return savedMessage;
+    }
+
+    public List<Message> getDmHistory(String dmRoomId) {
+        return messageRepository.findByDmRoomIdOrderBySentAtAsc(dmRoomId);
+    }
+
+    // Parses the two profile IDs from "dm-{id1}-{id2}" and notifies whichever isn't the sender.
+    private void notifyDmRecipient(String dmRoomId, Profile sender) {
+        try {
+            String[] parts = dmRoomId.split("-");
+            long idA = Long.parseLong(parts[1]);
+            long idB = Long.parseLong(parts[2]);
+            long recipientId = sender.getId().equals(idA) ? idB : idA;
+            Optional<Profile> recipient = profileRepository.findById(recipientId);
+            recipient.ifPresent(r -> notificationService.notifyDirectMessage(r, sender));
+        } catch (Exception e) {
+            log.error("Failed to send DM notification for room {}: {}", dmRoomId, e.getMessage());
+        }
     }
 }
