@@ -171,9 +171,7 @@ public class GamificationService {
         for (int i = 0; i < profiles.size(); i++) {
             Profile p = profiles.get(i);
             int badgeCount = userBadgeRepository.countByProfileId(p.getId());
-            LeaderboardEntryDTO entry = new LeaderboardEntryDTO(i + 1, p.getId(), p.getName(), p.getPoints(), badgeCount);
-            entry.setProfilePicURL(p.getProfilePicURL());
-            entries.add(entry);
+            entries.add(new LeaderboardEntryDTO(i + 1, p.getId(), p.getName(), p.getPoints(), badgeCount, p.getProfilePicURL()));
         }
         return entries;
     }
