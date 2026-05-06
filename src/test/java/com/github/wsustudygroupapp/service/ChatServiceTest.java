@@ -33,6 +33,9 @@ public class ChatServiceTest {
     @Mock
     private ProfileRepository profileRepository;
 
+    @Mock
+    private GamificationService gamificationService;
+
     @InjectMocks
     private ChatService chatService;
 
