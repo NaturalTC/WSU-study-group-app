@@ -37,7 +37,7 @@ class LeaderboardControllerTest {
 
     @Test
     void getGlobalLeaderboard_returnsServiceResult() {
-        LeaderboardEntryDTO entry = new LeaderboardEntryDTO(1, 1L, "Alice", 100, 2);
+        LeaderboardEntryDTO entry = new LeaderboardEntryDTO(1, 1L, "Alice", 100, 2, null);
         when(gamificationService.getGlobalLeaderboard(25)).thenReturn(List.of(entry));
 
         ResponseEntity<List<LeaderboardEntryDTO>> response =
@@ -82,7 +82,7 @@ class LeaderboardControllerTest {
 
     @Test
     void getCourseLeaderboard_returnsServiceResult() {
-        LeaderboardEntryDTO entry = new LeaderboardEntryDTO(1, 2L, "Bob", 200, 3);
+        LeaderboardEntryDTO entry = new LeaderboardEntryDTO(1, 2L, "Bob", 200, 3, null);
         when(gamificationService.getCourseLeaderboard(42L, 25)).thenReturn(List.of(entry));
 
         ResponseEntity<List<LeaderboardEntryDTO>> response =
