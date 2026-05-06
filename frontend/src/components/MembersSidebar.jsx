@@ -54,9 +54,13 @@ function MembersSidebar({ activeGroupId, currentGroup, members, myGroups, onSche
               ) : members.map((member) => (
                 <div key={member.id} className="flex items-center gap-3">
                   <div className="relative flex-shrink-0">
-                    <div className="w-8 h-8 rounded-full bg-wsu-navy dark:bg-blue-800 text-white text-xs font-bold flex items-center justify-center">
-                      {member.name?.charAt(0).toUpperCase() ?? '?'}
-                    </div>
+                    {member.profilePicURL ? (
+                      <img src={member.profilePicURL} alt={member.name} className="w-8 h-8 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-wsu-navy dark:bg-blue-800 text-white text-xs font-bold flex items-center justify-center">
+                        {member.name?.charAt(0).toUpperCase() ?? '?'}
+                      </div>
+                    )}
                     <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white dark:border-gray-900" />
                   </div>
                   <div className="min-w-0">

@@ -41,6 +41,22 @@ public class S3Service {
         return "https://" + bucket + ".s3." + region + ".amazonaws.com/" + key;
     }
 
+    public String uploadGroupPicture(MultipartFile file, Long groupId) throws IOException {
+        String extension = getExtension(file.getOriginalFilename());
+        String key = "group-pictures/" + groupId + "-" + UUID.randomUUID() + extension;
+
+        s3Client.putObject(
+                PutObjectRequest.builder()
+                        .bucket(bucket)
+                        .key(key)
+                        .contentType(file.getContentType())
+                        .build(),
+                RequestBody.fromInputStream(file.getInputStream(), file.getSize())
+        );
+
+        return "https://" + bucket + ".s3." + region + ".amazonaws.com/" + key;
+    }
+
     private String getExtension(String filename) {
         if (filename == null || !filename.contains(".")) return "";
         return "." + filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();

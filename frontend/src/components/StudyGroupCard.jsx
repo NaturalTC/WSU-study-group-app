@@ -23,7 +23,7 @@ function getCourseGradient(courseCode) {
   return 'from-wsu-navy to-blue-900'
 }
 
-function StudyGroupCard({ group, joined, joinLoading, onJoin, onLeave, onViewDetails }) {
+function StudyGroupCard({ group, joined, joinLoading, onJoin, onLeave, onDelete, isCreator, onViewDetails }) {
   const memberCount = group.members?.length ?? 0
   const courseCode  = group.course?.courseCode ?? ''
   const prefix      = courseCode.split(' ')[0] ?? ''
@@ -32,22 +32,37 @@ function StudyGroupCard({ group, joined, joinLoading, onJoin, onLeave, onViewDet
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.01] flex flex-col border border-transparent dark:border-gray-700 overflow-hidden">
 
-      {/* Gradient header */}
-      <div className={`h-24 bg-gradient-to-br ${gradient} relative overflow-hidden flex-shrink-0`}>
-        <span className="absolute -right-2 -bottom-3 text-7xl font-display font-black text-white/15 select-none leading-none">
-          {prefix}
-        </span>
-        <div className="absolute -left-4 -top-4 w-20 h-20 rounded-full bg-white/10" />
-        <div className="absolute right-16 top-2 w-10 h-10 rounded-full bg-white/10" />
-        <div className="absolute top-3 right-3">
+      {/* Header — group pic if set, otherwise gradient */}
+      <div className={`h-24 relative overflow-hidden flex-shrink-0 ${group.groupPicURL ? '' : `bg-gradient-to-br ${gradient}`}`}>
+        {group.groupPicURL ? (
+          <img src={group.groupPicURL} alt={group.name} className="w-full h-full object-cover" />
+        ) : (
+          <>
+            <span className="absolute -right-2 -bottom-3 text-7xl font-display font-black text-white/15 select-none leading-none">{prefix}</span>
+            <div className="absolute -left-4 -top-4 w-20 h-20 rounded-full bg-white/10" />
+            <div className="absolute right-16 top-2 w-10 h-10 rounded-full bg-white/10" />
+          </>
+        )}
+        <div className="absolute top-3 right-3 flex items-center gap-1.5">
+          {isCreator && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onDelete(group) }}
+              className="w-7 h-7 flex items-center justify-center rounded-full bg-black/30 backdrop-blur-sm hover:bg-red-500/80 text-white transition-colors"
+              title="Delete group"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          )}
           {joined ? (
-            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-sm text-white">Joined</span>
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-black/30 backdrop-blur-sm text-white">Joined</span>
           ) : (
-            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-sm text-white">Open</span>
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-black/30 backdrop-blur-sm text-white">Open</span>
           )}
         </div>
         <div className="absolute bottom-3 left-4">
-          <span className="text-xs font-bold text-white/80 uppercase tracking-widest">{courseCode}</span>
+          <span className="text-xs font-bold text-white drop-shadow uppercase tracking-widest">{courseCode}</span>
         </div>
       </div>
 
@@ -62,9 +77,13 @@ function StudyGroupCard({ group, joined, joinLoading, onJoin, onLeave, onViewDet
         <div className="flex items-center gap-2 mt-auto">
           <div className="flex -space-x-2">
             {(group.members ?? []).slice(0, 4).map((member, i) => (
-              <div key={i} className="w-7 h-7 rounded-full bg-wsu-navy dark:bg-blue-800 text-white text-xs flex items-center justify-center border-2 border-white dark:border-gray-800 font-semibold">
-                {member.name?.charAt(0)?.toUpperCase() ?? '?'}
-              </div>
+              member.profilePicURL ? (
+                <img key={i} src={member.profilePicURL} alt={member.name} className="w-7 h-7 rounded-full object-cover border-2 border-white dark:border-gray-800" />
+              ) : (
+                <div key={i} className="w-7 h-7 rounded-full bg-wsu-navy dark:bg-blue-800 text-white text-xs flex items-center justify-center border-2 border-white dark:border-gray-800 font-semibold">
+                  {member.name?.charAt(0)?.toUpperCase() ?? '?'}
+                </div>
+              )
             ))}
           </div>
           <span className="text-xs text-wsu-slate dark:text-gray-400">
