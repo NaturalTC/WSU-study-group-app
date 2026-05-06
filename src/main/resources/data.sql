@@ -895,3 +895,6 @@ INSERT IGNORE INTO badge_table (name, description, icon, point_value) VALUES
 ('Active Chatter',      'Sent 10 messages in group chats',   '💬', 20),
 ('Session Scheduler',   'Scheduled your first study session','📅', 25),
 ('Point Milestone 100', 'Reached 100 total points',          '🏆', 30);
+
+-- Widen notification type column to fit all enum values (SESSION_RESCHEDULED = 19 chars)
+ALTER TABLE notification_table MODIFY COLUMN type VARCHAR(30) NOT NULL;
