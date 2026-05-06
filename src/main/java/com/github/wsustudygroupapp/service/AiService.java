@@ -43,12 +43,17 @@ public class AiService {
     }
 
     public AiChatResponse chat(AiChatRequest request, String userEmail) {
+        if (openAiApiKey == null || openAiApiKey.isBlank()) {
+            return new AiChatResponse("AI assistant is not configured. Add an OpenAI key to enable it.");
+        }
+
         String courseContext = studyGroupRepository.findById(request.getGroupId())
                 .map(g -> g.getCourse() != null
                         ? g.getCourse().getCourseCode() + " — " + g.getCourse().getCourseName()
                         : "general studies")
                 .orElse("general studies");
 
+        // SUPER IMPORTANT, this is the training for the AI agent. This prompt can be adjusted for more accuracy
         String systemPrompt = "You are a helpful AI study assistant for a Westfield State University study group. " +
                 "The group is studying " + courseContext + ". " +
                 "Help students understand course material, answer academic questions, and explain concepts clearly. " +
