@@ -63,4 +63,9 @@ public class StudyGroup {
     @JsonIgnore
     @OneToMany(mappedBy = "studyGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Message> messages;
+
+    /** All scheduled meeting sessions for this group. Deleted when the group is deleted. */
+    @JsonIgnore
+    @OneToMany(mappedBy = "studyGroup", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MeetingSession> sessions;
 }
