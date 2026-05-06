@@ -50,6 +50,10 @@ public class StudyGroup {
     )
     private List<Profile> members;
 
+    /** Optional cover image URL stored in S3. Null means show the default gradient. */
+    @Column
+    private String groupPicURL;
+
     /** BCrypt-hashed password required to join this group. Null means the group is open to anyone. Never sent to clients. */
     @JsonIgnore
     @Column

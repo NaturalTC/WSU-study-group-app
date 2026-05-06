@@ -187,11 +187,15 @@ function Leaderboard() {
                         </div>
 
                         {/* Avatar */}
-                        <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0 ${
-                          isMe ? 'bg-blue-700' : 'bg-wsu-navy dark:bg-blue-800'
-                        }`}>
-                          {user.name?.charAt(0)?.toUpperCase() ?? '?'}
-                        </div>
+                        {user.profilePicURL ? (
+                          <img src={user.profilePicURL} alt={user.name} className={`w-9 h-9 rounded-full object-cover flex-shrink-0 ${isMe ? 'ring-2 ring-blue-500' : ''}`} />
+                        ) : (
+                          <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0 ${
+                            isMe ? 'bg-blue-700' : 'bg-wsu-navy dark:bg-blue-800'
+                          }`}>
+                            {user.name?.charAt(0)?.toUpperCase() ?? '?'}
+                          </div>
+                        )}
 
                         {/* Name + rank label */}
                         <div className="flex-1 min-w-0">
