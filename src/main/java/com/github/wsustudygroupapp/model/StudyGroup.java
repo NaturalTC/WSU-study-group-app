@@ -50,6 +50,11 @@ public class StudyGroup {
     )
     private List<Profile> members;
 
+    /** BCrypt-hashed password required to join this group. Null means the group is open to anyone. Never sent to clients. */
+    @JsonIgnore
+    @Column
+    private String password;
+
     /** All chat messages sent in this group, ordered by time. */
     @JsonIgnore
     @OneToMany(mappedBy = "studyGroup", cascade = CascadeType.ALL, orphanRemoval = true)
