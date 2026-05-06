@@ -12,19 +12,6 @@ export function AuthProvider({ children }) {
     const token = localStorage.getItem('token')
     if (!token) { setLoading(false); return }
 
-    if (token === 'demo') {
-      setProfile({
-        id:     'demo',
-        name:   'Demo Student',
-        major:  'Computer Science',
-        year:   'Junior',
-        bio:    'Previewing StudyNest in demo mode.',
-        points: 430,
-      })
-      setLoading(false)
-      return
-    }
-
     api.get('/profiles')
       .then(res => setProfile(res.data))
       .catch(() => {
@@ -49,21 +36,9 @@ export function AuthProvider({ children }) {
     }
   }
 
-  const demoLogin = () => {
-    localStorage.setItem('token', 'demo')
-    setProfile({
-      id:     'demo',
-      name:   'Demo Student',
-      major:  'Computer Science',
-      year:   'Junior',
-      bio:    'Previewing StudyNest in demo mode.',
-      points: 430,
-    })
-  }
-
   const refreshProfile = () => {
     const token = localStorage.getItem('token')
-    if (!token || token === 'demo') return
+    if (!token) return
     api.get('/profiles').then(res => setProfile(res.data)).catch(() => {})
   }
 
@@ -74,7 +49,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ profile, setProfile, refreshProfile, login, demoLogin, logout, loading }}>
+    <AuthContext.Provider value={{ profile, setProfile, refreshProfile, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   )
