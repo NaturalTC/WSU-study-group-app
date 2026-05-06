@@ -7,6 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 // DONE: Maicheal — exposes profile endpoints
 // All routes here require a valid JWT token (configured in SecurityConfig)
@@ -48,5 +51,11 @@ public class ProfileController {
     public ResponseEntity<Profile> updateProfile(Authentication authentication,
                                                   @RequestBody ProfileRequest request) {
         return ResponseEntity.ok(profileService.updateProfile(authentication.getName(), request));
+    }
+
+    @PostMapping("/picture")
+    public ResponseEntity<Profile> uploadProfilePicture(Authentication authentication,
+                                                         @RequestParam("file") MultipartFile file) throws IOException {
+        return ResponseEntity.ok(profileService.uploadProfilePicture(authentication.getName(), file));
     }
 }
