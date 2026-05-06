@@ -44,6 +44,29 @@ function Profile() {
     const [editLoading, setEditLoading] = useState(false)
     const [editError, setEditError]     = useState('')
 
+    const [picLoading, setPicLoading] = useState(false)
+    const [picError, setPicError]     = useState('')
+
+    const handlePicUpload = async (e) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+        setPicError('')
+        setPicLoading(true)
+        try {
+            const formData = new FormData()
+            formData.append('file', file)
+            const res = await api.post('/profiles/picture', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            })
+            setProfile(res.data)
+        } catch (err) {
+            setPicError(err.response?.data?.message || 'Upload failed.')
+        } finally {
+            setPicLoading(false)
+            e.target.value = ''
+        }
+    }
+
     useEffect(() => {
         api.get('/groups/my')
             .then(res => setGroups(res.data))
@@ -96,9 +119,41 @@ function Profile() {
                         <div className="flex flex-col sm:flex-row items-start gap-6">
 
                             {/* Avatar */}
-                            <div className="w-20 h-20 rounded-2xl bg-blue-700 flex items-center justify-center text-white font-display text-3xl font-bold shadow-md flex-shrink-0">
-                                {initials}
-                            </div>
+                            <label className="relative w-20 h-20 flex-shrink-0 cursor-pointer group">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={handlePicUpload}
+                                    disabled={picLoading}
+                                />
+                                {profile?.profilePicURL ? (
+                                    <img
+                                        src={profile.profilePicURL}
+                                        alt="Profile"
+                                        className="w-20 h-20 rounded-2xl object-cover shadow-md"
+                                    />
+                                ) : (
+                                    <div className="w-20 h-20 rounded-2xl bg-blue-700 flex items-center justify-center text-white font-display text-3xl font-bold shadow-md">
+                                        {picLoading ? (
+                                            <div className="w-6 h-6 border-4 border-white border-t-transparent rounded-full animate-spin" />
+                                        ) : initials}
+                                    </div>
+                                )}
+                                {!picLoading && (
+                                    <div className="absolute inset-0 rounded-2xl bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                    </div>
+                                )}
+                                {picLoading && profile?.profilePicURL && (
+                                    <div className="absolute inset-0 rounded-2xl bg-black/40 flex items-center justify-center">
+                                        <div className="w-6 h-6 border-4 border-white border-t-transparent rounded-full animate-spin" />
+                                    </div>
+                                )}
+                            </label>
 
                             {/* Info */}
                             <div className="flex-1 min-w-0">
@@ -130,6 +185,10 @@ function Profile() {
                                 Edit Profile
                             </button>
                         </div>
+
+                        {picError && (
+                            <p className="text-xs text-red-600 dark:text-red-400 mt-2">{picError}</p>
+                        )}
 
                         {/* Stats */}
                         <div className="flex items-start gap-6 mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
