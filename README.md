@@ -11,7 +11,7 @@ A full-stack web application designed exclusively for Westfield State University
 | Name | GitHub                                      |
 |------|---------------------------------------------|
 | Jose Jimenez | [@NaturalTC](https://github.com/NaturalTC)  |
-| Hayden Parker | [@Aalexlee22](https://github.com/Aalexlee22) |
+| Hayden Parker | [@Aalexlee22](https://github.com/Aalexlee22) [@Hparker2713](https://github.com/Hparker2713) |
 | Eric Melnik | [@ericmelnik](https://github.com/ericmelnik) |
 | Michael Mayberry | [@MichaelMayberry](https://github.com/MichaelMayberry) |
 | Brian Torres | [@btorres561](https://github.com/btorres561) |
