@@ -70,6 +70,14 @@ public class StudyGroupController {
         return ResponseEntity.noContent().build();
     }
 
+    // delete a group — only the creator can do this
+    @DeleteMapping("/{groupId}")
+    public ResponseEntity<Void> deleteGroup(@PathVariable Long groupId,
+                                            @AuthenticationPrincipal UserDetails userDetails) {
+        studyGroupService.deleteGroup(groupId, userDetails.getUsername());
+        return ResponseEntity.noContent().build();
+    }
+
     // load chat history when user opens the group chat (consider pagination)
     @GetMapping("/{groupId}/messages")
     public ResponseEntity<List<Message>> getChatHistory(@PathVariable Long groupId) {

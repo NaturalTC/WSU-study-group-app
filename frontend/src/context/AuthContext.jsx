@@ -61,6 +61,12 @@ export function AuthProvider({ children }) {
     })
   }
 
+  const refreshProfile = () => {
+    const token = localStorage.getItem('token')
+    if (!token || token === 'demo') return
+    api.get('/profiles').then(res => setProfile(res.data)).catch(() => {})
+  }
+
   const logout = () => {
     localStorage.removeItem('token')
     setProfile(null)
@@ -68,7 +74,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ profile, setProfile, login, demoLogin, logout, loading }}>
+    <AuthContext.Provider value={{ profile, setProfile, refreshProfile, login, demoLogin, logout, loading }}>
       {children}
     </AuthContext.Provider>
   )
