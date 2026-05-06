@@ -30,12 +30,16 @@ public class ChatController {
     @MessageMapping("/chat/{groupId}")
     @SendTo("/topic/chat/{groupId}")
     public MessageDTO sendMessage(MessageDTO dto) {
-        // TODO: dto.setSentAt(LocalDateTime.now())
-        LocalDateTime sentAt = LocalDateTime.now();
-        dto.setSentAt(sentAt);
-        // TODO: chatService.saveMessage(dto)
+        dto.setSentAt(LocalDateTime.now());
         chatService.saveMessage(dto);
-        // TODO: return dto
+        return dto;
+    }
+
+    @MessageMapping("/dm/{dmRoomId}")
+    @SendTo("/topic/dm/{dmRoomId}")
+    public MessageDTO sendDirectMessage(MessageDTO dto) {
+        dto.setSentAt(LocalDateTime.now());
+        chatService.saveMessage(dto);
         return dto;
     }
 }

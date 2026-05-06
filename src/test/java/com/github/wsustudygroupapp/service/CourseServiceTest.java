@@ -147,11 +147,10 @@ class CourseServiceTest {
     }
 
     @Test
-    void enroll_alreadyEnrolledInSameSectionAndSemester_throws409Conflict() {
+    void enroll_alreadyEnrolledInCourse_throws409Conflict() {
         stubResolveProfile();
         when(courseRepository.findByCourseCode("CAIS 0236")).thenReturn(Optional.of(mockCourse));
-        when(userCourseRepository.existsByProfileIdAndCourseIdAndSectionAndSemester(
-                1L, 10L, "001", "Fall 2026")).thenReturn(true);
+        when(userCourseRepository.existsByProfileIdAndCourseId(1L, 10L)).thenReturn(true);
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class,
                 () -> courseService.enroll(EMAIL, enrollRequest));
@@ -159,44 +158,23 @@ class CourseServiceTest {
     }
 
     @Test
-    void enroll_differentSectionSameCourse_doesNotThrowConflict() {
-        // enrolling in a different section of the same course should be allowed
-        stubResolveProfile();
-        CourseEnrollRequest differentSection = new CourseEnrollRequest();
-        differentSection.setCourseCode("CAIS 0236");
-        differentSection.setSection("002");
-        differentSection.setSemester("Fall 2026");
-
-        when(courseRepository.findByCourseCode("CAIS 0236")).thenReturn(Optional.of(mockCourse));
-        when(userCourseRepository.existsByProfileIdAndCourseIdAndSectionAndSemester(
-                1L, 10L, "002", "Fall 2026")).thenReturn(false);
-        when(userCourseRepository.save(any(UserCourse.class))).thenAnswer(inv -> inv.getArgument(0));
-
-        assertDoesNotThrow(() -> courseService.enroll(EMAIL, differentSection));
-    }
-
-    @Test
     void enroll_setsAllFieldsOnNewEnrollment() {
         stubResolveProfile();
         when(courseRepository.findByCourseCode("CAIS 0236")).thenReturn(Optional.of(mockCourse));
-        when(userCourseRepository.existsByProfileIdAndCourseIdAndSectionAndSemester(
-                1L, 10L, "001", "Fall 2026")).thenReturn(false);
+        when(userCourseRepository.existsByProfileIdAndCourseId(1L, 10L)).thenReturn(false);
         when(userCourseRepository.save(any(UserCourse.class))).thenAnswer(inv -> inv.getArgument(0));
 
         UserCourse result = courseService.enroll(EMAIL, enrollRequest);
 
         assertEquals(mockProfile, result.getProfile());
         assertEquals(mockCourse, result.getCourse());
-        assertEquals("001", result.getSection());
-        assertEquals("Fall 2026", result.getSemester());
     }
 
     @Test
     void enroll_persistsEnrollmentExactlyOnce() {
         stubResolveProfile();
         when(courseRepository.findByCourseCode("CAIS 0236")).thenReturn(Optional.of(mockCourse));
-        when(userCourseRepository.existsByProfileIdAndCourseIdAndSectionAndSemester(
-                1L, 10L, "001", "Fall 2026")).thenReturn(false);
+        when(userCourseRepository.existsByProfileIdAndCourseId(1L, 10L)).thenReturn(false);
         when(userCourseRepository.save(any(UserCourse.class))).thenReturn(mockEnrollment);
 
         courseService.enroll(EMAIL, enrollRequest);
@@ -253,50 +231,6 @@ class CourseServiceTest {
         courseService.drop(100L, EMAIL);
 
         verify(userCourseRepository, times(1)).delete(mockEnrollment);
-    }
-
-    // ── getClassmates ──────────────────────────────────────────────────────────
-
-    @Test
-    void getClassmates_enrollmentNotFound_throwsResourceNotFoundException() {
-        stubResolveProfile();
-        when(userCourseRepository.findById(100L)).thenReturn(Optional.empty());
-        assertThrows(ResourceNotFoundException.class,
-                () -> courseService.getClassmates(100L, EMAIL));
-    }
-
-    @Test
-    void getClassmates_queriesRepoWithCorrectCourseAndSectionAndSemester() {
-        stubResolveProfile();
-        when(userCourseRepository.findById(100L)).thenReturn(Optional.of(mockEnrollment));
-        when(userCourseRepository.findClassmates(10L, "001", "Fall 2026", 1L))
-                .thenReturn(List.of());
-
-        courseService.getClassmates(100L, EMAIL);
-
-        // verify the correct values are passed to the matching query
-        verify(userCourseRepository).findClassmates(10L, "001", "Fall 2026", 1L);
-    }
-
-    @Test
-    void getClassmates_returnsClassmatesFromRepo() {
-        stubResolveProfile();
-        UserCourse classmate = new UserCourse();
-        when(userCourseRepository.findById(100L)).thenReturn(Optional.of(mockEnrollment));
-        when(userCourseRepository.findClassmates(10L, "001", "Fall 2026", 1L))
-                .thenReturn(List.of(classmate));
-
-        assertEquals(1, courseService.getClassmates(100L, EMAIL).size());
-    }
-
-    @Test
-    void getClassmates_noMatchingStudents_returnsEmptyList() {
-        stubResolveProfile();
-        when(userCourseRepository.findById(100L)).thenReturn(Optional.of(mockEnrollment));
-        when(userCourseRepository.findClassmates(10L, "001", "Fall 2026", 1L))
-                .thenReturn(List.of());
-
-        assertTrue(courseService.getClassmates(100L, EMAIL).isEmpty());
     }
 
     // ── searchCourses ──────────────────────────────────────────────────────────

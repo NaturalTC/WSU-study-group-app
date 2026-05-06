@@ -17,6 +17,7 @@ import VerifySuccess from './pages/VerifySuccess'
 import VerifyError from './pages/VerifyError'
 import Leaderboard from './pages/Leaderboard'
 import Meetings from './pages/Meetings'
+import DirectMessage from './pages/DirectMessage'
 
 // Requires a token, but blocks users who already have a profile
 // (prevents someone from re-running setup and overwriting their data)
@@ -58,6 +59,7 @@ function App() {
       <Route path="/change-password"     element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
       <Route path="/leaderboard"          element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
       <Route path="/meetings"             element={<ProtectedRoute><Meetings /></ProtectedRoute>}    />
+      <Route path="/dm/:profileId"        element={<ProtectedRoute><DirectMessage /></ProtectedRoute>} />
     </Routes>
   )
 }

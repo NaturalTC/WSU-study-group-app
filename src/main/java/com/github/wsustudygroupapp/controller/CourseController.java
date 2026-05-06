@@ -61,15 +61,6 @@ public class CourseController {
         return ResponseEntity.noContent().build();
     }
 
-    // DONE: extract the logged-in user's profile ID
-    // DONE: call courseService.getClassmates(userCourseId, profileId)
-    // DONE: return 200 with the list of classmates
-    @GetMapping("/{userCourseId}/classmates")
-    public ResponseEntity<List<UserCourse>> getClassmates(Authentication authentication,
-                                                           @PathVariable Long userCourseId) {
-        return ResponseEntity.ok(courseService.getClassmates(userCourseId, authentication.getName()));
-    }
-
     // Search courses by keyword: GET /courses/search?q=biology
     @GetMapping("/search")
     public ResponseEntity<List<Course>> searchCourses(@RequestParam String q) {

@@ -15,12 +15,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
-// TODO: Maicheal — handles course enrollment and classmate matching
-// getAllCourses() → return the full WSU catalog (for the dropdown on the frontend)
-// getMyCourses() → return all courses a student is enrolled in
-// enroll() → add a student to a course with their section + semester
-// drop() → remove a student from a course
-// getClassmates() → find other students in the same course + section + semester
+// Handles course enrollment
 
 @Service
 public class CourseService {
@@ -60,10 +55,8 @@ public class CourseService {
         Profile profile = resolveProfile(email);
         Course course = courseRepository.findByCourseCode(request.getCourseCode())
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + request.getCourseCode()));
-        // prevent the same student from enrolling in the same course+section+semester twice
-        if (userCourseRepository.existsByProfileIdAndCourseIdAndSectionAndSemester(
-                profile.getId(), course.getId(), request.getSection(), request.getSemester())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Already enrolled in this course section");
+        if (userCourseRepository.existsByProfileIdAndCourseId(profile.getId(), course.getId())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Already enrolled in this course");
         }
         UserCourse enrollment = new UserCourse();
         enrollment.setProfile(profile);
@@ -85,21 +78,6 @@ public class CourseService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only drop your own enrollments");
         }
         userCourseRepository.delete(enrollment);
-    }
-
-    // DONE: find the UserCourse by ID to get courseId, section, semester
-    // DONE: call userCourseRepository.findClassmates(courseId, section, semester, profileId)
-    // DONE: return the list
-    public List<UserCourse> getClassmates(Long userCourseId, String email) {
-        Profile profile = resolveProfile(email);
-        UserCourse enrollment = userCourseRepository.findById(userCourseId)
-                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found: " + userCourseId));
-        // find all students in the same course, section, and semester (excluding the requester)
-        return userCourseRepository.findClassmates(
-                enrollment.getCourse().getId(),
-                enrollment.getSection(),
-                enrollment.getSemester(),
-                profile.getId());
     }
 
     // Plan C — search courses by keyword (e.g. "biology"), used for the frontend search bar

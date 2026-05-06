@@ -192,35 +192,6 @@ class CourseControllerTest {
         assertEquals(HttpStatus.FORBIDDEN, ex.getStatusCode());
     }
 
-    // ── GET /courses/{userCourseId}/classmates ─────────────────────────────────
-
-    @Test
-    void getClassmates_returns200WithClassmateList() {
-        mockAuth();
-        when(courseService.getClassmates(100L, EMAIL)).thenReturn(List.of(mockEnrollment));
-        ResponseEntity<List<UserCourse>> response = courseController.getClassmates(authentication, 100L);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(1, response.getBody().size());
-    }
-
-    @Test
-    void getClassmates_noClassmates_returns200WithEmptyList() {
-        mockAuth();
-        when(courseService.getClassmates(100L, EMAIL)).thenReturn(List.of());
-        ResponseEntity<List<UserCourse>> response = courseController.getClassmates(authentication, 100L);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertTrue(response.getBody().isEmpty());
-    }
-
-    @Test
-    void getClassmates_enrollmentNotFound_propagatesResourceNotFoundException() {
-        mockAuth();
-        when(courseService.getClassmates(100L, EMAIL))
-                .thenThrow(new ResourceNotFoundException("Enrollment not found"));
-        assertThrows(ResourceNotFoundException.class,
-                () -> courseController.getClassmates(authentication, 100L));
-    }
-
     // ── GET /courses/search ────────────────────────────────────────────────────
 
     @Test

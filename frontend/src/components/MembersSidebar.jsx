@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useEvents } from '../context/EventsContext'
+import { useAuth } from '../context/AuthContext'
 
 function formatEventDate(isoStr) {
   const d    = new Date(isoStr)
@@ -15,6 +16,8 @@ function formatEventDate(isoStr) {
 function MembersSidebar({ activeGroupId, currentGroup, members, myGroups, onSchedule }) {
   const [tab, setTab] = useState('members')
   const { getGroupEvents, removeEvent } = useEvents()
+  const { profile } = useAuth()
+  const navigate = useNavigate()
 
   const events = getGroupEvents(activeGroupId)
 
@@ -51,20 +54,44 @@ function MembersSidebar({ activeGroupId, currentGroup, members, myGroups, onSche
             <div className="space-y-3">
               {members.length === 0 ? (
                 <p className="text-xs text-wsu-slate dark:text-gray-500 text-center py-8">No members yet</p>
-              ) : members.map((member) => (
-                <div key={member.id} className="flex items-center gap-3">
-                  <div className="relative flex-shrink-0">
-                    <div className="w-8 h-8 rounded-full bg-wsu-navy dark:bg-blue-800 text-white text-xs font-bold flex items-center justify-center">
-                      {member.name?.charAt(0).toUpperCase() ?? '?'}
+              ) : members.map((member) => {
+                const isMe = member.id === profile?.id
+                return (
+                  <div key={member.id} className="flex items-center gap-3 group">
+                    <div className="relative flex-shrink-0">
+                      {member.profilePicURL ? (
+                        <img
+                          src={member.profilePicURL}
+                          alt={member.name}
+                          className="w-8 h-8 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-wsu-navy dark:bg-blue-800 text-white text-xs font-bold flex items-center justify-center">
+                          {member.name?.charAt(0).toUpperCase() ?? '?'}
+                        </div>
+                      )}
+                      <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white dark:border-gray-900" />
                     </div>
-                    <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white dark:border-gray-900" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-wsu-navy dark:text-white truncate">
+                        {member.name}{isMe && <span className="text-xs font-normal text-wsu-slate dark:text-gray-400 ml-1">(you)</span>}
+                      </p>
+                      <p className="text-xs text-wsu-slate dark:text-gray-400 truncate">{member.major ?? ''}</p>
+                    </div>
+                    {!isMe && (
+                      <button
+                        onClick={() => navigate(`/dm/${member.id}`)}
+                        title={`Message ${member.name}`}
+                        className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30 text-blue-700 dark:text-blue-400"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                      </button>
+                    )}
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-wsu-navy dark:text-white truncate">{member.name}</p>
-                    <p className="text-xs text-wsu-slate dark:text-gray-400 truncate">{member.major ?? ''}</p>
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
 

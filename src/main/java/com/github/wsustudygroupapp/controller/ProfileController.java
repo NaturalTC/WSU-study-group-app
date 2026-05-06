@@ -53,6 +53,11 @@ public class ProfileController {
         return ResponseEntity.ok(profileService.updateProfile(authentication.getName(), request));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Profile> getProfileById(@PathVariable Long id) {
+        return ResponseEntity.ok(profileService.getProfileById(id));
+    }
+
     @PostMapping("/picture")
     public ResponseEntity<Profile> uploadProfilePicture(Authentication authentication,
                                                          @RequestParam("file") MultipartFile file) throws IOException {
