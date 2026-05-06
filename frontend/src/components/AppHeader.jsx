@@ -47,9 +47,12 @@ function formatTimeAgo(isoStr) {
 }
 
 const NOTIF_ICON = {
-  SESSION_SCHEDULED: '📅',
-  BADGE_EARNED:      '🏆',
-  MEMBER_JOINED:     '👋',
+  SESSION_SCHEDULED:   '📅',
+  SESSION_RESCHEDULED: '📅',
+  SESSION_CANCELLED:   '❌',
+  BADGE_EARNED:        '🏆',
+  MEMBER_JOINED:       '👋',
+  DIRECT_MESSAGE:      '💬',
 }
 
 function AppHeader() {
@@ -87,6 +90,15 @@ function AppHeader() {
         setBellOpen(willOpen)
         setAvatarOpen(false)
         if (willOpen) markAllAsRead()
+    }
+
+    const handleNotifClick = (n) => {
+        setBellOpen(false)
+        if (n.type === 'DIRECT_MESSAGE' && n.relatedEntityId) {
+            navigate(`/dm/${n.relatedEntityId}`)
+        } else if (['MEMBER_JOINED', 'SESSION_SCHEDULED', 'SESSION_RESCHEDULED', 'SESSION_CANCELLED'].includes(n.type) && n.relatedEntityId) {
+            navigate(`/group-chat/${n.relatedEntityId}`)
+        }
     }
 
     const initials = (() => {
@@ -225,7 +237,7 @@ function AppHeader() {
                                     ) : (
                                         <ul className="max-h-72 overflow-y-auto divide-y divide-gray-50 dark:divide-gray-800">
                                             {notifications.map(n => (
-                                                <li key={n.id} className={`flex items-start gap-3 px-4 py-3 transition-colors ${!n.read ? 'bg-blue-50/50 dark:bg-blue-900/10' : 'hover:bg-wsu-mist dark:hover:bg-gray-800'}`}>
+                                                <li key={n.id} onClick={() => handleNotifClick(n)} className={`flex items-start gap-3 px-4 py-3 transition-colors cursor-pointer ${!n.read ? 'bg-blue-50/50 dark:bg-blue-900/10' : 'hover:bg-wsu-mist dark:hover:bg-gray-800'}`}>
                                                     <div className="w-8 h-8 bg-blue-50 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
                                                         <span className="text-sm">{NOTIF_ICON[n.type] ?? '🔔'}</span>
                                                     </div>

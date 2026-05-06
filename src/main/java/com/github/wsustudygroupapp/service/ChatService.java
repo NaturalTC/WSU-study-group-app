@@ -29,17 +29,20 @@ public class ChatService {
     private final ProfileRepository profileRepository;
     private final GamificationService gamificationService;
     private final NotificationService notificationService;
+    private final ActiveDmTracker activeDmTracker;
 
     public ChatService(MessageRepository messageRepository,
                        StudyGroupRepository studyGroupRepository,
                        ProfileRepository profileRepository,
                        GamificationService gamificationService,
-                       NotificationService notificationService) {
+                       NotificationService notificationService,
+                       ActiveDmTracker activeDmTracker) {
         this.messageRepository = messageRepository;
         this.studyGroupRepository = studyGroupRepository;
         this.profileRepository = profileRepository;
         this.gamificationService = gamificationService;
         this.notificationService = notificationService;
+        this.activeDmTracker = activeDmTracker;
     }
 
     // TODO: return messageRepository.findByStudyGroupIdOrderBySentAtAsc(groupId)
@@ -100,6 +103,7 @@ public class ChatService {
             long idA = Long.parseLong(parts[1]);
             long idB = Long.parseLong(parts[2]);
             long recipientId = sender.getId().equals(idA) ? idB : idA;
+            if (activeDmTracker.isActive(recipientId, dmRoomId)) return;
             Optional<Profile> recipient = profileRepository.findById(recipientId);
             recipient.ifPresent(r -> notificationService.notifyDirectMessage(r, sender));
         } catch (Exception e) {

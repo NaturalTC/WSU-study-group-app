@@ -1,11 +1,17 @@
 package com.github.wsustudygroupapp.controller;
 
+import com.github.wsustudygroupapp.dto.DmPresenceDTO;
 import com.github.wsustudygroupapp.dto.MessageDTO;
 import com.github.wsustudygroupapp.model.Message;
+import com.github.wsustudygroupapp.service.ActiveDmTracker;
 import com.github.wsustudygroupapp.service.ChatService;
+import org.springframework.context.event.EventListener;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -19,9 +25,11 @@ import java.time.LocalDateTime;
 public class ChatController {
 
     private final ChatService chatService;
+    private final ActiveDmTracker activeDmTracker;
 
-    public ChatController(ChatService chatService) {
+    public ChatController(ChatService chatService, ActiveDmTracker activeDmTracker) {
         this.chatService = chatService;
+        this.activeDmTracker = activeDmTracker;
     }
 
     // TODO: set the sentAt timestamp on the incoming message DTO
@@ -41,5 +49,23 @@ public class ChatController {
         dto.setSentAt(LocalDateTime.now());
         chatService.saveMessage(dto);
         return dto;
+    }
+
+    @MessageMapping("/dm/enter/{dmRoomId}")
+    public void enterDm(SimpMessageHeaderAccessor headerAccessor,
+                        @DestinationVariable String dmRoomId,
+                        DmPresenceDTO dto) {
+        activeDmTracker.enter(headerAccessor.getSessionId(), dto.getProfileId(), dmRoomId);
+    }
+
+    @MessageMapping("/dm/leave/{dmRoomId}")
+    public void leaveDm(SimpMessageHeaderAccessor headerAccessor,
+                        @DestinationVariable String dmRoomId) {
+        activeDmTracker.leave(headerAccessor.getSessionId());
+    }
+
+    @EventListener
+    public void handleDisconnect(SessionDisconnectEvent event) {
+        activeDmTracker.leave(event.getSessionId());
     }
 }
