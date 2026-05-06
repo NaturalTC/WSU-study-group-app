@@ -21,6 +21,8 @@ function StudyGroups() {
   const [createLoading, setCreateLoading] = useState(false)
   const [createError, setCreateError]     = useState('')
   const [joinLoading, setJoinLoading]     = useState(null)
+  const [picLoading, setPicLoading]       = useState(false)
+  const [picError, setPicError]           = useState('')
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -90,6 +92,27 @@ function StudyGroups() {
       setJoinedGroupIds(prev => { const next = new Set(prev); next.delete(group.id); return next })
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to delete group.')
+    }
+  }
+
+  const handleGroupPicUpload = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setPicLoading(true)
+    setPicError('')
+    try {
+      const form = new FormData()
+      form.append('file', file)
+      const res = await api.post(`/groups/${selectedGroup.id}/picture`, form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      const updated = res.data
+      setGroups(prev => prev.map(g => g.id === updated.id ? updated : g))
+      setSelectedGroup(updated)
+    } catch (err) {
+      setPicError(err.response?.data?.message || 'Failed to upload picture.')
+    } finally {
+      setPicLoading(false)
     }
   }
 
@@ -240,13 +263,47 @@ function StudyGroups() {
       {/* View Details Modal */}
       {selectedGroup && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-6 backdrop-blur-sm">
-          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-lg w-full p-8 animate-fade-up">
-            <div className="flex items-center justify-between mb-6">
-              <span className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-semibold px-3 py-1 rounded-full">
-                {selectedGroup.course?.courseCode}
-              </span>
-              <button onClick={() => setSelectedGroup(null)} className="text-gray-400 hover:text-wsu-navy dark:hover:text-white text-2xl leading-none">×</button>
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden animate-fade-up">
+
+            {/* Group picture header */}
+            <div className="relative h-40 bg-gradient-to-br from-wsu-navy to-blue-800 flex-shrink-0">
+              {selectedGroup.groupPicURL ? (
+                <img src={selectedGroup.groupPicURL} alt={selectedGroup.name} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <span className="text-6xl font-display font-black text-white/20 select-none">
+                    {selectedGroup.course?.courseCode?.split(' ')[0]}
+                  </span>
+                </div>
+              )}
+              {/* Camera upload — creator only */}
+              {profile?.id === selectedGroup.createdBy?.id && (
+                <label className="absolute bottom-3 right-3 cursor-pointer group">
+                  <input type="file" accept="image/*" className="hidden" onChange={handleGroupPicUpload} disabled={picLoading} />
+                  <div className="w-9 h-9 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/60 transition-all">
+                    {picLoading ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    )}
+                  </div>
+                </label>
+              )}
+              <button onClick={() => { setSelectedGroup(null); setPicError('') }} className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm text-white flex items-center justify-center hover:bg-black/60 transition-all text-lg leading-none">×</button>
             </div>
+
+            <div className="p-8">
+              {picError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-2 mb-4">{picError}</div>
+              )}
+              <div className="flex items-center justify-between mb-4">
+                <span className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-semibold px-3 py-1 rounded-full">
+                  {selectedGroup.course?.courseCode}
+                </span>
+              </div>
             <h2 className="font-display text-2xl text-wsu-navy dark:text-white mb-2">{selectedGroup.name}</h2>
             <p className="text-wsu-slate dark:text-gray-400 text-sm mb-6">{selectedGroup.course?.courseName}</p>
             <div className="grid grid-cols-2 gap-4 mb-6">
@@ -268,7 +325,7 @@ function StudyGroups() {
               </div>
             </div>
             <div className="flex gap-3">
-              <button onClick={() => setSelectedGroup(null)} className="btn-secondary flex-1 py-3">Close</button>
+              <button onClick={() => { setSelectedGroup(null); setPicError('') }} className="btn-secondary flex-1 py-3">Close</button>
               {joinedGroupIds.has(selectedGroup.id) ? (
                 <button
                   onClick={() => { handleLeave(selectedGroup); setSelectedGroup(null) }}
@@ -285,6 +342,7 @@ function StudyGroups() {
                 </button>
               )}
             </div>
+            </div>{/* end p-8 */}
           </div>
         </div>
       )}
