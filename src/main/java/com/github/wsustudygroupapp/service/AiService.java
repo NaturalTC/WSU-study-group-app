@@ -2,12 +2,16 @@ package com.github.wsustudygroupapp.service;
 
 import com.github.wsustudygroupapp.dto.AiChatRequest;
 import com.github.wsustudygroupapp.dto.AiChatResponse;
+import com.github.wsustudygroupapp.dto.MessageDTO;
+import com.github.wsustudygroupapp.repository.ProfileRepository;
 import com.github.wsustudygroupapp.repository.StudyGroupRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -20,14 +24,25 @@ public class AiService {
     @Value("${openai.model:gpt-4o-mini}")
     private String openAiModel;
 
+    private final RestTemplate restTemplate;
     private final StudyGroupRepository studyGroupRepository;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final ProfileRepository profileRepository;
+    private final ChatService chatService;
+    private final SimpMessagingTemplate messagingTemplate;
 
-    public AiService(StudyGroupRepository studyGroupRepository) {
+    public AiService(RestTemplate restTemplate,
+                     StudyGroupRepository studyGroupRepository,
+                     ProfileRepository profileRepository,
+                     ChatService chatService,
+                     SimpMessagingTemplate messagingTemplate) {
+        this.restTemplate = restTemplate;
         this.studyGroupRepository = studyGroupRepository;
+        this.profileRepository = profileRepository;
+        this.chatService = chatService;
+        this.messagingTemplate = messagingTemplate;
     }
 
-    public AiChatResponse chat(AiChatRequest request) {
+    public AiChatResponse chat(AiChatRequest request, String userEmail) {
         String courseContext = studyGroupRepository.findById(request.getGroupId())
                 .map(g -> g.getCourse() != null
                         ? g.getCourse().getCourseCode() + " — " + g.getCourse().getCourseName()
@@ -51,6 +66,7 @@ public class AiService {
                 )
         );
 
+        AiChatResponse aiResponse;
         try {
             ResponseEntity<Map> response = restTemplate.postForEntity(
                     "https://api.openai.com/v1/chat/completions",
@@ -61,9 +77,35 @@ public class AiService {
             List<Map<String, Object>> choices = (List<Map<String, Object>>) response.getBody().get("choices");
             @SuppressWarnings("unchecked")
             Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
-            return new AiChatResponse((String) message.get("content"));
+            aiResponse = new AiChatResponse((String) message.get("content"));
         } catch (Exception e) {
-            return new AiChatResponse("Sorry, I'm having trouble connecting right now. Please try again in a moment.");
+            aiResponse = new AiChatResponse("Sorry, I'm having trouble connecting right now. Please try again in a moment.");
         }
+
+        String senderName = profileRepository.findByUserEmail(userEmail)
+                .map(p -> p.getName())
+                .orElse("Student");
+
+        String topic = "/topic/chat/" + request.getGroupId();
+        LocalDateTime now = LocalDateTime.now();
+
+        MessageDTO questionDto = new MessageDTO();
+        questionDto.setStudyGroupId(request.getGroupId());
+        questionDto.setSenderName(senderName);
+        questionDto.setContent("[AI] asked: " + request.getMessage());
+        questionDto.setSentAt(now);
+        messagingTemplate.convertAndSend(topic, questionDto);
+        chatService.saveSystemMessage(request.getGroupId(), senderName, questionDto.getContent(), now);
+
+        LocalDateTime replyTime = LocalDateTime.now();
+        MessageDTO replyDto = new MessageDTO();
+        replyDto.setStudyGroupId(request.getGroupId());
+        replyDto.setSenderName("AI Assistant");
+        replyDto.setContent(aiResponse.getReply());
+        replyDto.setSentAt(replyTime);
+        messagingTemplate.convertAndSend(topic, replyDto);
+        chatService.saveSystemMessage(request.getGroupId(), "AI Assistant", aiResponse.getReply(), replyTime);
+
+        return aiResponse;
     }
 }
