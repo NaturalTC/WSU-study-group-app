@@ -4,6 +4,7 @@ import com.github.wsustudygroupapp.dto.LeaderboardEntryDTO;
 import com.github.wsustudygroupapp.exception.ResourceNotFoundException;
 import com.github.wsustudygroupapp.model.*;
 import com.github.wsustudygroupapp.repository.*;
+import com.github.wsustudygroupapp.service.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +19,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+// Unit tests for GamificationService. All repositories are mocked (no real database needed).
+// See GamificationService.java for the implementation being tested.
 @ExtendWith(MockitoExtension.class)
 class GamificationServiceTest {
 
@@ -28,6 +31,7 @@ class GamificationServiceTest {
     @Mock private MessageRepository messageRepository;
     @Mock private MeetingSessionRepository meetingSessionRepository;
     @Mock private UserCourseRepository userCourseRepository;
+    @Mock private NotificationService notificationService;
     @InjectMocks private GamificationService gamificationService;
 
     private Profile mockProfile;
