@@ -3,7 +3,7 @@ import axios from 'axios'
 // Single axios instance used across the entire app.
 // Base URL is set once here — no more hardcoding http://localhost:8080 in every file.
 const api = axios.create({
-  baseURL: 'http://localhost:8080',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080',
   headers: {
     'Content-Type': 'application/json',
   },

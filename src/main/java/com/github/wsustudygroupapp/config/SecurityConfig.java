@@ -31,6 +31,9 @@ public class SecurityConfig {
     @Value("${app.frontend-url}")
     private String frontendUrl;
 
+    @Value("${app.frontend-url-extra:}")
+    private String frontendUrlExtra;
+
     public SecurityConfig(JwtAuthFilter jwtAuthFilter)
     {
         this.jwtAuthFilter = jwtAuthFilter;
@@ -70,7 +73,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(frontendUrl));
+        List<String> origins = frontendUrlExtra.isBlank()
+                ? List.of(frontendUrl)
+                : List.of(frontendUrl, frontendUrlExtra);
+        config.setAllowedOrigins(origins);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
