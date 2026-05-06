@@ -30,10 +30,14 @@ public class Message {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    /** The student who sent this message. */
+    /** The student who sent this message. Null for system/AI messages — use senderName instead. */
     @ManyToOne
-    @JoinColumn(name = "sender_id", nullable = false)
+    @JoinColumn(name = "sender_id", nullable = true)
     private Profile sender;
+
+    /** Display name used when sender is null (e.g. "AI Assistant"). */
+    @Column(name = "sender_name")
+    private String senderName;
 
     /** The study group this message was sent in. */
     @ManyToOne
