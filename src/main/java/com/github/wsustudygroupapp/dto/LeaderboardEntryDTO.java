@@ -37,5 +37,6 @@ public class LeaderboardEntryDTO {
     @Schema(description = "Total number of badges the student has earned", example = "5")
     private int badgeCount;
 
-    // TODO: Sprint 2 — add a topBadgeIcon field so the frontend can show the student's rarest badge
+    @Schema(description = "S3 URL of the student's profile picture, or null if not set")
+    private String profilePicURL;
 }
