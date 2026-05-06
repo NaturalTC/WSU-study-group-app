@@ -295,10 +295,14 @@ function AppHeader() {
                     <div className="relative" ref={avatarRef}>
                         <button
                             onClick={() => { setAvatarOpen(prev => !prev); setBellOpen(false) }}
-                            className="w-9 h-9 rounded-full bg-blue-700 flex items-center justify-center shadow hover:bg-blue-800 transition-colors flex-shrink-0"
+                            className="w-9 h-9 rounded-full bg-blue-700 flex items-center justify-center shadow hover:ring-2 hover:ring-blue-400 transition-all flex-shrink-0 overflow-hidden"
                             aria-label="Account menu"
                         >
-                            <span className="text-white text-xs font-bold font-display">{initials}</span>
+                            {profile?.profilePicURL ? (
+                                <img src={profile.profilePicURL} alt="Avatar" className="w-full h-full object-cover" />
+                            ) : (
+                                <span className="text-white text-xs font-bold font-display">{initials}</span>
+                            )}
                         </button>
 
                         {avatarOpen && (

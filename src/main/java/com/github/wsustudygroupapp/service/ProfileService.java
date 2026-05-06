@@ -7,6 +7,9 @@ import com.github.wsustudygroupapp.model.User;
 import com.github.wsustudygroupapp.repository.ProfileRepository;
 import com.github.wsustudygroupapp.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 // DONE: Maicheal — handles profile creation and updates
 // getProfile() → return a student's profile by their user ID
@@ -18,10 +21,14 @@ public class ProfileService {
 
     private final ProfileRepository profileRepository;
     private final UserRepository userRepository;
+    private final S3Service s3Service;
 
-    public ProfileService(ProfileRepository profileRepository, UserRepository userRepository) {
+    public ProfileService(ProfileRepository profileRepository,
+                          UserRepository userRepository,
+                          S3Service s3Service) {
         this.profileRepository = profileRepository;
         this.userRepository = userRepository;
+        this.s3Service = s3Service;
     }
 
     // DONE: find profile by userId using profileRepository.findByUserId(userId)
@@ -66,6 +73,21 @@ public class ProfileService {
         profile.setMajor(request.getMajor());
         profile.setYear(request.getYear());
         profile.setBio(request.getBio());
+        return profileRepository.save(profile);
+    }
+
+    public Profile uploadProfilePicture(String email, MultipartFile file) throws IOException {
+        if (file.isEmpty()) throw new IllegalArgumentException("File cannot be empty");
+        if (!file.getContentType().startsWith("image/")) throw new IllegalArgumentException("File must be an image");
+        if (file.getSize() > 5 * 1024 * 1024) throw new IllegalArgumentException("File must be under 5MB");
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + email));
+        Profile profile = profileRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Profile not found for: " + email));
+
+        String url = s3Service.uploadProfilePicture(file, profile.getId());
+        profile.setProfilePicURL(url);
         return profileRepository.save(profile);
     }
 }

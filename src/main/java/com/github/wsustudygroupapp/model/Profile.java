@@ -54,6 +54,9 @@ public class Profile {
     @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserCourse> enrollments;
 
+    @Column
+    private String profilePicURL;
+
     // ── Sprint 2 fields ───────────────────────────────────────────────
 
     /**
