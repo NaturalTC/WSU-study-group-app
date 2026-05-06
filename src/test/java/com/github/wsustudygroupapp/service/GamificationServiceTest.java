@@ -201,6 +201,27 @@ class GamificationServiceTest {
         verify(profileRepository, atLeastOnce()).save(mockProfile);
     }
 
+    @Test
+    void awardBadge_newBadge_sendsNotificationToProfile() {
+        when(badgeRepository.findByName("First Group Join")).thenReturn(Optional.of(mockBadge));
+        when(userBadgeRepository.existsByProfileIdAndBadgeId(1L, 10L)).thenReturn(false);
+        when(profileRepository.findById(1L)).thenReturn(Optional.of(mockProfile));
+
+        gamificationService.awardBadge(1L, "First Group Join");
+
+        verify(notificationService, times(1)).notifyBadgeEarned(mockProfile, mockBadge);
+    }
+
+    @Test
+    void awardBadge_alreadyEarned_doesNotSendNotification() {
+        when(badgeRepository.findByName("First Group Join")).thenReturn(Optional.of(mockBadge));
+        when(userBadgeRepository.existsByProfileIdAndBadgeId(1L, 10L)).thenReturn(true);
+
+        gamificationService.awardBadge(1L, "First Group Join");
+
+        verify(notificationService, never()).notifyBadgeEarned(any(), any());
+    }
+
     // ── checkBadgeEligibility (tested via awardPoints) ────────────────────────
     // For each threshold test: stubs the relevant count, returns Optional.empty()
     // for the badge so tryAwardBadge silently skips — we just verify the lookup happened.
@@ -359,6 +380,29 @@ class GamificationServiceTest {
         List<LeaderboardEntryDTO> result = gamificationService.getGlobalLeaderboard(10);
 
         assertEquals(3, result.get(0).getBadgeCount());
+    }
+
+    @Test
+    void getGlobalLeaderboard_zeroTopN_returnsEmptyList() {
+        when(profileRepository.findAll()).thenReturn(List.of(
+                makeProfile(1L, "Alice", 100)
+        ));
+
+        List<LeaderboardEntryDTO> result = gamificationService.getGlobalLeaderboard(0);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void awardPoints_belowHundredPoints_doesNotAttemptMilestoneBadge() {
+        // profile reaches 99 points — one short of the milestone threshold
+        mockProfile.setPoints(98);
+        when(profileRepository.findById(1L)).thenReturn(Optional.of(mockProfile));
+        stubNoBadgeEligibility();
+
+        gamificationService.awardPoints(1L, 1);
+
+        verify(badgeRepository, never()).findByName("Point Milestone 100");
     }
 
     // ── getCourseLeaderboard ──────────────────────────────────────────────────
