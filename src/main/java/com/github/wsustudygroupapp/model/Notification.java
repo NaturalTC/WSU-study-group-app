@@ -23,6 +23,10 @@ public class Notification {
 
     public enum NotificationType {
         SESSION_SCHEDULED,
+        /** An existing session was moved to a different time by its creator. */
+        SESSION_RESCHEDULED,
+        /** A scheduled session was cancelled by its creator. */
+        SESSION_CANCELLED,
         BADGE_EARNED,
         MEMBER_JOINED
     }

@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { EventsProvider } from './context/EventsContext'
+import { MeetingsProvider } from './context/MeetingsContext'
 import { BadgesProvider } from './context/BadgesContext'
 import { ToastProvider } from './context/ToastContext'
 import { NotificationProvider } from './context/NotificationContext'
@@ -18,9 +19,11 @@ createRoot(document.getElementById('root')).render(
           <ToastProvider>
             <NotificationProvider>
               <EventsProvider>
-                <BadgesProvider>
-                  <App />
-                </BadgesProvider>
+                <MeetingsProvider>
+                  <BadgesProvider>
+                    <App />
+                  </BadgesProvider>
+                </MeetingsProvider>
               </EventsProvider>
             </NotificationProvider>
           </ToastProvider>

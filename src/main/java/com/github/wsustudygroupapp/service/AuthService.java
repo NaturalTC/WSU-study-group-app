@@ -36,6 +36,9 @@ public class AuthService {
     @Value("${app.base-url}")
     private String baseUrl; // http://localhost:8080
 
+    @Value("${app.frontend-url}")
+    private String frontendUrl; // http://localhost:5173
+
     // Spring injects all dependencies through this constructor at startup
     public AuthService(UserRepository userRepository,
                        ProfileRepository profileRepository,
@@ -181,7 +184,7 @@ public class AuthService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(request.getEmail());
         message.setSubject("Reset your WSU Study Group password");
-        message.setText("Click to reset your password: " + baseUrl + "/reset-password?token=" + resetToken);
+        message.setText("Click to reset your password: " + frontendUrl + "/reset-password?token=" + resetToken);
         mailSender.send(message);
     }
 
