@@ -1,7 +1,9 @@
 package com.github.wsustudygroupapp.controller;
 
+import com.github.wsustudygroupapp.dto.BadgeResponseDTO;
 import com.github.wsustudygroupapp.dto.ProfileRequest;
 import com.github.wsustudygroupapp.model.Profile;
+import com.github.wsustudygroupapp.service.GamificationService;
 import com.github.wsustudygroupapp.service.ProfileService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 // DONE: Maicheal — exposes profile endpoints
 // All routes here require a valid JWT token (configured in SecurityConfig)
@@ -19,9 +22,11 @@ import java.io.IOException;
 public class ProfileController {
 
     private final ProfileService profileService;
+    private final GamificationService gamificationService;
 
-    public ProfileController(ProfileService profileService) {
+    public ProfileController(ProfileService profileService, GamificationService gamificationService) {
         this.profileService = profileService;
+        this.gamificationService = gamificationService;
     }
 
     // DONE: extract the logged-in user's ID from the JWT (Spring Security principal)
@@ -57,5 +62,10 @@ public class ProfileController {
     public ResponseEntity<Profile> uploadProfilePicture(Authentication authentication,
                                                          @RequestParam("file") MultipartFile file) throws IOException {
         return ResponseEntity.ok(profileService.uploadProfilePicture(authentication.getName(), file));
+    }
+
+    @GetMapping("/badges")
+    public ResponseEntity<List<BadgeResponseDTO>> getMyBadges(Authentication authentication) {
+        return ResponseEntity.ok(gamificationService.getUserBadges(authentication.getName()));
     }
 }

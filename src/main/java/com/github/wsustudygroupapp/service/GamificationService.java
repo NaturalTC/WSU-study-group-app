@@ -1,5 +1,6 @@
 package com.github.wsustudygroupapp.service;
 
+import com.github.wsustudygroupapp.dto.BadgeResponseDTO;
 import com.github.wsustudygroupapp.dto.LeaderboardEntryDTO;
 import com.github.wsustudygroupapp.exception.ResourceNotFoundException;
 import com.github.wsustudygroupapp.model.Badge;
@@ -134,6 +135,18 @@ public class GamificationService {
             awardBadge(profileId, badgeName);
         } catch (ResourceNotFoundException ignored) {
         }
+    }
+
+    // Returns all badges earned by the logged-in user, mapped to frontend badge IDs.
+    // Badges with no frontend code (e.g. "Group Starter") are filtered out.
+    public List<BadgeResponseDTO> getUserBadges(String email) {
+        Profile profile = profileRepository.findByUserEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Profile not found for: " + email));
+        return userBadgeRepository.findByProfileIdOrderByAwardedAtDesc(profile.getId())
+                .stream()
+                .filter(ub -> ub.getBadge().getCode() != null)
+                .map(ub -> new BadgeResponseDTO(ub.getBadge().getCode(), ub.getAwardedAt().toString()))
+                .collect(Collectors.toList());
     }
 
     // Returns the top topN students across the whole app ranked by points (highest first).
