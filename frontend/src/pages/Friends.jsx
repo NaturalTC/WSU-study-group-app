@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import AppHeader from '../components/AppHeader'
 import api from '../api/axios'
+import campusPhoto from '../assets/UHallSept2018_3-X3.jpg'
 
 function initials(name = '') {
   const parts = name.trim().split(' ')
@@ -234,15 +235,18 @@ function Friends() {
                  : suggestions
 
   return (
-    <div className="flex flex-col min-h-screen bg-wsu-chalk dark:bg-gray-900 transition-colors duration-300">
+    <div
+      className="flex flex-col min-h-screen bg-cover bg-center bg-fixed transition-colors duration-300"
+      style={{ backgroundImage: `url(${campusPhoto})` }}
+    >
       <AppHeader />
 
       <main className="flex-1 pt-16">
 
         {/* ── Hero Banner ── */}
-        <div className="bg-gradient-to-br from-wsu-navy via-blue-900 to-blue-800 text-white">
-          <div className="max-w-5xl mx-auto px-6 py-16">
-            <div className="flex flex-col md:flex-row items-end justify-between gap-6">
+        <div className="relative bg-gradient-to-br from-wsu-navy/75 via-blue-900/75 to-blue-800/75 text-white overflow-hidden">
+          <div className="relative max-w-5xl mx-auto px-6 py-16">
+            <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6">
               <div>
                 <h1 className="font-display text-3xl md:text-4xl font-bold leading-tight">Friends</h1>
                 <p className="text-blue-200 mt-1 text-sm">Connect with classmates from your courses and study groups.</p>
@@ -251,6 +255,9 @@ function Friends() {
                 <p className="text-xs text-blue-200 font-semibold uppercase tracking-wider mb-1">Friends</p>
                 <p className="font-display text-4xl font-bold text-white">{friends.length}</p>
                 <p className="text-xs text-blue-200 mt-1">connected</p>
+                <span className="inline-block mt-2 text-xs font-semibold px-3 py-1 rounded-full bg-white/20 text-white">
+                  {incoming.length > 0 ? `${incoming.length} pending` : 'no requests'}
+                </span>
               </div>
             </div>
           </div>

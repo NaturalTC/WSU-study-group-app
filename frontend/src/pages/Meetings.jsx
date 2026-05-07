@@ -116,9 +116,9 @@ function Meetings() {
       <main className="flex-1 pt-16">
 
         {/* ── Hero Banner ── */}
-        <div className="bg-gradient-to-br from-wsu-navy/75 via-blue-900/75 to-blue-800/75 text-white">
-          <div className="max-w-5xl mx-auto px-6 py-16">
-            <div className="flex flex-col md:flex-row items-end justify-between gap-6">
+        <div className="relative bg-gradient-to-br from-wsu-navy/75 via-blue-900/75 to-blue-800/75 text-white overflow-hidden">
+          <div className="relative max-w-5xl mx-auto px-6 py-16">
+            <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6">
               <div>
                 <h1 className="font-display text-3xl md:text-4xl font-bold leading-tight">Meetings</h1>
                 <p className="text-blue-200 mt-1 text-sm">Upcoming study sessions across all your groups.</p>
