@@ -113,26 +113,33 @@ function Meetings() {
     >
       <AppHeader />
 
-      <main className="flex-1 pt-24 pb-12 max-w-5xl mx-auto w-full px-4 md:px-6">
+      <main className="flex-1 pt-16">
 
-        <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-6 md:p-8 mb-6">
-          <div className="flex items-start justify-between gap-4 flex-wrap">
-            <div>
-              <h1 className="font-display text-3xl text-wsu-navy dark:text-white">Meetings</h1>
-              <p className="text-sm text-wsu-slate dark:text-gray-400 mt-1">
-                Upcoming study sessions across all your groups.
-              </p>
+        {/* ── Hero Banner ── */}
+        <div className="relative bg-gradient-to-br from-wsu-navy/75 via-blue-900/75 to-blue-800/75 text-white overflow-hidden">
+          <div className="relative max-w-5xl mx-auto px-6 py-16">
+            <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6">
+              <div>
+                <h1 className="font-display text-3xl md:text-4xl font-bold leading-tight">Meetings</h1>
+                <p className="text-blue-200 mt-1 text-sm">Upcoming study sessions across all your groups.</p>
+              </div>
+              <div className="bg-white/10 border border-white/20 backdrop-blur-sm rounded-2xl px-6 py-4 min-w-[200px] text-center flex-shrink-0">
+                <p className="text-xs text-blue-200 font-semibold uppercase tracking-wider mb-1">Ready to meet?</p>
+                <p className="font-display text-4xl font-bold text-white">📅</p>
+                <p className="text-xs mt-1 invisible">placeholder</p>
+                <button
+                  onClick={() => setShowModal(true)}
+                  disabled={groupsLoading || groups.length === 0}
+                  className="inline-block mt-2 bg-white/20 hover:bg-white/30 text-white text-xs font-semibold px-3 py-1 rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Schedule Meeting
+                </button>
+              </div>
             </div>
-            <button
-              onClick={() => setShowModal(true)}
-              disabled={groupsLoading || groups.length === 0}
-              className="flex items-center gap-2 px-4 py-2.5 bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold rounded-xl shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <span>📅</span>
-              Schedule Meeting
-            </button>
           </div>
         </div>
+
+        <div className="max-w-5xl mx-auto px-6 pt-8 pb-12">
 
         {cancelError && (
           <div className="mb-4 p-3 rounded-xl bg-red-50 dark:bg-red-900/20">
@@ -143,7 +150,7 @@ function Meetings() {
           </div>
         )}
 
-        <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-6 md:p-8">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 md:p-8">
           {loadingUpcoming ? (
             <div className="flex justify-center py-16">
               <div className="animate-spin w-8 h-8 border-4 border-blue-700 border-t-transparent rounded-full" />
@@ -256,6 +263,7 @@ function Meetings() {
               ))}
             </div>
           )}
+        </div>
         </div>
       </main>
 
