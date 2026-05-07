@@ -81,7 +81,7 @@ function Leaderboard() {
               </div>
 
               {/* Your stat card */}
-              <div className="bg-white/10 border border-white/20 backdrop-blur-sm rounded-2xl px-6 py-4 min-w-[200px] text-center">
+              <div className="bg-white/10 border border-white/20 backdrop-blur-sm rounded-2xl px-6 py-4 min-w-[200px] text-center self-center md:self-auto">
                 <p className="text-xs text-blue-200 font-semibold uppercase tracking-wider mb-1">Your Rank</p>
                 <p className="font-display text-4xl font-bold text-wsu-gold">
                   {myRank > 0 ? `#${myRank}` : '—'}

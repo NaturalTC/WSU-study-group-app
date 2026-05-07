@@ -11,8 +11,8 @@ const features = [
     title: 'AI Study Assistant',
     description:
       'Get instant help on any subject with our built-in AI tutor. Ask questions, get explanations, and generate practice problems — available 24/7.',
-    color: 'bg-blue-50',
-    accent: 'text-blue-600',
+    color: 'bg-blue-50 dark:bg-blue-900/30',
+    accent: 'text-blue-600 dark:text-blue-400',
   },
   {
     id: 2,
@@ -20,8 +20,8 @@ const features = [
     title: 'Study Groups',
     description:
       'Find or create study groups for your courses. Schedule sessions, share notes, and collaborate with classmates in real time.',
-    color: 'bg-red-50',
-    accent: 'text-wsu-crimson',
+    color: 'bg-red-50 dark:bg-red-900/30',
+    accent: 'text-wsu-crimson dark:text-red-400',
   },
   {
     id: 3,
@@ -29,8 +29,8 @@ const features = [
     title: 'Gamification & Rewards',
     description:
       'Earn points for attending sessions, helping others, and hitting study goals. Climb the leaderboard and unlock badges.',
-    color: 'bg-yellow-50',
-    accent: 'text-yellow-600',
+    color: 'bg-yellow-50 dark:bg-yellow-900/30',
+    accent: 'text-yellow-600 dark:text-yellow-400',
   },
   {
     id: 4,
@@ -38,8 +38,8 @@ const features = [
     title: 'Smart Scheduling',
     description:
       'Sync your class schedule and find times that work for everyone in your group. No more back-and-forth texting.',
-    color: 'bg-green-50',
-    accent: 'text-green-600',
+    color: 'bg-green-50 dark:bg-green-900/30',
+    accent: 'text-green-600 dark:text-green-400',
   },
   {
     id: 5,
@@ -47,8 +47,8 @@ const features = [
     title: 'Course Resources',
     description:
       'Access shared notes, past exams, and study guides organized by course. Contribute and give back to your community.',
-    color: 'bg-purple-50',
-    accent: 'text-purple-600',
+    color: 'bg-purple-50 dark:bg-purple-900/30',
+    accent: 'text-purple-600 dark:text-purple-400',
   },
   {
     id: 6,
@@ -56,8 +56,8 @@ const features = [
     title: 'Group Messaging',
     description:
       'Stay connected with your study group through built-in messaging. Share links, files, and updates in one place.',
-    color: 'bg-pink-50',
-    accent: 'text-pink-600',
+    color: 'bg-pink-50 dark:bg-pink-900/30',
+    accent: 'text-pink-600 dark:text-pink-400',
   },
 ]
 
@@ -87,7 +87,7 @@ function FeaturesSection() {
     <section
       id="features"
       ref={sectionRef}
-      className="py-24 px-6 bg-wsu-chalk"
+      className="py-24 px-6 bg-wsu-chalk dark:bg-gray-900 transition-colors duration-300"
     >
       <div className="max-w-7xl mx-auto">
 
@@ -124,7 +124,7 @@ function FeaturesSection() {
               </h3>
 
               {/* Description */}
-              <p className="text-wsu-slate text-sm leading-relaxed">
+              <p className="text-wsu-slate dark:text-gray-400 text-sm leading-relaxed">
                 {feature.description}
               </p>
             </div>
@@ -162,8 +162,8 @@ function FeaturesSection() {
                 <div className="w-14 h-14 bg-wsu-navy text-white font-display text-xl rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
                   {item.step}
                 </div>
-                <h3 className="font-display text-xl text-wsu-navy mb-2">{item.title}</h3>
-                <p className="text-wsu-slate text-sm leading-relaxed">{item.desc}</p>
+                <h3 className="font-display text-xl text-wsu-navy dark:text-white mb-2">{item.title}</h3>
+                <p className="text-wsu-slate dark:text-gray-400 text-sm leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
