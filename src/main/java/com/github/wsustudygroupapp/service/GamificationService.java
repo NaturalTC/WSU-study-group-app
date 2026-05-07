@@ -7,6 +7,7 @@ import com.github.wsustudygroupapp.model.Badge;
 import com.github.wsustudygroupapp.model.Profile;
 import com.github.wsustudygroupapp.model.UserBadge;
 import com.github.wsustudygroupapp.repository.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +34,7 @@ import java.util.stream.Collectors;
  *   + 1 send a chat message   (ChatService)
  *   +25 schedule a meeting    (MeetingSessionService)
  */
+@Slf4j
 @Service
 public class GamificationService {
 
@@ -71,6 +73,7 @@ public class GamificationService {
     // TODO [DONE]: call checkBadgeEligibility(profile) to see if any badge thresholds were crossed
     @Transactional
     public void awardPoints(Long profileId, int points) {
+        log.info("awardPoints called for profileId={}, points={}", profileId, points);
         Profile profile = profileRepository.findById(profileId)
                 .orElseThrow(() -> new ResourceNotFoundException("Profile not found: " + profileId));
         profile.setPoints(profile.getPoints() + points);
@@ -140,6 +143,7 @@ public class GamificationService {
     // Returns all badges earned by the logged-in user, mapped to frontend badge IDs.
     // Badges with no frontend code (e.g. "Group Starter") are filtered out.
     public List<BadgeResponseDTO> getUserBadges(String email) {
+        log.info("getUserBadges called for email={}", email);
         Profile profile = profileRepository.findByUserEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Profile not found for: " + email));
         return userBadgeRepository.findByProfileIdOrderByAwardedAtDesc(profile.getId())
@@ -155,6 +159,7 @@ public class GamificationService {
     // TODO [DONE]: for each profile build a LeaderboardEntryDTO with rank, profileId, displayName, points, badgeCount
     // TODO [DONE]: return the list
     public List<LeaderboardEntryDTO> getGlobalLeaderboard(int topN) {
+        log.info("getGlobalLeaderboard called for topN={}", topN);
         List<Profile> sorted = profileRepository.findAll().stream()
                 .sorted(Comparator.comparingInt(Profile::getPoints).reversed())
                 .limit(topN)
@@ -168,6 +173,7 @@ public class GamificationService {
     // TODO [DONE]: load all profiles enrolled in a given course (via UserCourse), sort by points descending, take top N
     // TODO [DONE]: build and return LeaderboardEntryDTO list the same way as getGlobalLeaderboard()
     public List<LeaderboardEntryDTO> getCourseLeaderboard(Long courseId, int topN) {
+        log.info("getCourseLeaderboard called for courseId={}, topN={}", courseId, topN);
         List<Profile> sorted = userCourseRepository.findByCourseId(courseId).stream()
                 .map(uc -> uc.getProfile())
                 .distinct()

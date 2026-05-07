@@ -12,6 +12,7 @@ import com.github.wsustudygroupapp.model.User;
 import com.github.wsustudygroupapp.repository.NotificationRepository;
 import com.github.wsustudygroupapp.repository.ProfileRepository;
 import com.github.wsustudygroupapp.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ import java.util.List;
  * Notifications are triggered by backend events (session scheduled, badge earned, member joined)
  * and fetched by the frontend on page load to populate the bell dropdown.
  */
+@Slf4j
 @Service
 public class NotificationService {
 
@@ -45,6 +47,7 @@ public class NotificationService {
 
     /** Returns all notifications for the logged-in student, newest first. Used to populate the bell dropdown. */
     public List<NotificationResponse> getNotifications(String email) {
+        log.info("getNotifications called for email={}", email);
         Profile profile = currentProfile(email);
         return notificationRepository.findByRecipientIdOrderByCreatedAtDesc(profile.getId())
                 .stream()
@@ -54,17 +57,20 @@ public class NotificationService {
 
     /** Returns the count of unread notifications. Used to show the red dot on the bell icon. */
     public int getUnreadCount(String email) {
+        log.info("getUnreadCount called for email={}", email);
         Profile profile = currentProfile(email);
         return notificationRepository.countByRecipientIdAndIsReadFalse(profile.getId());
     }
 
     /** Marks a single notification as read. Throws 403 if the requesting student doesn't own it. */
     public void markAsRead(Long notificationId, String email) {
+        log.info("markAsRead called for notificationId={}, email={}", notificationId, email);
         Profile profile = currentProfile(email);
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Notification not found: " + notificationId));
 
         if (!notification.getRecipient().getId().equals(profile.getId())) {
+            log.warn("markAsRead rejected — email={} does not own notificationId={}", email, notificationId);
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this notification");
         }
 
@@ -75,12 +81,14 @@ public class NotificationService {
     /** Deletes all notifications for the logged-in student. */
     @Transactional
     public void clearAll(String email) {
+        log.info("clearAll notifications called for email={}", email);
         Profile profile = currentProfile(email);
         notificationRepository.deleteByRecipientId(profile.getId());
     }
 
     /** Marks all of a student's unread notifications as read. */
     public void markAllAsRead(String email) {
+        log.info("markAllAsRead called for email={}", email);
         Profile profile = currentProfile(email);
         List<Notification> unread = notificationRepository.findByRecipientIdAndIsReadFalse(profile.getId());
         unread.forEach(n -> n.setRead(true));

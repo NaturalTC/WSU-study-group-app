@@ -11,6 +11,7 @@ import com.github.wsustudygroupapp.repository.FriendshipRepository;
 import com.github.wsustudygroupapp.repository.ProfileRepository;
 import com.github.wsustudygroupapp.repository.StudyGroupRepository;
 import com.github.wsustudygroupapp.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -22,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class FriendshipService {
 
@@ -42,15 +44,18 @@ public class FriendshipService {
 
     /** Send a friend request from the logged-in user to targetProfileId. */
     public FriendshipResponse sendRequest(String email, Long targetProfileId) {
+        log.info("sendRequest called from email={} to targetProfileId={}", email, targetProfileId);
         Profile sender   = resolveProfile(email);
         Profile receiver = profileRepository.findById(targetProfileId)
                 .orElseThrow(() -> new ResourceNotFoundException("Profile not found: " + targetProfileId));
 
         if (sender.getId().equals(receiver.getId())) {
+            log.warn("sendRequest rejected — cannot add yourself as a friend, email={}", email);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot add yourself as a friend");
         }
 
         friendshipRepository.findBetween(sender.getId(), receiver.getId()).ifPresent(existing -> {
+            log.warn("sendRequest rejected — request already exists between email={} and profileId={}", email, targetProfileId);
             throw new ResponseStatusException(HttpStatus.CONFLICT, "A friend request already exists between these users");
         });
 
@@ -65,6 +70,7 @@ public class FriendshipService {
 
     /** Accept an incoming friend request (caller must be the receiver). */
     public FriendshipResponse acceptRequest(String email, Long friendshipId) {
+        log.info("acceptRequest called by email={} for friendshipId={}", email, friendshipId);
         Profile me         = resolveProfile(email);
         Friendship friendship = getFriendshipOrThrow(friendshipId);
 
@@ -81,6 +87,7 @@ public class FriendshipService {
 
     /** Decline an incoming friend request (caller must be the receiver). */
     public FriendshipResponse declineRequest(String email, Long friendshipId) {
+        log.info("declineRequest called by email={} for friendshipId={}", email, friendshipId);
         Profile me         = resolveProfile(email);
         Friendship friendship = getFriendshipOrThrow(friendshipId);
 
@@ -100,6 +107,7 @@ public class FriendshipService {
      * Either party may do this.
      */
     public void removeFriendOrCancel(String email, Long friendshipId) {
+        log.info("removeFriendOrCancel called by email={} for friendshipId={}", email, friendshipId);
         Profile me         = resolveProfile(email);
         Friendship friendship = getFriendshipOrThrow(friendshipId);
 
@@ -114,6 +122,7 @@ public class FriendshipService {
 
     /** All accepted friends for the logged-in user. */
     public List<FriendshipResponse> getFriends(String email) {
+        log.info("getFriends called for email={}", email);
         Profile me = resolveProfile(email);
         return friendshipRepository.findAcceptedFriends(me.getId())
                 .stream()
@@ -123,6 +132,7 @@ public class FriendshipService {
 
     /** Pending requests received by the logged-in user. */
     public List<FriendshipResponse> getIncomingRequests(String email) {
+        log.info("getIncomingRequests called for email={}", email);
         Profile me = resolveProfile(email);
         return friendshipRepository.findByReceiverIdAndStatus(me.getId(), FriendshipStatus.PENDING)
                 .stream()
@@ -132,6 +142,7 @@ public class FriendshipService {
 
     /** Pending requests sent by the logged-in user. */
     public List<FriendshipResponse> getOutgoingRequests(String email) {
+        log.info("getOutgoingRequests called for email={}", email);
         Profile me = resolveProfile(email);
         return friendshipRepository.findBySenderIdAndStatus(me.getId(), FriendshipStatus.PENDING)
                 .stream()
@@ -144,6 +155,7 @@ public class FriendshipService {
      * Each suggestion carries the name of one shared group for context.
      */
     public List<SuggestionResponse> getSuggestions(String email) {
+        log.info("getSuggestions called for email={}", email);
         Profile me = resolveProfile(email);
 
         // IDs of everyone already connected (any status, either direction)
@@ -177,6 +189,7 @@ public class FriendshipService {
 
     /** Case-insensitive name search across all profiles, excluding the current user. */
     public List<SuggestionResponse> searchProfiles(String query, String email) {
+        log.info("searchProfiles called by email={} query={}", email, query);
         Profile me = resolveProfile(email);
 
         // Build existing-connection map for status overlay
