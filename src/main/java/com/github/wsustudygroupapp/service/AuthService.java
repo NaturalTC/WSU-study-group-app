@@ -6,6 +6,7 @@ import com.github.wsustudygroupapp.model.User;
 import com.github.wsustudygroupapp.repository.ProfileRepository;
 import com.github.wsustudygroupapp.repository.UserRepository;
 import com.github.wsustudygroupapp.util.JwtUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -20,6 +21,7 @@ import java.util.UUID;
 // verify() → find user by token, mark as verified
 // login() → check credentials, check verified, return JWT
 
+@Slf4j
 @Service
 public class AuthService {
 
@@ -63,16 +65,19 @@ public class AuthService {
      */
     public void register(RegisterRequest request)
     {
+        log.info("register called for email={}", request.getEmail());
 
         // Only @westfield.ma.edu emails allowed — enforce the school domain
         if (!request.getEmail().endsWith(schoolEmailDomain))
         {
+            log.warn("register rejected — invalid email domain for email={}", request.getEmail());
             throw new RuntimeException("Only @westfield.ma.edu emails are allowed");
         }
 
         // Prevent duplicate accounts — check if this email is already in the DB
         if (userRepository.existsByEmail(request.getEmail()))
         {
+            log.warn("register rejected — duplicate email={}", request.getEmail());
             throw new RuntimeException("Email already registered");
         }
 
@@ -114,6 +119,7 @@ public class AuthService {
      */
     public void verify(String token)
     {
+        log.info("verify called for token={}", token);
 
         // Look up the user by their verification token — throw if the token doesn't exist
         User user = userRepository.findByVerificationToken(token)
@@ -132,6 +138,7 @@ public class AuthService {
      */
     public AuthResponse login(LoginRequest request)
     {
+        log.info("login called for email={}", request.getEmail());
 
         // Look up the user by email — throw if no account exists
         User user = userRepository.findByEmail(request.getEmail())
@@ -140,12 +147,14 @@ public class AuthService {
         // Compare the raw password against the BCrypt hash stored in the DB
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword()))
         {
+            log.warn("login rejected — invalid password for email={}", request.getEmail());
             throw new RuntimeException("Invalid password");
         }
 
         // Block login if they skipped email verification
         if (!user.isVerified())
         {
+            log.warn("login rejected — unverified account for email={}", request.getEmail());
             throw new RuntimeException("Please verify your email before logging in");
         }
 
@@ -156,10 +165,12 @@ public class AuthService {
     }
 
     public void resendVerification(String email) {
+        log.info("resendVerification called for email={}", email);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("No account found with that email"));
 
         if (user.isVerified()) {
+            log.warn("resendVerification rejected — account already verified for email={}", email);
             throw new RuntimeException("This account is already verified. You can log in.");
         }
 
@@ -177,6 +188,7 @@ public class AuthService {
 
     public void forgotPassword(ForgotPasswordRequest request)
     {
+        log.info("forgotPassword called for email={}", request.getEmail());
         User user = userRepository.findByEmail(request.getEmail())
         .orElseThrow(() -> new RuntimeException("No account found with that email"));
 
@@ -203,6 +215,7 @@ public class AuthService {
     {
         // Pull the authenticated user's email from the JWT — Spring Security sets this after JwtAuthFilter runs
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.info("updatePassword called for email={}", email);
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -210,11 +223,13 @@ public class AuthService {
         // Make sure they actually know their current password before letting them change it
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword()))
         {
+            log.warn("updatePassword rejected — incorrect current password for email={}", email);
             throw new RuntimeException("Current password is incorrect");
         }
 
         if (request.getNewPassword().length() < 8)
         {
+            log.warn("updatePassword rejected — new password too short for email={}", email);
             throw new RuntimeException("New password must be at least 8 characters");
         }
 
@@ -225,6 +240,7 @@ public class AuthService {
 
     public void changePassword(ChangePasswordRequest request)
     {
+        log.info("changePassword called via reset token");
         User user = userRepository.findByResetToken(request.getToken())
                 .orElseThrow(() -> new RuntimeException("Invalid or expired reset token"));
 

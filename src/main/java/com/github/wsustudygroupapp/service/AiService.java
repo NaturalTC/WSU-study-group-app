@@ -5,6 +5,7 @@ import com.github.wsustudygroupapp.dto.AiChatResponse;
 import com.github.wsustudygroupapp.dto.MessageDTO;
 import com.github.wsustudygroupapp.repository.ProfileRepository;
 import com.github.wsustudygroupapp.repository.StudyGroupRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class AiService {
 
@@ -43,7 +45,9 @@ public class AiService {
     }
 
     public AiChatResponse chat(AiChatRequest request, String userEmail) {
+        log.info("chat called by userEmail={} for groupId={}", userEmail, request.getGroupId());
         if (openAiApiKey == null || openAiApiKey.isBlank()) {
+            log.warn("chat rejected — OpenAI API key not configured");
             return new AiChatResponse("AI assistant is not configured. Add an OpenAI key to enable it.");
         }
 
@@ -84,6 +88,7 @@ public class AiService {
             Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
             aiResponse = new AiChatResponse((String) message.get("content"));
         } catch (Exception e) {
+            log.error("chat OpenAI call failed for groupId={}: {}", request.getGroupId(), e.getMessage());
             aiResponse = new AiChatResponse("Sorry, I'm having trouble connecting right now. Please try again in a moment.");
         }
 

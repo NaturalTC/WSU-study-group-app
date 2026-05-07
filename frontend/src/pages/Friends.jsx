@@ -212,6 +212,12 @@ function Friends() {
         setIncoming(prev => prev.filter(f => f.profileId !== person.profileId))
       }
       setSelected(null)
+    } catch (err) {
+      if (err.response?.status === 409) {
+        // Request already exists — remove from suggestions so the button disappears
+        setSuggestions(prev => prev.filter(s => s.profileId !== person.profileId))
+        setSelected(null)
+      }
     } finally { setActionLoading(null) }
   }
 

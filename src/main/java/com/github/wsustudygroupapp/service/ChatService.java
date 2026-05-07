@@ -7,8 +7,7 @@ import com.github.wsustudygroupapp.model.StudyGroup;
 import com.github.wsustudygroupapp.repository.MessageRepository;
 import com.github.wsustudygroupapp.repository.ProfileRepository;
 import com.github.wsustudygroupapp.repository.StudyGroupRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -19,10 +18,9 @@ import java.util.Optional;
 // getHistory() → load all past messages for a group when a student opens the chat
 // saveMessage() → persist an incoming WebSocket message to the database
 
+@Slf4j
 @Service
 public class ChatService {
-
-    private static final Logger log = LoggerFactory.getLogger(ChatService.class);
 
     private final MessageRepository messageRepository;
     private final StudyGroupRepository studyGroupRepository;
@@ -48,6 +46,7 @@ public class ChatService {
     // TODO: return messageRepository.findByStudyGroupIdOrderBySentAtAsc(groupId)
     public List<Message> getHistory(Long groupId)
     {
+        log.info("getHistory called for groupId={}", groupId);
         return messageRepository.findByStudyGroupIdOrderBySentAtAsc(groupId);
     }
 
@@ -66,6 +65,7 @@ public class ChatService {
     }
 
     public Message saveMessage(MessageDTO dto) {
+        log.info("saveMessage called from senderName={}", dto.getSenderName());
         Profile sender = profileRepository.findByName(dto.getSenderName())
                 .orElseThrow(() -> new RuntimeException("Could not find profile"));
 
@@ -93,6 +93,7 @@ public class ChatService {
     }
 
     public List<Message> getDmHistory(String dmRoomId) {
+        log.info("getDmHistory called for dmRoomId={}", dmRoomId);
         return messageRepository.findByDmRoomIdOrderBySentAtAsc(dmRoomId);
     }
 

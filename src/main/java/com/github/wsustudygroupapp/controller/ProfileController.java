@@ -5,6 +5,8 @@ import com.github.wsustudygroupapp.dto.ProfileRequest;
 import com.github.wsustudygroupapp.model.Profile;
 import com.github.wsustudygroupapp.service.GamificationService;
 import com.github.wsustudygroupapp.service.ProfileService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -17,6 +19,7 @@ import java.util.List;
 // DONE: Maicheal — exposes profile endpoints
 // All routes here require a valid JWT token (configured in SecurityConfig)
 
+@Tag(name = "Profiles", description = "Student profile creation, retrieval, update, and picture upload")
 @RestController
 @RequestMapping("/profiles")
 public class ProfileController {
@@ -32,6 +35,7 @@ public class ProfileController {
     // DONE: extract the logged-in user's ID from the JWT (Spring Security principal)
     // DONE: call profileService.getProfile(userId)
     // DONE: return 200 with the Profile
+    @Operation(summary = "Get the logged-in student's profile")
     @GetMapping
     public ResponseEntity<Profile> getMyProfile(Authentication authentication) {
         // getName() returns the email stored in the JWT by JwtAuthFilter
@@ -41,6 +45,7 @@ public class ProfileController {
     // DONE: extract the logged-in user's ID from the JWT
     // DONE: call profileService.createProfile(userId, request)
     // DONE: return 201 with the created Profile
+    @Operation(summary = "Create a profile for the logged-in student")
     @PostMapping
     public ResponseEntity<Profile> createProfile(Authentication authentication,
                                                   @RequestBody ProfileRequest request) {
@@ -52,23 +57,27 @@ public class ProfileController {
     // DONE: extract the logged-in user's ID from the JWT
     // DONE: call profileService.updateProfile(userId, request)
     // DONE: return 200 with the updated Profile
+    @Operation(summary = "Update the logged-in student's profile")
     @PutMapping
     public ResponseEntity<Profile> updateProfile(Authentication authentication,
                                                   @RequestBody ProfileRequest request) {
         return ResponseEntity.ok(profileService.updateProfile(authentication.getName(), request));
     }
 
+    @Operation(summary = "Get any student's profile by their profile ID")
     @GetMapping("/{id}")
     public ResponseEntity<Profile> getProfileById(@PathVariable Long id) {
         return ResponseEntity.ok(profileService.getProfileById(id));
     }
 
+    @Operation(summary = "Upload or replace the logged-in student's profile picture")
     @PostMapping("/picture")
     public ResponseEntity<Profile> uploadProfilePicture(Authentication authentication,
                                                          @RequestParam("file") MultipartFile file) throws IOException {
         return ResponseEntity.ok(profileService.uploadProfilePicture(authentication.getName(), file));
     }
 
+    @Operation(summary = "Get all badges earned by the logged-in student")
     @GetMapping("/badges")
     public ResponseEntity<List<BadgeResponseDTO>> getMyBadges(Authentication authentication) {
         return ResponseEntity.ok(gamificationService.getUserBadges(authentication.getName()));
