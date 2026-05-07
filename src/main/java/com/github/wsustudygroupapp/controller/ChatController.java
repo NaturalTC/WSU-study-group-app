@@ -5,6 +5,8 @@ import com.github.wsustudygroupapp.dto.MessageDTO;
 import com.github.wsustudygroupapp.model.Message;
 import com.github.wsustudygroupapp.service.ActiveDmTracker;
 import com.github.wsustudygroupapp.service.ChatService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -21,6 +23,7 @@ import java.time.LocalDateTime;
 // When a client sends a message to /app/chat/{groupId}, this method handles it
 // The response is broadcast to everyone subscribed to /topic/chat/{groupId}
 
+@Tag(name = "Chat (WebSocket)", description = "STOMP WebSocket handlers for group chat and direct messages")
 @Controller
 public class ChatController {
 
@@ -35,6 +38,7 @@ public class ChatController {
     // TODO: set the sentAt timestamp on the incoming message DTO
     // TODO: call chatService.saveMessage(dto) to persist it
     // TODO: return the dto — Spring will broadcast it to /topic/chat/{groupId}
+    @Operation(summary = "Send a group chat message via WebSocket")
     @MessageMapping("/chat/{groupId}")
     @SendTo("/topic/chat/{groupId}")
     public MessageDTO sendMessage(MessageDTO dto) {
@@ -43,6 +47,7 @@ public class ChatController {
         return dto;
     }
 
+    @Operation(summary = "Send a direct message via WebSocket")
     @MessageMapping("/dm/{dmRoomId}")
     @SendTo("/topic/dm/{dmRoomId}")
     public MessageDTO sendDirectMessage(MessageDTO dto) {
@@ -51,6 +56,7 @@ public class ChatController {
         return dto;
     }
 
+    @Operation(summary = "Mark the user as active in a DM room (suppresses notifications)")
     @MessageMapping("/dm/enter/{dmRoomId}")
     public void enterDm(SimpMessageHeaderAccessor headerAccessor,
                         @DestinationVariable String dmRoomId,
@@ -58,6 +64,7 @@ public class ChatController {
         activeDmTracker.enter(headerAccessor.getSessionId(), dto.getProfileId(), dmRoomId);
     }
 
+    @Operation(summary = "Mark the user as inactive in a DM room (re-enables notifications)")
     @MessageMapping("/dm/leave/{dmRoomId}")
     public void leaveDm(SimpMessageHeaderAccessor headerAccessor,
                         @DestinationVariable String dmRoomId) {

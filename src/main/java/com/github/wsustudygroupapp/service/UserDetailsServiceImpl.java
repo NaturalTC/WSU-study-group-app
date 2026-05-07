@@ -2,6 +2,7 @@ package com.github.wsustudygroupapp.service;
 
 import com.github.wsustudygroupapp.model.User;
 import com.github.wsustudygroupapp.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 // Spring calls loadUserByUsername() to look up a user before validating their password or token
 // "username" in Spring Security = email in our app
 
+@Slf4j
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
@@ -23,6 +25,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException
     {
+        log.info("loadUserByUsername called for email={}", email);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
 

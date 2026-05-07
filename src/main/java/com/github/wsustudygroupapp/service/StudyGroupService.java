@@ -2,6 +2,7 @@ package com.github.wsustudygroupapp.service;
 
 import com.github.wsustudygroupapp.dto.StudyGroupRequest;
 import com.github.wsustudygroupapp.exception.ResourceNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 import com.github.wsustudygroupapp.model.Course;
 import com.github.wsustudygroupapp.model.Profile;
@@ -11,8 +12,6 @@ import com.github.wsustudygroupapp.repository.CourseRepository;
 import com.github.wsustudygroupapp.repository.ProfileRepository;
 import com.github.wsustudygroupapp.repository.StudyGroupRepository;
 import com.github.wsustudygroupapp.repository.UserRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,10 +20,9 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 public class StudyGroupService {
-
-    private static final Logger log = LoggerFactory.getLogger(StudyGroupService.class);
 
     private final StudyGroupRepository studyGroupRepository;
     private final CourseRepository courseRepository;
@@ -54,24 +52,29 @@ public class StudyGroupService {
     }
 
     public StudyGroup getGroupById(Long groupId) {
+        log.info("getGroupById called for groupId={}", groupId);
         return studyGroupRepository.findById(groupId)
                 .orElseThrow(() -> new ResourceNotFoundException("Study group not found: " + groupId));
     }
 
     public List<StudyGroup> getAllGroups() {
+        log.info("getAllGroups called");
         return studyGroupRepository.findAll();
     }
 
     public List<StudyGroup> getGroupsForCourse(Long courseId) {
+        log.info("getGroupsForCourse called for courseId={}", courseId);
         return studyGroupRepository.findByCourseId(courseId);
     }
 
     public List<StudyGroup> getMyGroups(String email) {
+        log.info("getMyGroups called for email={}", email);
         Profile profile = currentProfile(email);
         return studyGroupRepository.findByMembersId(profile.getId());
     }
 
     public StudyGroup createGroup(StudyGroupRequest request, String creatorEmail) {
+        log.info("createGroup called by email={} for courseId={}", creatorEmail, request.getCourseId());
         Profile creator = currentProfile(creatorEmail);
         Course course = courseRepository.findById(request.getCourseId())
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + request.getCourseId()));
@@ -99,6 +102,7 @@ public class StudyGroupService {
     }
 
     public StudyGroup joinGroup(Long groupId, String password, String email) {
+        log.info("joinGroup called by email={} for groupId={}", email, groupId);
         Profile profile = currentProfile(email);
         StudyGroup group = studyGroupRepository.findById(groupId)
                 .orElseThrow(() -> new ResourceNotFoundException("Study group not found: " + groupId));
@@ -106,10 +110,12 @@ public class StudyGroupService {
         boolean alreadyMember = group.getMembers().stream()
                 .anyMatch(member -> member.getId().equals(profile.getId()));
         if (alreadyMember) {
+            log.warn("joinGroup rejected — email={} is already a member of groupId={}", email, groupId);
             return group;
         }
 
         if (group.getPassword() != null && !passwordEncoder.matches(password, group.getPassword())) {
+            log.warn("joinGroup rejected — incorrect password for groupId={} by email={}", groupId, email);
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Incorrect group password");
         }
 
@@ -126,6 +132,7 @@ public class StudyGroupService {
     }
 
     public void leaveGroup(Long groupId, String email) {
+        log.info("leaveGroup called by email={} for groupId={}", email, groupId);
         Profile profile = currentProfile(email);
         StudyGroup group = studyGroupRepository.findById(groupId)
                 .orElseThrow(() -> new ResourceNotFoundException("Study group not found: " + groupId));
@@ -135,6 +142,7 @@ public class StudyGroupService {
     }
 
     public StudyGroup uploadGroupPicture(Long groupId, String email, MultipartFile file) throws java.io.IOException {
+        log.info("uploadGroupPicture called by email={} for groupId={}", email, groupId);
         if (file.isEmpty()) throw new IllegalArgumentException("File cannot be empty");
         if (!file.getContentType().startsWith("image/")) throw new IllegalArgumentException("File must be an image");
         if (file.getSize() > 5 * 1024 * 1024) throw new IllegalArgumentException("File must be under 5MB");
@@ -152,6 +160,7 @@ public class StudyGroupService {
     }
 
     public void deleteGroup(Long groupId, String email) {
+        log.info("deleteGroup called by email={} for groupId={}", email, groupId);
         Profile profile = currentProfile(email);
         StudyGroup group = studyGroupRepository.findById(groupId)
                 .orElseThrow(() -> new ResourceNotFoundException("Study group not found: " + groupId));

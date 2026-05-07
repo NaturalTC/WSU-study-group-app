@@ -11,6 +11,7 @@ import com.github.wsustudygroupapp.repository.FriendshipRepository;
 import com.github.wsustudygroupapp.repository.ProfileRepository;
 import com.github.wsustudygroupapp.repository.UserCourseRepository;
 import com.github.wsustudygroupapp.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class CourseService {
 
@@ -40,6 +42,7 @@ public class CourseService {
     }
 
     public List<Course> getAllCourses() {
+        log.info("getAllCourses called");
         return courseRepository.findAll();
     }
 
@@ -48,6 +51,7 @@ public class CourseService {
      * Annotates each result with the current user's friendship status toward that student.
      */
     public List<CourseStudentResponse> getCourseStudents(Long courseId, String section, String email) {
+        log.info("getCourseStudents called for courseId={}, section={}, email={}", courseId, section, email);
         Profile me = resolveProfile(email);
 
         List<UserCourse> enrollments = (section != null && !section.isBlank())

@@ -6,6 +6,7 @@ import com.github.wsustudygroupapp.model.Profile;
 import com.github.wsustudygroupapp.model.User;
 import com.github.wsustudygroupapp.repository.ProfileRepository;
 import com.github.wsustudygroupapp.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,6 +17,7 @@ import java.io.IOException;
 // createProfile() → called after registration to set up name, major, year, bio
 // updateProfile() → let the student edit their profile later
 
+@Slf4j
 @Service
 public class ProfileService {
 
@@ -34,6 +36,7 @@ public class ProfileService {
     // DONE: find profile by userId using profileRepository.findByUserId(userId)
     // DONE: throw exception if not found
     public Profile getProfile(String email) {
+        log.info("getProfile called for email={}", email);
         // look up the User by email — throws 404 if account doesn't exist
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + email));
@@ -46,6 +49,7 @@ public class ProfileService {
     // DONE: link the profile to the User with the given userId
     // DONE: save and return the profile
     public Profile createProfile(String email, ProfileRequest request) {
+        log.info("createProfile called for email={}", email);
         // resolve the User account so we can link the profile to it
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + email));
@@ -63,6 +67,7 @@ public class ProfileService {
     // DONE: update fields from the request
     // DONE: save and return the updated profile
     public Profile updateProfile(String email, ProfileRequest request) {
+        log.info("updateProfile called for email={}", email);
         // resolve the User and their existing profile — both must exist
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + email));
@@ -77,11 +82,13 @@ public class ProfileService {
     }
 
     public Profile getProfileById(Long id) {
+        log.info("getProfileById called for id={}", id);
         return profileRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Profile not found: " + id));
     }
 
     public Profile uploadProfilePicture(String email, MultipartFile file) throws IOException {
+        log.info("uploadProfilePicture called for email={}", email);
         if (file.isEmpty()) throw new IllegalArgumentException("File cannot be empty");
         if (!file.getContentType().startsWith("image/")) throw new IllegalArgumentException("File must be an image");
         if (file.getSize() > 5 * 1024 * 1024) throw new IllegalArgumentException("File must be under 5MB");

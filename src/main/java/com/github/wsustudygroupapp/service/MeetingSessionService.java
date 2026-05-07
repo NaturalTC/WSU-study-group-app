@@ -8,8 +8,7 @@ import com.github.wsustudygroupapp.repository.MeetingSessionRepository;
 import com.github.wsustudygroupapp.repository.ProfileRepository;
 import com.github.wsustudygroupapp.repository.StudyGroupRepository;
 import com.github.wsustudygroupapp.repository.UserRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,10 +20,9 @@ import java.util.List;
  * Handles scheduling, retrieval, and cancellation of study group meeting sessions.
  * When a session is created, all group members (except the creator) are notified automatically.
  */
+@Slf4j
 @Service
 public class MeetingSessionService {
-
-    private static final Logger log = LoggerFactory.getLogger(MeetingSessionService.class);
 
     private final MeetingSessionRepository meetingSessionRepository;
     private final StudyGroupRepository studyGroupRepository;
@@ -54,6 +52,7 @@ public class MeetingSessionService {
      *   • the requested time is in the future (defense in depth — DTO already has @Future)
      */
     public MeetingSession scheduleSession(String schedulerEmail, MeetingSessionRequest request) {
+        log.info("scheduleSession called by email={} for groupId={}", schedulerEmail, request.getGroupId());
         Profile scheduler = currentProfile(schedulerEmail);
         StudyGroup group = studyGroupRepository.findById(request.getGroupId())
                 .orElseThrow(() -> new ResourceNotFoundException("Study group not found: " + request.getGroupId()));
@@ -92,6 +91,7 @@ public class MeetingSessionService {
 
     /** Returns all future sessions across every group the student belongs to, ordered by date. */
     public List<MeetingSession> getUpcomingSessions(String email) {
+        log.info("getUpcomingSessions called for email={}", email);
         Profile profile = currentProfile(email);
         return meetingSessionRepository.findByStudyGroupMembersIdAndScheduledAtAfterOrderByScheduledAtAsc(
                 profile.getId(), LocalDateTime.now());
@@ -102,6 +102,7 @@ public class MeetingSessionService {
      * Only members of the group may view its sessions — otherwise 403.
      */
     public List<MeetingSession> getSessionsForGroup(Long groupId, String requestingEmail) {
+        log.info("getSessionsForGroup called for groupId={}, email={}", groupId, requestingEmail);
         Profile profile = currentProfile(requestingEmail);
         StudyGroup group = studyGroupRepository.findById(groupId)
                 .orElseThrow(() -> new ResourceNotFoundException("Study group not found: " + groupId));
@@ -122,6 +123,7 @@ public class MeetingSessionService {
      * null fields leave the existing value unchanged.
      */
     public MeetingSession rescheduleSession(Long sessionId, String requestingEmail, MeetingRescheduleRequest request) {
+        log.info("rescheduleSession called for sessionId={}, email={}", sessionId, requestingEmail);
         Profile requester = currentProfile(requestingEmail);
         MeetingSession session = meetingSessionRepository.findById(sessionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Meeting session not found: " + sessionId));
@@ -165,6 +167,7 @@ public class MeetingSessionService {
      * Notifies all other group members so the meeting drops off their lists.
      */
     public void cancelSession(Long sessionId, String requestingEmail) {
+        log.info("cancelSession called for sessionId={}, email={}", sessionId, requestingEmail);
         Profile requester = currentProfile(requestingEmail);
         MeetingSession session = meetingSessionRepository.findById(sessionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Meeting session not found: " + sessionId));
