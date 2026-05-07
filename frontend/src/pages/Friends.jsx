@@ -156,10 +156,10 @@ function Friends() {
     const load = async () => {
       try {
         const [fr, inc, out, sug] = await Promise.all([
-          api.get('/friends'),
-          api.get('/friends/requests/incoming'),
-          api.get('/friends/requests/outgoing'),
-          api.get('/friends/suggestions'),
+          api.get('/friends').catch(() => ({ data: [] })),
+          api.get('/friends/requests/incoming').catch(() => ({ data: [] })),
+          api.get('/friends/requests/outgoing').catch(() => ({ data: [] })),
+          api.get('/friends/suggestions').catch(() => ({ data: [] })),
         ])
         setFriends(fr.data)
         setIncoming(inc.data)
