@@ -57,7 +57,7 @@ export default function GroupChatIndex() {
                                 <h1 className="font-display text-3xl md:text-4xl font-bold leading-tight">Group Chats</h1>
                                 <p className="text-blue-200 mt-1 text-sm">Select a group to open its chat.</p>
                             </div>
-                            <div className="bg-white/10 border border-white/20 backdrop-blur-sm rounded-2xl px-6 py-4 min-w-[200px] text-center flex-shrink-0">
+                            <div className="bg-white/10 border border-white/20 backdrop-blur-sm rounded-2xl px-6 py-4 min-w-[200px] text-center flex-shrink-0 self-center md:self-auto">
                                 <p className="text-xs text-blue-200 font-semibold uppercase tracking-wider mb-1">Your Chats</p>
                                 <p className="font-display text-4xl font-bold text-white">{groups.length}</p>
                                 <p className="text-xs text-blue-200 mt-1">active group{groups.length !== 1 ? 's' : ''}</p>
