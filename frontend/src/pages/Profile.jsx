@@ -22,7 +22,6 @@ function Profile() {
     const { earned: badges }      = useBadges()
 
     const [groups, setGroups]               = useState([])
-    const [myCourses, setMyCourses]         = useState([])
     const [dataLoading, setDataLoading]     = useState(true)
     const [showBadgesModal, setShowBadgesModal] = useState(false)
 
@@ -65,13 +64,10 @@ function Profile() {
     }
 
     useEffect(() => {
-        Promise.all([
-            api.get('/groups/my').catch(() => ({ data: [] })),
-            api.get('/courses/my').catch(() => ({ data: [] })),
-        ]).then(([groupsRes, coursesRes]) => {
-            setGroups(groupsRes.data)
-            setMyCourses(coursesRes.data)
-        }).finally(() => setDataLoading(false))
+        api.get('/groups/my')
+            .then(res => setGroups(res.data))
+            .catch(() => setGroups([]))
+            .finally(() => setDataLoading(false))
     }, [])
 
     const openEdit = () => {
@@ -316,57 +312,6 @@ function Profile() {
                     )}
                 </div>
 
-                {/* ── My Courses ── */}
-                <div className="max-w-4xl mx-auto px-6 pb-10">
-                    <div className="flex items-center justify-between mb-5">
-                        <h2 className="font-display text-xl text-wsu-navy dark:text-white font-bold">My Courses</h2>
-                        <Link to="/study-groups" className="text-sm text-blue-700 font-semibold hover:underline">
-                            Study groups →
-                        </Link>
-                    </div>
-
-                    {dataLoading ? (
-                        <div className="flex justify-center py-10">
-                            <div className="animate-spin w-6 h-6 border-4 border-blue-700 border-t-transparent rounded-full" />
-                        </div>
-                    ) : myCourses.length === 0 ? (
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm px-6 py-10 text-center">
-                            <p className="text-wsu-navy dark:text-white font-semibold mb-1">No courses enrolled</p>
-                            <p className="text-wsu-slate dark:text-gray-400 text-sm">Enroll in courses to browse classmates.</p>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {myCourses.map(uc => (
-                                <div key={uc.id} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5 flex flex-col gap-3 hover:shadow-md transition-shadow duration-200">
-                                    <div className="flex items-start gap-3">
-                                        <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-700 dark:text-blue-400 font-display font-bold text-sm flex-shrink-0">
-                                            {uc.course?.courseCode?.split(' ')[0]?.charAt(0) ?? 'C'}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <span className="text-xs font-semibold bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded-full">
-                                                {uc.course?.courseCode}
-                                            </span>
-                                            <p className="font-semibold text-wsu-navy dark:text-white text-sm mt-1 leading-snug">
-                                                {uc.course?.courseName}
-                                            </p>
-                                            <p className="text-xs text-wsu-slate dark:text-gray-400 mt-0.5">
-                                                Sec {uc.section} · {uc.semester}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="mt-auto pt-3 border-t border-gray-50 dark:border-gray-700">
-                                        <Link
-                                            to={`/courses/${uc.course?.id}/students`}
-                                            className="text-xs font-semibold text-blue-700 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:underline transition-colors"
-                                        >
-                                            View Students →
-                                        </Link>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
             </main>
 
             {/* ── All Badges Modal ── */}
