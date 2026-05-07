@@ -47,13 +47,29 @@ export default function GroupChatIndex() {
         >
             <AppHeader />
 
-            <main className="flex-1 pt-24 pb-12">
-                <div className="max-w-2xl mx-auto px-6">
+            <main className="flex-1 pt-16">
 
-                    <div className="mb-8">
-                        <h1 className="font-display text-3xl md:text-4xl text-white font-bold leading-tight drop-shadow-md">Group Chats</h1>
-                        <p className="text-white/80 text-sm mt-1 drop-shadow">Select a group to open its chat.</p>
+                {/* ── Hero Banner ── */}
+                <div className="relative bg-gradient-to-br from-wsu-navy/75 via-blue-900/75 to-blue-800/75 text-white overflow-hidden">
+                    <div className="relative max-w-5xl mx-auto px-6 py-16">
+                        <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6">
+                            <div>
+                                <h1 className="font-display text-3xl md:text-4xl font-bold leading-tight">Group Chats</h1>
+                                <p className="text-blue-200 mt-1 text-sm">Select a group to open its chat.</p>
+                            </div>
+                            <div className="bg-white/10 border border-white/20 backdrop-blur-sm rounded-2xl px-6 py-4 min-w-[200px] text-center flex-shrink-0 self-center md:self-auto">
+                                <p className="text-xs text-blue-200 font-semibold uppercase tracking-wider mb-1">Your Chats</p>
+                                <p className="font-display text-4xl font-bold text-white">{groups.length}</p>
+                                <p className="text-xs text-blue-200 mt-1">active group{groups.length !== 1 ? 's' : ''}</p>
+                                <span className="inline-block mt-2 text-xs font-semibold px-3 py-1 rounded-full bg-white/20 text-white">
+                                    {loading ? '…' : groups.length === 0 ? 'join a group' : 'select below'}
+                                </span>
+                            </div>
+                        </div>
                     </div>
+                </div>
+
+                <div className="max-w-2xl mx-auto px-6 pt-8 pb-12">
 
                     {loading ? (
                         <div className="flex justify-center py-20">
