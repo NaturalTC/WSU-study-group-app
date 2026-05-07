@@ -19,6 +19,7 @@ import Leaderboard from './pages/Leaderboard'
 import Meetings from './pages/Meetings'
 import Friends from './pages/Friends'
 import CourseStudents from './pages/CourseStudents'
+import DirectMessage from './pages/DirectMessage'
 
 // Requires a token, but blocks users who already have a profile
 // (prevents someone from re-running setup and overwriting their data)
@@ -62,6 +63,7 @@ function App() {
       <Route path="/meetings"                   element={<ProtectedRoute><Meetings /></ProtectedRoute>}       />
       <Route path="/friends"                    element={<ProtectedRoute><Friends /></ProtectedRoute>}        />
       <Route path="/courses/:courseId/students" element={<ProtectedRoute><CourseStudents /></ProtectedRoute>} />
+      <Route path="/dm/:profileId"              element={<ProtectedRoute><DirectMessage /></ProtectedRoute>}  />
     </Routes>
   )
 }
