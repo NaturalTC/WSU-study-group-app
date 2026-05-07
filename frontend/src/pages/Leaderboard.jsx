@@ -139,7 +139,7 @@ function Leaderboard() {
                     if (!user) return <div key={visualIdx} />
                     const rank = leaders.indexOf(user) + 1
                     const isMe = user.id === profile?.id || user.name === profile?.name
-                    const heights = ['h-24', 'h-32', 'h-20']
+                    const heights = ['h-28', 'h-36', 'h-24']
                     const medal = MEDALS[rank - 1]
                     const podiumColors = [
                       'from-gray-300 to-gray-400',
