@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
 import { Client } from '@stomp/stompjs'
-import SockJS from 'sockjs-client'
 import api from '../api/axios'
 import { useAuth } from './AuthContext'
 
@@ -36,7 +35,7 @@ export function NotificationProvider({ children }) {
     const token = localStorage.getItem('token')
 
     const client = new Client({
-      webSocketFactory: () => new SockJS(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/ws`),
+      brokerURL: (import.meta.env.VITE_API_URL || 'http://localhost:8080').replace(/^http/, 'ws') + '/ws',
       connectHeaders: { Authorization: `Bearer ${token}` },
       reconnectDelay: 5000,
       onConnect: () => {

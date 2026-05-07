@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Client } from '@stomp/stompjs'
-import SockJS from 'sockjs-client'
 import AppHeader from '../components/AppHeader'
 import ChatMessage from '../components/ChatMessage'
 import { useAuth } from '../context/AuthContext'
@@ -96,7 +95,7 @@ function DirectMessage() {
     const token = localStorage.getItem('token')
 
     const client = new Client({
-      webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
+      brokerURL: (import.meta.env.VITE_API_URL || 'http://localhost:8080').replace(/^http/, 'ws') + '/ws',
       connectHeaders: { Authorization: `Bearer ${token}` },
       reconnectDelay: 5000,
       onConnect: () => {
