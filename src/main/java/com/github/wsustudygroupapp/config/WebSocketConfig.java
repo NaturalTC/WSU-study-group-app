@@ -27,8 +27,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer { // le
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws") // the URL the frontend connects to to open a WebSocket connection
-                .setAllowedOriginPatterns("*") // allows connections from any domain (fine for dev, should be restricted in production)
-                .withSockJS(); // adds a fallback for browsers that don't support native WebSockets
+        registry.addEndpoint("/ws")
+                .setAllowedOriginPatterns("*");
     }
 }
