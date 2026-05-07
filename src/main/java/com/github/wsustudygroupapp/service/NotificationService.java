@@ -13,6 +13,7 @@ import com.github.wsustudygroupapp.repository.NotificationRepository;
 import com.github.wsustudygroupapp.repository.ProfileRepository;
 import com.github.wsustudygroupapp.repository.UserRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -30,13 +31,16 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final ProfileRepository profileRepository;
     private final UserRepository userRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     public NotificationService(NotificationRepository notificationRepository,
                                ProfileRepository profileRepository,
-                               UserRepository userRepository) {
+                               UserRepository userRepository,
+                               SimpMessagingTemplate messagingTemplate) {
         this.notificationRepository = notificationRepository;
         this.profileRepository = profileRepository;
         this.userRepository = userRepository;
+        this.messagingTemplate = messagingTemplate;
     }
 
     /** Returns all notifications for the logged-in student, newest first. Used to populate the bell dropdown. */
@@ -102,6 +106,8 @@ public class NotificationService {
                 })
                 .toList();
         notificationRepository.saveAll(notifications);
+        notifications.forEach(n -> messagingTemplate.convertAndSend(
+                "/topic/notifications/" + n.getRecipient().getId(), toResponse(n)));
     }
 
     /** Notifies the recipient that they earned a badge. */
@@ -116,6 +122,14 @@ public class NotificationService {
                 NotificationType.MEMBER_JOINED, group.getId(), joiner.getId());
         saveNotification(joiner, "You joined " + group.getName(),
                 NotificationType.MEMBER_JOINED, group.getId());
+    }
+
+    /** Notifies the recipient that they have a new direct message from sender. */
+    public void notifyDirectMessage(Profile recipient, Profile sender) {
+        saveNotification(recipient,
+                sender.getName() + " sent you a message",
+                NotificationType.DIRECT_MESSAGE,
+                sender.getId());
     }
 
     /** Notifies all group members (except the scheduler) that a new session was scheduled. */
@@ -139,6 +153,7 @@ public class NotificationService {
         n.setRelatedEntityId(relatedEntityId);
         n.setRead(false);
         notificationRepository.save(n);
+        messagingTemplate.convertAndSend("/topic/notifications/" + recipient.getId(), toResponse(n));
     }
 
     private Profile currentProfile(String email) {

@@ -76,6 +76,11 @@ public class ProfileService {
         return profileRepository.save(profile);
     }
 
+    public Profile getProfileById(Long id) {
+        return profileRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Profile not found: " + id));
+    }
+
     public Profile uploadProfilePicture(String email, MultipartFile file) throws IOException {
         if (file.isEmpty()) throw new IllegalArgumentException("File cannot be empty");
         if (!file.getContentType().startsWith("image/")) throw new IllegalArgumentException("File must be an image");

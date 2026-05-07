@@ -55,12 +55,12 @@ public class StudyGroupController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdGroup);
     }
 
-    // join an existing group — requires the group password in the request body
     @PostMapping("/{groupId}/join")
     public ResponseEntity<StudyGroup> joinGroup(@PathVariable Long groupId,
-                                                @RequestBody JoinGroupRequest request,
+                                                @RequestBody(required = false) JoinGroupRequest request,
                                                 @AuthenticationPrincipal UserDetails userDetails) {
-        StudyGroup updatedGroup = studyGroupService.joinGroup(groupId, request.getPassword(), userDetails.getUsername());
+        String password = request != null ? request.getPassword() : null;
+        StudyGroup updatedGroup = studyGroupService.joinGroup(groupId, password, userDetails.getUsername());
         return ResponseEntity.ok(updatedGroup);
     }
 
