@@ -39,6 +39,9 @@ public class AuthService {
     @Value("${app.frontend-url}")
     private String frontendUrl; // http://localhost:5173
 
+    @Value("${spring.mail.from:study.group.westfield@gmail.com}")
+    private String mailFrom;
+
     // Spring injects all dependencies through this constructor at startup
     public AuthService(UserRepository userRepository,
                        ProfileRepository profileRepository,
@@ -98,6 +101,7 @@ public class AuthService {
 
         // Send the verification email — when they click it, GET /auth/verify?token=... fires
         SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(mailFrom);
         message.setTo(request.getEmail());
         message.setSubject("Verify your WSU Study Group account");
         message.setText("Click to verify your account: " + baseUrl + "/auth/verify?token=" + verificationToken);
@@ -164,6 +168,7 @@ public class AuthService {
         userRepository.save(user);
 
         SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(mailFrom);
         message.setTo(email);
         message.setSubject("Verify your WSU Study Group account");
         message.setText("Click to verify your account: " + baseUrl + "/auth/verify?token=" + verificationToken);
@@ -182,6 +187,7 @@ public class AuthService {
 
         // Email the reset link — frontend /reset-password?token=... page handles it
         SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(mailFrom);
         message.setTo(request.getEmail());
         message.setSubject("Reset your WSU Study Group password");
         message.setText("Click to reset your password: " + frontendUrl + "/reset-password?token=" + resetToken);
