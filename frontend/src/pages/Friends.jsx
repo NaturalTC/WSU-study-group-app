@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import AppHeader from '../components/AppHeader'
 import api from '../api/axios'
 import campusPhoto from '../assets/UHallSept2018_3-X3.jpg'
@@ -20,7 +21,8 @@ function avatarColor(id) {
 }
 
 function ProfileModal({ person, onClose, onAction, friendState }) {
-  const ref = useRef(null)
+  const ref      = useRef(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) onClose() }
@@ -70,10 +72,18 @@ function ProfileModal({ person, onClose, onAction, friendState }) {
 
         <div className="mt-6">
           {status === 'ACCEPTED' ? (
-            <button disabled={loading} onClick={() => handle('remove')}
-              className="w-full py-3 rounded-xl text-sm font-semibold text-red-500 border border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all disabled:opacity-60">
-              Remove Friend
-            </button>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => navigate(`/dm/${person.profileId}`)}
+                className="w-full py-3 rounded-xl text-sm font-semibold bg-blue-700 text-white hover:bg-blue-800 transition-all"
+              >
+                Message
+              </button>
+              <button disabled={loading} onClick={() => handle('remove')}
+                className="w-full py-3 rounded-xl text-sm font-semibold text-red-500 border border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all disabled:opacity-60">
+                Remove Friend
+              </button>
+            </div>
           ) : status === 'PENDING' && direction === 'SENT' ? (
             <button disabled={loading} onClick={() => handle('cancel')}
               className="w-full py-3 rounded-xl text-sm font-semibold border border-gray-200 dark:border-gray-700 text-wsu-slate dark:text-gray-300 hover:bg-wsu-mist dark:hover:bg-gray-700 transition-all disabled:opacity-60">
@@ -128,6 +138,8 @@ function PersonCard({ person, onTap, badge, actionSlot }) {
 }
 
 function Friends() {
+  const navigate = useNavigate()
+
   const [friends,      setFriends]      = useState([])
   const [incoming,     setIncoming]     = useState([])
   const [outgoing,     setOutgoing]     = useState([])
@@ -358,7 +370,19 @@ function Friends() {
               ) : (
                 <div className={activeTab === 'requests' || activeTab === 'sent' ? 'space-y-3' : 'grid grid-cols-1 sm:grid-cols-2 gap-3'}>
                   {activeTab === 'friends' && friends.map(f => (
-                    <PersonCard key={f.friendshipId} person={f} onTap={setSelected} />
+                    <PersonCard
+                      key={f.friendshipId}
+                      person={f}
+                      onTap={setSelected}
+                      actionSlot={
+                        <button
+                          onClick={() => navigate(`/dm/${f.profileId}`)}
+                          className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-blue-700 text-white hover:bg-blue-800 transition-colors whitespace-nowrap"
+                        >
+                          Message
+                        </button>
+                      }
+                    />
                   ))}
 
                   {activeTab === 'requests' && incoming.map(f => (
