@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import AppHeader from '../components/AppHeader'
 import api from '../api/axios'
+import campusPhoto from '../assets/UHallSept2018_3-X3.jpg'
 
 function initials(name = '') {
   const parts = name.trim().split(' ')
@@ -234,40 +235,55 @@ function Friends() {
                  : suggestions
 
   return (
-    <div className="flex flex-col min-h-screen bg-wsu-chalk dark:bg-gray-900 transition-colors duration-300">
+    <div
+      className="flex flex-col min-h-screen bg-cover bg-center bg-fixed transition-colors duration-300"
+      style={{ backgroundImage: `url(${campusPhoto})` }}
+    >
       <AppHeader />
 
       <main className="flex-1 pt-16">
 
-        <div className="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
-          <div className="max-w-4xl mx-auto px-6 py-8">
-            <h1 className="font-display text-2xl text-wsu-navy dark:text-white font-bold">Friends</h1>
-            <p className="text-sm text-wsu-slate dark:text-gray-400 mt-1">
-              Connect with classmates from your courses and study groups.
-            </p>
-
-            <div className="relative mt-5">
-              <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <input
-                type="text"
-                placeholder="Search by name…"
-                className="form-input !pl-10 !py-2.5"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-              />
-              {search && (
-                <button
-                  onClick={() => setSearch('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-lg leading-none"
-                >×</button>
-              )}
+        {/* ── Hero Banner ── */}
+        <div className="relative bg-gradient-to-br from-wsu-navy/75 via-blue-900/75 to-blue-800/75 text-white overflow-hidden">
+          <div className="relative max-w-5xl mx-auto px-6 py-16">
+            <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6">
+              <div>
+                <h1 className="font-display text-3xl md:text-4xl font-bold leading-tight">Friends</h1>
+                <p className="text-blue-200 mt-1 text-sm">Connect with classmates from your courses and study groups.</p>
+              </div>
+              <div className="bg-white/10 border border-white/20 backdrop-blur-sm rounded-2xl px-6 py-4 min-w-[200px] text-center flex-shrink-0">
+                <p className="text-xs text-blue-200 font-semibold uppercase tracking-wider mb-1">Friends</p>
+                <p className="font-display text-4xl font-bold text-white">{friends.length}</p>
+                <p className="text-xs text-blue-200 mt-1">connected</p>
+                <span className="inline-block mt-2 text-xs font-semibold px-3 py-1 rounded-full bg-white/20 text-white">
+                  {incoming.length > 0 ? `${incoming.length} pending` : 'no requests'}
+                </span>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="max-w-4xl mx-auto px-6 py-6">
+        <div className="max-w-5xl mx-auto px-6 pt-8 pb-6">
+
+          {/* Search */}
+          <div className="relative mb-6">
+            <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search by name…"
+              className="form-input !pl-10 !py-2.5"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+            {search && (
+              <button
+                onClick={() => setSearch('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-lg leading-none"
+              >×</button>
+            )}
+          </div>
 
           {searchResults !== null ? (
             <>

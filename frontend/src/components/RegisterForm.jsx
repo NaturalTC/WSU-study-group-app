@@ -9,6 +9,7 @@ function RegisterForm() {
   const [error, setError]     = useState(null)
 
   const [formData, setFormData] = useState({
+    name:            '',
     email:           '',
     password:        '',
     confirmPassword: '',
@@ -34,6 +35,7 @@ function RegisterForm() {
     setLoading(true)
     try {
       await api.post('/auth/register', {
+        name:     formData.name,
         email:    formData.email,
         password: formData.password,
       })
@@ -71,6 +73,20 @@ function RegisterForm() {
 
           {/* Form */}
           <form onSubmit={handleRegister} className="space-y-4">
+
+            <div>
+              <label className="form-label" htmlFor="name">Full Name</label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                required
+                placeholder="e.g. Jose Jimenez"
+                className="form-input"
+                value={formData.name}
+                onChange={handleChange}
+              />
+            </div>
 
             <div>
               <label className="form-label" htmlFor="email">WSU Email</label>
