@@ -78,9 +78,15 @@ function AppHeader() {
     const [avatarOpen, setAvatarOpen] = useState(false)
     const [bellOpen,   setBellOpen]   = useState(false)
     const [bellTab,    setBellTab]    = useState('notifications')
+    const [, setTick]                 = useState(0)
 
     const avatarRef = useRef(null)
     const bellRef   = useRef(null)
+
+    useEffect(() => {
+        const id = setInterval(() => setTick(t => t + 1), 60000)
+        return () => clearInterval(id)
+    }, [])
 
     const upcoming   = getUpcoming()
     const totalBadge = unreadCount + upcoming.length
