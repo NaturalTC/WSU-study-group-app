@@ -39,10 +39,14 @@ public class Message {
     @Column(name = "sender_name")
     private String senderName;
 
-    /** The study group this message was sent in. */
+    /** The study group this message was sent in. Null for direct messages. */
     @ManyToOne
-    @JoinColumn(name = "study_group_id", nullable = false)
+    @JoinColumn(name = "study_group_id", nullable = true)
     private StudyGroup studyGroup;
+
+    /** Canonical DM room ID (e.g. "dm-1-5"). Null for group messages. */
+    @Column(name = "dm_room_id")
+    private String dmRoomId;
 
     /** Timestamp of when the message was sent — set automatically by the server. */
     @Column(nullable = false)

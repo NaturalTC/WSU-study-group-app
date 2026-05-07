@@ -25,4 +25,7 @@ public class MessageDTO {
 
     @Schema(description = "Timestamp set by the server when the message is received", example = "2026-04-01T19:30:00")
     private LocalDateTime sentAt;
+
+    @Schema(description = "DM room ID (e.g. 'dm-1-5'). Null for group messages.", example = "dm-1-5")
+    private String dmRoomId;
 }

@@ -40,6 +40,10 @@ public class Badge {
     @Column(nullable = false)
     private int pointValue;
 
+    /** Frontend badge definition ID (e.g. "group_1"). Null for backend-only badges with no frontend display. */
+    @Column
+    private String code;
+
     // TODO: Maicheal Shenouda — add a BadgeType enum (MILESTONE, STREAK, SOCIAL, etc.)
     //       and store it here so the frontend can group badges by category
 }

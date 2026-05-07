@@ -7,6 +7,7 @@ import com.github.wsustudygroupapp.model.StudyGroup;
 import com.github.wsustudygroupapp.repository.MessageRepository;
 import com.github.wsustudygroupapp.repository.ProfileRepository;
 import com.github.wsustudygroupapp.repository.StudyGroupRepository;
+import com.github.wsustudygroupapp.service.ActiveDmTracker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,6 +37,12 @@ public class ChatServiceTest {
 
     @Mock
     private GamificationService gamificationService;
+
+    @Mock
+    private NotificationService notificationService;
+
+    @Mock
+    private ActiveDmTracker activeDmTracker;
 
     @InjectMocks
     private ChatService chatService;
@@ -111,5 +119,123 @@ public class ChatServiceTest {
 
         assertThrows(RuntimeException.class, () -> chatService.saveMessage(dto));
         verify(messageRepository, never()).save(any());
+    }
+
+    @Test
+    void saveMessage_groupMessage_doesNotTriggerDmNotification() {
+        MessageDTO dto = new MessageDTO();
+        dto.setStudyGroupId(42L);
+        dto.setSenderName("Brian");
+        dto.setContent("Hello!");
+        dto.setSentAt(LocalDateTime.now());
+
+        when(profileRepository.findByName("Brian")).thenReturn(Optional.of(testProfile));
+        when(studyGroupRepository.getReferenceById(42L)).thenReturn(testGroup);
+        when(messageRepository.save(any(Message.class))).thenReturn(testMessage);
+
+        chatService.saveMessage(dto);
+
+        verify(notificationService, never()).notifyDirectMessage(any(), any());
+    }
+
+    // ── DM saveMessage ────────────────────────────────────────────────────────
+
+    @Test
+    void saveMessage_dm_setsDmRoomIdOnMessage() {
+        Profile recipient = new Profile();
+        recipient.setId(2L);
+
+        MessageDTO dto = new MessageDTO();
+        dto.setSenderName("Brian");
+        dto.setContent("Hey!");
+        dto.setSentAt(LocalDateTime.now());
+        dto.setDmRoomId("dm-1-2");
+
+        when(profileRepository.findByName("Brian")).thenReturn(Optional.of(testProfile));
+        when(profileRepository.findById(2L)).thenReturn(Optional.of(recipient));
+        when(messageRepository.save(any(Message.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Message result = chatService.saveMessage(dto);
+
+        assertEquals("dm-1-2", result.getDmRoomId());
+    }
+
+    @Test
+    void saveMessage_dm_doesNotSetStudyGroup() {
+        Profile recipient = new Profile();
+        recipient.setId(2L);
+
+        MessageDTO dto = new MessageDTO();
+        dto.setSenderName("Brian");
+        dto.setContent("Hey!");
+        dto.setSentAt(LocalDateTime.now());
+        dto.setDmRoomId("dm-1-2");
+
+        when(profileRepository.findByName("Brian")).thenReturn(Optional.of(testProfile));
+        when(profileRepository.findById(2L)).thenReturn(Optional.of(recipient));
+        when(messageRepository.save(any(Message.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Message result = chatService.saveMessage(dto);
+
+        assertNull(result.getStudyGroup());
+        verify(studyGroupRepository, never()).getReferenceById(any());
+    }
+
+    @Test
+    void saveMessage_dm_notifiesRecipient() {
+        Profile recipient = new Profile();
+        recipient.setId(2L);
+
+        MessageDTO dto = new MessageDTO();
+        dto.setSenderName("Brian");
+        dto.setContent("Hey!");
+        dto.setSentAt(LocalDateTime.now());
+        dto.setDmRoomId("dm-1-2");
+
+        when(profileRepository.findByName("Brian")).thenReturn(Optional.of(testProfile));
+        when(profileRepository.findById(2L)).thenReturn(Optional.of(recipient));
+        when(messageRepository.save(any(Message.class))).thenReturn(testMessage);
+
+        chatService.saveMessage(dto);
+
+        verify(notificationService).notifyDirectMessage(recipient, testProfile);
+    }
+
+    @Test
+    void saveMessage_dm_recipientNotFound_stillSavesMessage() {
+        MessageDTO dto = new MessageDTO();
+        dto.setSenderName("Brian");
+        dto.setContent("Hey!");
+        dto.setSentAt(LocalDateTime.now());
+        dto.setDmRoomId("dm-1-99");
+
+        when(profileRepository.findByName("Brian")).thenReturn(Optional.of(testProfile));
+        when(profileRepository.findById(99L)).thenReturn(Optional.empty());
+        when(messageRepository.save(any(Message.class))).thenReturn(testMessage);
+
+        assertDoesNotThrow(() -> chatService.saveMessage(dto));
+        verify(messageRepository).save(any(Message.class));
+        verify(notificationService, never()).notifyDirectMessage(any(), any());
+    }
+
+    // ── getDmHistory ──────────────────────────────────────────────────────────
+
+    @Test
+    void getDmHistory_returnsMessagesFromRepo() {
+        when(messageRepository.findByDmRoomIdOrderBySentAtAsc("dm-1-2"))
+                .thenReturn(List.of(testMessage));
+
+        List<Message> result = chatService.getDmHistory("dm-1-2");
+
+        assertEquals(1, result.size());
+        verify(messageRepository).findByDmRoomIdOrderBySentAtAsc("dm-1-2");
+    }
+
+    @Test
+    void getDmHistory_noMessages_returnsEmptyList() {
+        when(messageRepository.findByDmRoomIdOrderBySentAtAsc("dm-1-2"))
+                .thenReturn(List.of());
+
+        assertTrue(chatService.getDmHistory("dm-1-2").isEmpty());
     }
 }

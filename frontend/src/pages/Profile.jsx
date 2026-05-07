@@ -8,17 +8,13 @@ import api from '../api/axios'
 
 const YEAR_OPTIONS = ['Freshman', 'Sophomore', 'Junior', 'Senior']
 
-const CATEGORY_ORDER = ['logins', 'streak', 'messages', 'emojis', 'groups', 'sessions', 'points', 'helper']
+const CATEGORY_ORDER = ['groups', 'messages', 'sessions', 'points']
 
 const CATEGORY_META = {
-  logins:   { label: 'Login Milestones',  hint: 'Log in to StudyNest to unlock these badges. Badges are awarded at 1, 10, 25, 50, and 100 logins.' },
-  streak:   { label: 'Login Streaks',     hint: 'Log in on consecutive days without missing one. Streaks of 3, 7, 14, and 30 days each earn a badge.' },
-  messages: { label: 'Messages Sent',     hint: 'Send messages in any group chat. Milestones at 1, 25, 100, and 500 messages.' },
-  emojis:   { label: 'Emojis Sent',       hint: 'Use the emoji button in group chat. Earned at 1, 10, and 50 emojis sent.' },
-  groups:   { label: 'Study Groups',      hint: 'Join study groups for your courses. Badges unlock at 1, 3, and 5 groups joined.' },
-  sessions: { label: 'Study Sessions',    hint: 'Attend scheduled study sessions. Milestones at 1, 5, 10, and 25 sessions.' },
-  points:   { label: 'Points Earned',     hint: 'Earn points through all your StudyNest activity. Awarded at 100, 500, 1,000, and 5,000 points.' },
-  helper:   { label: 'Helping Others',    hint: 'Help a classmate in a study group. Badges earned at 1, 5, and 10 assists.' },
+  groups:   { label: 'Study Groups',   hint: 'Join or create study groups. Earn a badge for joining your first group and creating your first group.' },
+  messages: { label: 'Messages Sent',  hint: 'Send messages in any group chat. Earn a badge at 10 messages sent.' },
+  sessions: { label: 'Study Sessions', hint: 'Schedule a study session to earn your first session badge.' },
+  points:   { label: 'Points Earned',  hint: 'Earn points through your StudyNest activity. First milestone at 100 points.' },
 }
 
 function Profile() {
