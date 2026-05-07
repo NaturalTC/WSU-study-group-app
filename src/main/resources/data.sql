@@ -889,12 +889,19 @@ INSERT IGNORE INTO course_table (department_code, course_code, course_name) VALU
 
 
 -- ── Gamification badges ──────────────────────────────────────────────────────
-INSERT IGNORE INTO badge_table (name, description, icon, point_value) VALUES
-('First Group Join',    'Joined your first study group',     '👥', 10),
-('Group Starter',       'Created your first study group',    '🚀', 15),
-('Active Chatter',      'Sent 10 messages in group chats',   '💬', 20),
-('Session Scheduler',   'Scheduled your first study session','📅', 25),
-('Point Milestone 100', 'Reached 100 total points',          '🏆', 30);
+INSERT IGNORE INTO badge_table (name, description, icon, point_value, code) VALUES
+('First Group Join',    'Joined your first study group',     '👥', 10, 'group_1'),
+('Group Starter',       'Created your first study group',    '🚀', 15, 'group_starter'),
+('Active Chatter',      'Sent 10 messages in group chats',   '💬', 20, 'msg_10'),
+('Session Scheduler',   'Scheduled your first study session','📅', 25, 'session_1'),
+('Point Milestone 100', 'Reached 100 total points',          '🏆', 30, 'pts_100');
+
+-- Backfill code for rows that existed before this column was added
+UPDATE badge_table SET code = 'group_1'       WHERE name = 'First Group Join'    AND code IS NULL;
+UPDATE badge_table SET code = 'group_starter' WHERE name = 'Group Starter'       AND code IS NULL;
+UPDATE badge_table SET code = 'msg_10'        WHERE name = 'Active Chatter'      AND code IS NULL;
+UPDATE badge_table SET code = 'session_1'     WHERE name = 'Session Scheduler'   AND code IS NULL;
+UPDATE badge_table SET code = 'pts_100'       WHERE name = 'Point Milestone 100' AND code IS NULL;
 
 -- Widen notification type column to fit all enum values (SESSION_RESCHEDULED = 19 chars)
 ALTER TABLE notification_table MODIFY COLUMN type VARCHAR(30) NOT NULL;
