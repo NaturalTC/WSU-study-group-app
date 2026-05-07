@@ -22,13 +22,14 @@ If you're unsure where to start, find your name above and jump to the relevant s
 1. [What Is This Stack?](#what-is-this-stack)
 2. [Prerequisites](#prerequisites)
 3. [Local Setup (Step by Step)](#local-setup-step-by-step)
-4. [Project Structure](#project-structure)
-5. [How the App Works](#how-the-app-works)
-6. [Git Workflow](#git-workflow)
-7. [Commit Messages](#commit-messages)
-8. [Pull Request Process](#pull-request-process)
-9. [Daily Standup Format](#daily-standup-format)
-10. [Common Problems & Fixes](#common-problems--fixes)
+4. [Running the Frontend](#running-the-frontend)
+5. [Project Structure](#project-structure)
+6. [How the App Works](#how-the-app-works)
+7. [Git Workflow](#git-workflow)
+8. [Commit Messages](#commit-messages)
+9. [Pull Request Process](#pull-request-process)
+10. [Daily Standup Format](#daily-standup-format)
+11. [Common Problems & Fixes](#common-problems--fixes)
 
 ---
 
@@ -208,6 +209,64 @@ docker compose down -v     # stops the container AND wipes all data (use this to
 ```
 
 You don't have to stop it every time — it's fine to leave it running. Just stop it when you're done for the day or your computer is running slow.
+
+---
+
+## Running the Frontend
+
+The frontend is a React app in the `frontend/` folder. You need the backend running first (Steps 1–4 above), then open a **second terminal** for this.
+
+### Prerequisites
+
+**Node.js 20+** is required. Check your version:
+```bash
+node -v
+```
+If you see `v20.x.x` or higher you're good. If not, download from: https://nodejs.org/ (pick the **LTS** version)
+
+### Step 1 — Create your frontend env file
+
+```bash
+cp frontend/.env.example frontend/.env.local
+```
+
+The default value (`VITE_API_URL=http://localhost:8080`) points to your local backend. Don't change it for local development.
+
+> **Note:** `.env.local` is in `.gitignore`. Never commit it.
+
+### Step 2 — Install dependencies
+
+```bash
+cd frontend
+npm install
+```
+
+This downloads all React packages. Takes about a minute the first time.
+
+### Step 3 — Start the dev server
+
+```bash
+npm run dev
+```
+
+You'll see output like:
+```
+  VITE v6.x.x  ready in 300ms
+
+  ➜  Local:   http://localhost:5173/
+```
+
+Open **http://localhost:5173** in your browser. The page hot-reloads whenever you save a file — no need to restart.
+
+### Stopping the frontend
+
+Press `Ctrl+C` in the terminal running `npm run dev`.
+
+### Running both at once
+
+You need **two terminals** open simultaneously:
+- Terminal 1: `./mvnw spring-boot:run` (backend on port 8080)
+- Terminal 2: `cd frontend && npm run dev` (frontend on port 5173)
 
 ---
 
@@ -419,6 +478,18 @@ chmod +x mvnw
 
 **IntelliJ doesn't recognize Spring annotations / red errors everywhere**
 - Right-click `pom.xml` → Maven → Reload Project. Wait for it to finish downloading dependencies.
+
+---
+
+**Frontend shows a blank page or "Network Error" on every API call**
+- The backend isn't running. Start it first: `./mvnw spring-boot:run`
+- Check that `frontend/.env.local` exists and contains `VITE_API_URL=http://localhost:8080`
+
+**`npm install` fails with engine errors**
+- You're on an older version of Node. Run `node -v` — you need v20 or higher. Download the LTS from https://nodejs.org/
+
+**Port 5173 already in use**
+- Another Vite dev server is running. Either stop it (`Ctrl+C`) or run on a different port: `npm run dev -- --port 5174`
 
 ---
 
