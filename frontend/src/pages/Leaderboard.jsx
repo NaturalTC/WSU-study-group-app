@@ -21,7 +21,7 @@ const MEDALS = ['🥇', '🥈', '🥉']
 const HOW_TO_EARN = [
   { icon: '👥', action: 'Join a study group',      pts: '+10 pts' },
   { icon: '💬', action: 'Send messages in chat',   pts: '+1 pt each' },
-  { icon: '⭐', action: 'Help a classmate',         pts: '+15 pts' },
+  { icon: '⭐', action: 'Create study group',         pts: '+15 pts' },
   { icon: '📅', action: 'Attend a study session',  pts: '+25 pts' },
   { icon: '🔥', action: 'Daily login streak',      pts: '+5 pts/day' },
 ]

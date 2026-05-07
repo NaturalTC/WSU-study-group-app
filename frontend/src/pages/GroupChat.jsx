@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { Client } from '@stomp/stompjs'
-import SockJS from 'sockjs-client'
 import AppHeader from '../components/AppHeader'
 import ChatMessage from '../components/ChatMessage'
 import MembersSidebar from '../components/MembersSidebar'
@@ -135,8 +134,11 @@ function GroupChat() {
   useEffect(() => {
     const token = localStorage.getItem('token')
 
+    const wsUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8080')
+      .replace(/^http/, 'ws') + '/ws'
+
     const client = new Client({
-      webSocketFactory: () => new SockJS(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/ws`),
+      brokerURL: wsUrl,
       connectHeaders: { Authorization: `Bearer ${token}` },
       reconnectDelay: 5000,
       onConnect: () => {
