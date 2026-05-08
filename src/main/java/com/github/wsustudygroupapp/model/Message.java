@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 
@@ -30,9 +32,10 @@ public class Message {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    /** The student who sent this message. Null for system/AI messages — use senderName instead. */
+    /** The student who sent this message. Null for system/AI messages or deleted users — use senderName instead. */
     @ManyToOne
     @JoinColumn(name = "sender_id", nullable = true)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private Profile sender;
 
     /** Display name used when sender is null (e.g. "AI Assistant"). */
