@@ -159,8 +159,9 @@ public class AuthService {
         }
 
         // All checks passed — generate the JWT and hand it back to the client
+        // We embed the role in the token so JwtAuthFilter never has to hit the DB again
         // From this point on the client sends: Authorization: Bearer <token> on every request
-        String token = jwtUtil.generateToken(user.getEmail());
+        String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
         return new AuthResponse(token, "Login successful");
     }
 
