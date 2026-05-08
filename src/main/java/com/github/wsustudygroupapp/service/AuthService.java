@@ -109,7 +109,7 @@ public class AuthService {
         message.setFrom(mailFrom);
         message.setTo(request.getEmail());
         message.setSubject("Verify your WSU Study Group account");
-        message.setText("Click to verify your account: " + baseUrl + "/auth/verify?token=" + verificationToken);
+        message.setText("Click to verify your account: " + frontendUrl + "/verify?token=" + verificationToken);
         mailSender.send(message);
     }
 
@@ -182,7 +182,7 @@ public class AuthService {
         message.setFrom(mailFrom);
         message.setTo(email);
         message.setSubject("Verify your WSU Study Group account");
-        message.setText("Click to verify your account: " + baseUrl + "/auth/verify?token=" + verificationToken);
+        message.setText("Click to verify your account: " + frontendUrl + "/verify?token=" + verificationToken);
         mailSender.send(message);
     }
 
