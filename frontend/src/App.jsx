@@ -15,6 +15,7 @@ import ChangePassword from './pages/ChangePassword'
 import VerifyPending from './pages/VerifyPending'
 import VerifySuccess from './pages/VerifySuccess'
 import VerifyError from './pages/VerifyError'
+import VerifyEmail from './pages/VerifyEmail'
 import Leaderboard from './pages/Leaderboard'
 import Meetings from './pages/Meetings'
 import Friends from './pages/Friends'
@@ -48,9 +49,10 @@ function App() {
       <Route path="/register"            element={<Register />}       />
       <Route path="/forgot-password"     element={<ForgotPassword />} />
       <Route path="/reset-password"      element={<ResetPassword />}  />
-      <Route path="/verify-pending"      element={<VerifyPending />}  />
-      <Route path="/verify-success"      element={<VerifySuccess />}  />
-      <Route path="/verify-error"        element={<VerifyError />}    />
+      <Route path="/verify"          element={<VerifyEmail />}    />
+      <Route path="/verify-pending"  element={<VerifyPending />}  />
+      <Route path="/verify-success"  element={<VerifySuccess />}  />
+      <Route path="/verify-error"    element={<VerifyError />}    />
 
       <Route path="/setup-profile"       element={<SetupRoute><SetupProfile /></SetupRoute>} />
 

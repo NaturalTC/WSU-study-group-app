@@ -5,9 +5,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Map;
 import com.github.wsustudygroupapp.service.AuthService;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,9 +17,6 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
-
-    @Value("${app.frontend-url}")
-    private String frontendUrl;
 
     public AuthController(AuthService authService)
     {
@@ -37,20 +31,12 @@ public class AuthController {
         return ResponseEntity.ok("Registration successful. Check your email to verify your account.");
     }
 
-    @Operation(summary = "Verify a student's email address via token link")
-    @GetMapping("/verify")
-    public ResponseEntity<Void> verify(@RequestParam String token)
+    @Operation(summary = "Verify a student's email address via token")
+    @PostMapping("/verify")
+    public ResponseEntity<String> verify(@RequestParam String token)
     {
-        try {
-            authService.verify(token);
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Location", frontendUrl + "/verify-success");
-            return new ResponseEntity<>(headers, HttpStatus.FOUND);
-        } catch (RuntimeException e) {
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Location", frontendUrl + "/verify-error");
-            return new ResponseEntity<>(headers, HttpStatus.FOUND);
-        }
+        authService.verify(token);
+        return ResponseEntity.ok("Email verified successfully");
     }
 
     @Operation(summary = "Login and receive a JWT token")
