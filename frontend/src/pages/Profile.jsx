@@ -43,6 +43,29 @@ function Profile() {
     const [picLoading, setPicLoading] = useState(false)
     const [picError, setPicError]     = useState('')
 
+    const [bgLoading, setBgLoading] = useState(false)
+    const [bgError, setBgError]     = useState('')
+
+    const handleBgUpload = async (e) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+        setBgError('')
+        setBgLoading(true)
+        try {
+            const formData = new FormData()
+            formData.append('file', file)
+            const res = await api.post('/profiles/background', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            })
+            setProfile(res.data)
+        } catch (err) {
+            setBgError(err.response?.data?.message || 'Upload failed.')
+        } finally {
+            setBgLoading(false)
+            e.target.value = ''
+        }
+    }
+
     const handlePicUpload = async (e) => {
         const file = e.target.files?.[0]
         if (!file) return
@@ -108,6 +131,46 @@ function Profile() {
             <AppHeader />
 
             <main className="flex-1 pt-16">
+
+                {/* ── Cover Photo ── */}
+                <div className="relative h-40 sm:h-52 overflow-hidden group">
+                    {profile?.backgroundPicURL ? (
+                        <img
+                            src={profile.backgroundPicURL}
+                            alt="Cover"
+                            className="w-full h-full object-cover"
+                        />
+                    ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-blue-700 via-blue-800 to-wsu-navy" />
+                    )}
+
+                    <label className="absolute inset-0 cursor-pointer flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30">
+                        <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleBgUpload}
+                            disabled={bgLoading}
+                        />
+                        <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white text-sm font-semibold px-4 py-2 rounded-xl border border-white/30">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            Edit cover photo
+                        </div>
+                    </label>
+
+                    {bgLoading && (
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                            <div className="w-6 h-6 border-4 border-white border-t-transparent rounded-full animate-spin" />
+                        </div>
+                    )}
+                </div>
+
+                {bgError && (
+                    <p className="text-xs text-red-600 dark:text-red-400 px-6 pt-2 max-w-4xl mx-auto">{bgError}</p>
+                )}
 
                 {/* ── Profile Banner ── */}
                 <div className="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">

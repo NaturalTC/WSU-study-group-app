@@ -102,4 +102,20 @@ public class ProfileService {
         profile.setProfilePicURL(url);
         return profileRepository.save(profile);
     }
+
+    public Profile uploadBackgroundPicture(String email, MultipartFile file) throws IOException {
+        log.info("uploadBackgroundPicture called for email={}", email);
+        if (file.isEmpty()) throw new IllegalArgumentException("File cannot be empty");
+        if (!file.getContentType().startsWith("image/")) throw new IllegalArgumentException("File must be an image");
+        if (file.getSize() > 10 * 1024 * 1024) throw new IllegalArgumentException("File must be under 10MB");
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + email));
+        Profile profile = profileRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Profile not found for: " + email));
+
+        String url = s3Service.uploadBackgroundPicture(file, profile.getId());
+        profile.setBackgroundPicURL(url);
+        return profileRepository.save(profile);
+    }
 }

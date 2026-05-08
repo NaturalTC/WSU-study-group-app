@@ -50,6 +50,9 @@ public class Profile {
     @Column
     private String profilePicURL;
 
+    @Column
+    private String backgroundPicURL;
+
     // ── Sprint 2 fields ───────────────────────────────────────────────
 
     /**

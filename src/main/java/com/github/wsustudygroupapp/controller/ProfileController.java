@@ -77,6 +77,13 @@ public class ProfileController {
         return ResponseEntity.ok(profileService.uploadProfilePicture(authentication.getName(), file));
     }
 
+    @Operation(summary = "Upload or replace the logged-in student's profile background picture")
+    @PostMapping("/background")
+    public ResponseEntity<Profile> uploadBackgroundPicture(Authentication authentication,
+                                                            @RequestParam("file") MultipartFile file) throws IOException {
+        return ResponseEntity.ok(profileService.uploadBackgroundPicture(authentication.getName(), file));
+    }
+
     @Operation(summary = "Get all badges earned by the logged-in student")
     @GetMapping("/badges")
     public ResponseEntity<List<BadgeResponseDTO>> getMyBadges(Authentication authentication) {

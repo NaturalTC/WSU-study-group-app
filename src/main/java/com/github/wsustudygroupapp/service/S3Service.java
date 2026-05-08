@@ -44,6 +44,23 @@ public class S3Service {
         return "https://" + bucket + ".s3." + region + ".amazonaws.com/" + key;
     }
 
+    public String uploadBackgroundPicture(MultipartFile file, Long profileId) throws IOException {
+        log.info("uploadBackgroundPicture called for profileId={}", profileId);
+        String extension = getExtension(file.getOriginalFilename());
+        String key = "background-pictures/" + profileId + "-" + UUID.randomUUID() + extension;
+
+        s3Client.putObject(
+                PutObjectRequest.builder()
+                        .bucket(bucket)
+                        .key(key)
+                        .contentType(file.getContentType())
+                        .build(),
+                RequestBody.fromInputStream(file.getInputStream(), file.getSize())
+        );
+
+        return "https://" + bucket + ".s3." + region + ".amazonaws.com/" + key;
+    }
+
     public String uploadGroupPicture(MultipartFile file, Long groupId) throws IOException {
         log.info("uploadGroupPicture called for groupId={}", groupId);
         String extension = getExtension(file.getOriginalFilename());
