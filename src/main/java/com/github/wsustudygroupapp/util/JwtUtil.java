@@ -41,13 +41,15 @@ public class JwtUtil {
 
     // Okay, the front door to our application is created here,
     // We will return a String that resembles a JWT token
-    public String generateToken(String email)
+    // role is embedded as a claim so the filter never has to hit the DB to get it
+    public String generateToken(String email, String role)
     {
         // Jwts class provides a Builder pattern static method that takes attributes as setters.
         // Builder pattern is used for multiple arguments/method chaining
         // Pretty much a constructor    email -> JWT Token   with some data
         return Jwts.builder()
           .setSubject(email) // user email
+          .claim("role", role) // user role baked into the token — avoids a DB hit on every request
           .setIssuedAt(new Date()) // date issued
           .setExpiration(new Date(System.currentTimeMillis() + expirationMs)) // expiration date
           .signWith(getSigningKey(), SignatureAlgorithm.HS256) // encryption for the jwt string
@@ -66,6 +68,11 @@ public class JwtUtil {
             function. That way people don't just decode the JWT token themselves and send it back as admin
             The token can easily be decoded, the signing key puts our unique encryption on it
      */
+
+    // Reads the role claim we embedded at login — no DB needed
+    public String extractRole(String token) {
+        return parseClaims(token).get("role", String.class);
+    }
 
     // A getter method that returns the email of the JWT token
     public String extractEmail(String token) {
