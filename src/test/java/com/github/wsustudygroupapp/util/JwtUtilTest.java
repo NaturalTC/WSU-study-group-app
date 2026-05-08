@@ -18,19 +18,19 @@ class JwtUtilTest {
 
     @Test
     void generateToken_returnsNonNullToken() {
-        String token = jwtUtil.generateToken("jose@westfield.ma.edu", "USER");
+        String token = jwtUtil.generateToken("jose@westfield.ma.edu");
         Assertions.assertNotNull(token);
     }
 
     @Test
     void extractEmail_returnsCorrectEmail() {
-        String token = jwtUtil.generateToken("jose@westfield.ma.edu", "USER");
+        String token = jwtUtil.generateToken("jose@westfield.ma.edu");
         Assertions.assertEquals("jose@westfield.ma.edu", jwtUtil.extractEmail(token));
     }
 
     @Test
     void isTokenValid_validToken_returnsTrue() {
-        String token = jwtUtil.generateToken("jose@westfield.ma.edu", "USER");
+        String token = jwtUtil.generateToken("jose@westfield.ma.edu");
         Assertions.assertTrue(jwtUtil.isTokenValid(token));
     }
 
@@ -43,7 +43,7 @@ class JwtUtilTest {
     void isTokenValid_expiredToken_returnsFalse() {
         // Set expiration to -1000ms so the token is already expired the moment it's created
         ReflectionTestUtils.setField(jwtUtil, "expirationMs", -1000L);
-        String token = jwtUtil.generateToken("jose@westfield.ma.edu", "USER");
+        String token = jwtUtil.generateToken("jose@westfield.ma.edu");
         Assertions.assertFalse(jwtUtil.isTokenValid(token));
     }
 }
