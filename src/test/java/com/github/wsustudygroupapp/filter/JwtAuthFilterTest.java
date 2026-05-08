@@ -10,13 +10,19 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.security.core.context.SecurityContextHolder;
+import
+        org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import
+        org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.io.IOException;
 
 class JwtAuthFilterTest {
 
     private JwtUtil jwtUtil;
+    private UserDetailsService userDetailsService;
+    private UserDetails userDetails;
     private HttpServletRequest request;
     private HttpServletResponse response;
     private FilterChain filterChain;
@@ -24,11 +30,14 @@ class JwtAuthFilterTest {
 
     @BeforeEach
     void setup() {
-        jwtUtil = Mockito.mock(JwtUtil.class);
+        jwtUtil = Mockito.mock(JwtUtil.class); // generate, validate, parse token
+        userDetailsService = Mockito.mock(UserDetailsService.class);
+        userDetails = Mockito.mock(UserDetails.class);
         request = Mockito.mock(HttpServletRequest.class);
         response = Mockito.mock(HttpServletResponse.class);
         filterChain = Mockito.mock(FilterChain.class);
-        jwtAuthFilter = new JwtAuthFilter(jwtUtil);
+        jwtAuthFilter = new JwtAuthFilter(jwtUtil,
+                userDetailsService);
     }
 
     @AfterEach
