@@ -46,9 +46,13 @@ function ProfileModal({ person, onClose, onAction, friendState }) {
         </div>
 
         <div className="flex flex-col items-center text-center gap-2">
-          <div className={`w-16 h-16 rounded-2xl ${avatarColor(person.profileId)} flex items-center justify-center text-white font-display font-bold text-2xl shadow`}>
-            {initials(person.name)}
-          </div>
+          {person.profilePicURL ? (
+            <img src={person.profilePicURL} alt={person.name} className="w-16 h-16 rounded-2xl object-cover shadow" />
+          ) : (
+            <div className={`w-16 h-16 rounded-2xl ${avatarColor(person.profileId)} flex items-center justify-center text-white font-display font-bold text-2xl shadow`}>
+              {initials(person.name)}
+            </div>
+          )}
           <div>
             <h2 className="font-display text-xl text-wsu-navy dark:text-white font-bold">{person.name}</h2>
             <div className="flex items-center justify-center gap-2 mt-1 flex-wrap">
@@ -118,9 +122,13 @@ function PersonCard({ person, onTap, badge, actionSlot }) {
       onClick={() => onTap(person)}
       className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 flex items-center gap-3 hover:shadow-md hover:border-blue-100 dark:hover:border-blue-800 cursor-pointer transition-all duration-200"
     >
-      <div className={`w-11 h-11 rounded-xl ${avatarColor(person.profileId)} flex items-center justify-center text-white font-display font-bold text-base flex-shrink-0`}>
-        {initials(person.name)}
-      </div>
+      {person.profilePicURL ? (
+        <img src={person.profilePicURL} alt={person.name} className="w-11 h-11 rounded-xl object-cover flex-shrink-0" />
+      ) : (
+        <div className={`w-11 h-11 rounded-xl ${avatarColor(person.profileId)} flex items-center justify-center text-white font-display font-bold text-base flex-shrink-0`}>
+          {initials(person.name)}
+        </div>
+      )}
       <div className="flex-1 min-w-0">
         <p className="font-semibold text-wsu-navy dark:text-white text-sm leading-snug truncate">{person.name}</p>
         <p className="text-xs text-wsu-slate dark:text-gray-400 mt-0.5 truncate">
