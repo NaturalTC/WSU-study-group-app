@@ -7,6 +7,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Stores student-facing data for a registered user.
  * Kept separate from {@link User} so authentication logic stays isolated from app data.
@@ -20,28 +23,22 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Profile {
 
-    /** Auto-generated primary key. */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /** Student's display name shown across the app. */
     @Column
     private String name;
 
-    /** Student's declared major (e.g. "Computer Science"). */
     @Column
     private String major;
 
-    /** Academic year — Freshman, Sophomore, Junior, or Senior. */
     @Column
     private String year;
 
-    /** Optional short bio visible to other students in shared study groups. */
     @Column(columnDefinition = "TEXT")
     private String bio;
 
-    /** The User account this profile belongs to. */
     @JsonIgnore
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
@@ -50,16 +47,54 @@ public class Profile {
     @Column
     private String profilePicURL;
 
-    // ── Sprint 2 fields ───────────────────────────────────────────────
-
-    /**
-     * Total gamification points earned by this student. Incremented by GamificationService.
-     * columnDefinition is explicit so the database column gets a real DEFAULT 0 — without it,
-     * Hibernate only sets the Java-side default and the DB column may have no default at all,
-     * which causes issues when rows are inserted outside the app (e.g. data.sql, migration scripts).
-     */
     @Column(nullable = false, columnDefinition = "INT NOT NULL DEFAULT 0")
     private int points = 0;
 
-    // TODO: Maicheal Shenouda — add a @OneToMany to UserBadge so profile.getBadges() works
+    // ── Cascade-delete collections ────────────────────────────────────
+    // These are needed so deleting a User (→ Profile) cleans up all child rows
+    // without foreign key violations. None of these collections are exposed by
+    // any API — they exist purely to tell JPA the deletion order.
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserCourse> courses = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserBadge> badges = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "recipient", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notification> notifications = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Friendship> sentFriendships = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Friendship> receivedFriendships = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "scheduledBy", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MeetingSession> scheduledSessions = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "createdBy", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StudyGroup> createdGroups = new ArrayList<>();
+
+    // Groups this profile is a member of (but didn't necessarily create).
+    // Not cascade-deleted — we just remove the membership row via @PreRemove.
+    @JsonIgnore
+    @ManyToMany(mappedBy = "members")
+    private List<StudyGroup> memberGroups = new ArrayList<>();
+
+    // Before this profile is deleted, remove it from every group's member list
+    // so the study_group_members join table rows are cleaned up first.
+    @PreRemove
+    private void removeFromMemberGroups() {
+        for (StudyGroup group : new ArrayList<>(memberGroups)) {
+            group.getMembers().remove(this);
+        }
+    }
 }
